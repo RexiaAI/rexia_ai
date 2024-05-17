@@ -10,12 +10,11 @@ authors = [
     { name = "Robyn Le Sueur", email = "robyn.lesueur@googlemail.com" }
 ]
 dependencies = [
-    "python>=3.8",
     "selenium>=3.141.0",
     "webdriver-manager>=3.4.2",
     "python-dotenv>=0.19.1",
     "python-docx>=0.8.11",
-    "llama-index @ git+https://github.com/your-git-repo/llama-index.git@main"
+    "llama-index @ git+https://github.com/run-llama/llama_index"
 ]
 
 [project.optional-dependencies]
