@@ -1,7 +1,7 @@
 # base_task.py
 
 class BaseTask():
-    def __init__(self, task_id: str, task_name: str, task_description: str, task_type: str, task_priority: int, task_status: str, task_data: dict):
+    def __init__(self, task_id: str, task_name: str, task_description: str, task_type: int, task_priority: int, task_status: str, task_data: dict):
         """Initialize the task."""
         self.task_id = task_id
         self.task_name = task_name

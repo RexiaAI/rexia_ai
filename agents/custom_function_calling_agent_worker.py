@@ -1,11 +1,12 @@
 # custom_function_calling_agent_worker.py
 from llama_index.core.agent import CustomSimpleAgentWorker, Task, AgentChatResponse
+from llama_index.core.tools.types import BaseTool
 from typing import List, Any
 
 class RexiaAIFunctionCallingAgentWorker(CustomSimpleAgentWorker):
     """Custom function calling agent worker for ReXia AI."""
 
-    def __init__(self, tools: List[Any], llm: Any, verbose: bool = True):
+    def __init__(self, tools: List[BaseTool], llm: Any, verbose: bool = True):
         """Initialize the custom function calling agent worker."""
         super().__init__(tools=tools, llm=llm, verbose=verbose)
 

@@ -11,3 +11,7 @@ class BaseAgency:
         self.tools = tools
         self.llm = llm
         self.verbose = verbose
+    
+    def launch(self):
+        """Launch the agency."""
+        pass
