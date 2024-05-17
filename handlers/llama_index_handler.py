@@ -7,7 +7,7 @@ from llama_index.tools.google import GoogleSearchToolSpec
 from llama_index.tools.arxiv import ArxivToolSpec
 from llama_index.embeddings.ollama import OllamaEmbedding
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader
-from config import OPENAI_LLM, OLLAMA_LLM, OPENAI_API_KEY, GOOGLE_API_KEY, SEARCH_ENGINE_ID, OLLAMA_EMBED_MODEL
+from rexia_ai.utilities import OPENAI_LLM, OLLAMA_LLM, OPENAI_API_KEY, GOOGLE_API_KEY, SEARCH_ENGINE_ID, OLLAMA_EMBED_MODEL
 
 class LlamaIndexLLMHandler:
     def create_ollama_llm(self, model=OLLAMA_LLM, verbose=True, temperature=0.2, timeout=3000, system_prompt=None):
@@ -27,6 +27,9 @@ class LlamaIndexAgentHandler:
     
     def create_agent_runner(self, tools, llm, verbose=True):
         return AgentRunner(tools=tools, llm=llm, verbose=verbose)
+    
+    def create_agent_worker(self, tools, llm, verbose=True):
+        return AgentRunner(tools=tools, llm=llm, verbose=verbose).as_agent()
     
     def create_function_callin_agent(self, tools, llm, verbose=True):
         return FunctionCallingAgentWorker.from_tools(tools=tools, llm=llm, verbose=verbose).as_agent()
