@@ -1,8 +1,16 @@
 # priorities.py
 
-HIGH_PRIORITY = 1
-"""int: High priority for tasks."""
-MEDIUM_PRIORITY = 2
-"""int: Medium priority for tasks."""
-LOW_PRIORITY = 3
-"""int: Low priority for tasks."""
+from enum import Enum
+
+class Priority(Enum):
+    """
+    An enumeration representing different priority levels.
+
+    Attributes:
+        HIGH (int): Represents a high priority level.
+        MEDIUM (int): Represents a medium priority level.
+        LOW (int): Represents a low priority level.
+    """
+    HIGH = 1
+    MEDIUM = 2
+    LOW = 3

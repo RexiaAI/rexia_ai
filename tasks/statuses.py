@@ -1,13 +1,18 @@
 # statuses.py
 
-PENDING = "Pending"
-"""str: Task has not started."""
+from enum import Enum
 
-IN_PROGRESS = "In Progress"
-"""str: Task is in progress."""
+class Status(Enum):
+    """
+    Represents the status of a task.
 
-COMPLETED = "Completed"
-"""str: Task has been completed."""
-
-FAILED = "Failed"
-"""str: Task has encountered an error."""
+    Attributes:
+        PENDING: The task is pending.
+        IN_PROGRESS: The task is in progress.
+        COMPLETED: The task is completed.
+        FAILED: The task has failed.
+    """
+    PENDING = 1
+    IN_PROGRESS = 2
+    COMPLETED = 3
+    FAILED = 4

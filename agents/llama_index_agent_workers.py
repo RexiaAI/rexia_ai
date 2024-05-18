@@ -1,6 +1,5 @@
 # llama_index_agent_workers.py
 from llama_index.core.agent import ReActAgentWorker, FunctionCallingAgentWorker, CustomSimpleAgentWorker, Task, AgentChatResponse
-from llama_index.agent.introspective import IntrospectiveAgentWorker, SelfReflectionAgentWorker
 from llama_index.core.tools.types import BaseTool
 from typing import List, Any
 
@@ -14,18 +13,6 @@ class FunctionCallingAgentWorker(FunctionCallingAgentWorker):
     """This class is a wrapper for llama_index.core.agent FunctionCallingAgentWorker."""
     def __init__(self):
         """Initialize the Llama Index Function Calling Agent Worker."""
-        super().__init__()
-        
-class IntrospectiveAgentWorker(IntrospectiveAgentWorker):
-    """This class is a wrapper for llama_index.agent.introspective IntrospectiveAgentWorker."""
-    def __init__(self):
-        """Initialize the Llama Index Introspective Agent Worker."""
-        super().__init__()
-        
-class SelfReflectionAgentWorker(SelfReflectionAgentWorker):
-    """This class is a wrapper for llama_index.agent.introspective SelfReflectionAgentWorker."""
-    def __init__(self):
-        """Initialize the Llama Index Self Reflection Agent Worker."""
         super().__init__()
 
 class CustomSimpleAgentWorker(CustomSimpleAgentWorker):

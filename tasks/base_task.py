@@ -1,8 +1,8 @@
 # base_task.py
-from rexia_ai.tasks import MEDIUM_PRIORITY, PENDING
+from rexia_ai.tasks import Status, Priority, TaskType
 
 class BaseTask():
-    def __init__(self, task_id: str, task_name: str, task_description: str, task_type: int, task_priority: int = MEDIUM_PRIORITY, task_status: str = PENDING, task_context: str = ""):
+    def __init__(self, task_id: str, task_name: str, task_description: str, task_type: int, task_priority: int = Priority.MEDIUM, task_status: str = Status.PENDING, task_context: str = ""):
         """Initialize the task."""
         self.task_id = task_id
         self.task_name = task_name
