@@ -1,6 +1,7 @@
-# status.py
+"""Agency status module for ReXia AI."""
 
 from enum import Enum
+
 
 class Status(Enum):
     """
@@ -12,6 +13,7 @@ class Status(Enum):
         COMPLETED (int): Represents the completed status.
         FAILED (int): Represents the failed status.
     """
+
     IDLE = 1
     WORKING = 2
     COMPLETED = 3

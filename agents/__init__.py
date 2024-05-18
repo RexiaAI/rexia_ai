@@ -1,18 +1,13 @@
-from rexia_ai.agents.llama_index_agent_workers import ReactAgentWorker, FunctionCallingAgentWorker, RexiaAIFunctionCallingAgentWorker, CustomSimpleAgentWorker
-from rexia_ai.agents.llama_index_agents import AgentRunnner, StructuredPlannerAgent, ReActAgent
+"""This module contains the classes for the agents."""
+
 from rexia_ai.agents.manager_agent_worker import ManagerAgentWorker
 from rexia_ai.agents.manager_agent import ManagerAgent
 from rexia_ai.agents.collaborative_agent_worker import CollaborativeAgentWorker
 from rexia_ai.agents.collaborative_agent import CollaborativeAgent
 
-__all__ = ['RexiaAIFunctionCallingAgentWorker',
-           'ReactAgentWorker',
-           'FunctionCallingAgentWorker',
-           'CustomSimpleAgentWorker',
-           'AgentRunnner',
-           'StructuredPlannerAgent',
-           'ReActAgent',
-           'ManagerAgentWorker',
-           'ManagerAgent',
-           'CollaborativeAgentWorker',
-           'CollaborativeAgent']
+__all__ = [
+    "ManagerAgentWorker",
+    "ManagerAgent",
+    "CollaborativeAgentWorker",
+    "CollaborativeAgent",
+]

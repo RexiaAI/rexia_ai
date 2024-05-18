@@ -1,6 +1,7 @@
-# statuses.py
+"""This module contains the Status enum."""
 
 from enum import Enum
+
 
 class Status(Enum):
     """
@@ -12,6 +13,7 @@ class Status(Enum):
         COMPLETED: The task is completed.
         FAILED: The task has failed.
     """
+
     PENDING = 1
     IN_PROGRESS = 2
     COMPLETED = 3

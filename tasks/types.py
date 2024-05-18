@@ -1,5 +1,7 @@
-# types.py
+"""This module contains the TaskType enumeration."""
+
 from enum import Enum
+
 
 class TaskType(Enum):
     """
@@ -12,6 +14,7 @@ class TaskType(Enum):
         UTILITY_DRIVEN_TASK (int): Represents a utility-driven task.
         LEARNING_TASK (int): Represents a learning task.
     """
+
     REFLEX_TASK = 1
     MODEL_REFLEX_TASK = 2
     GOAL_ORIENTED_TASK = 3
