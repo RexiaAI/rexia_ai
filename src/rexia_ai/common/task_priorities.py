@@ -1,9 +1,9 @@
-"""This module contains the Priority enumeration."""
+"""This module contains the TaskPriority enumeration."""
 
 from enum import Enum
 
 
-class Priority(Enum):
+class TaskPriority(Enum):
     """
     An enumeration representing different priority levels.
 

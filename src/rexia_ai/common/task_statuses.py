@@ -1,9 +1,9 @@
-"""This module contains the Status enum."""
+"""This module contains the TaskStatus enum."""
 
 from enum import Enum
 
 
-class Status(Enum):
+class TaskStatus(Enum):
     """
     Represents the status of a task.
 

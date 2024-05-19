@@ -1,9 +1,12 @@
-"""This module is used to install the package using the command "pip install -e ."""
-
+# setup.py
 from setuptools import setup, find_packages
 
 setup(
-    name="rexia_ai",
-    version="0.0.1",
-    packages=find_packages(include=["agencies", "agents", "handlers", "tasks"]),
+    name='rexia_ai',
+    version='0.1',
+    packages=find_packages(where='src'),
+    package_dir={'': 'src'},
+    install_requires=[
+        "llama_index"
+    ],
 )

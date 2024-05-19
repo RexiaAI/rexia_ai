@@ -3,7 +3,7 @@
 from enum import Enum
 
 
-class Status(Enum):
+class AgencyStatus(Enum):
     """
     Represents the status of an agency.
 

@@ -1,13 +1,15 @@
 """Collaborative Agent for ReXia AI."""
 
-from llama_index.core.agent import AgentRunner
-from rexia_ai.agents.collaborative_agent_worker import CollaborativeAgentWorker
+from llama_index.core.agent import (
+    AgentRunner,
+    ReActAgentWorker
+)
 
 
 class CollaborativeAgent(AgentRunner):
     """Collaborative Agent for ReXia AI."""
 
-    def __init__(self, agent_worker: CollaborativeAgentWorker):
+    def __init__(self, agent_worker: ReActAgentWorker):
         """Initialize the Collaborative Agent."""
         super().__init__(agent_worker=agent_worker)
 
