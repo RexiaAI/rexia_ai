@@ -9,12 +9,12 @@ class TaskStatus(Enum):
 
     Attributes:
         PENDING: The task is pending.
-        IN_PROGRESS: The task is in progress.
-        COMPLETED: The task is completed.
-        FAILED: The task has failed.
+        WORKING: The task is being worked on by the agency.
+        COMPLETED: The task has been accepted by the manager.
+        REJECTED: The task has not been accepted by the manager.
     """
 
     PENDING = 1
-    IN_PROGRESS = 2
+    WORKING = 2
     COMPLETED = 3
-    FAILED = 4
+    REJECTED = 4
