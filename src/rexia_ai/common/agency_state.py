@@ -17,9 +17,11 @@ def add_message(left: list, right: list):
 class AgencyStateSchema(TypedDict):
     """The schema for the state of the tasks."""
     task: Annotated[str, "The task to be completed"]
-    task_status: Annotated[int, "The status of the task"]
+    task_status: Annotated[TaskStatus, "The status of the task"]
     messages: Annotated[List[str], add_message]
+    guidelines: Annotated[str, "guidelines on completing the task"]
     accepted_result: Annotated[str, "The result of the task"]
+    state: Annotated[str, "The state of the task"]
 
 class AgencyState(StateGraph):
     """The state of all tasks to be performed."""
@@ -31,7 +33,9 @@ class AgencyState(StateGraph):
             task=task,
             task_status=TaskStatus.PENDING,
             messages=[],
-            accepted_result=""
+            guidelines="",
+            accepted_result="",
+            state="",
         )
         super().__init__(state_schema=state_schema)
 

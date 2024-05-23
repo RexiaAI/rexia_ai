@@ -1,6 +1,7 @@
 """task module for ReXia AI."""
 
-from .collaborative_agent import CollaborativeAgent
-from .manager_agent import ManagerAgent
+from .rexia_ai_agent import RexiaAIAgent
+from .planner_agent import PlanningAgent
+from .review_agent import ReviewAgent
 
-__all__ = ["CollaborativeAgent", "ManagerAgent"]
+__all__ = ["RexiaAIAgent", "PlanningAgent", "ReviewAgent"]
