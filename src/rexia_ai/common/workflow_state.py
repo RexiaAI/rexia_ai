@@ -7,35 +7,38 @@ from typing import (
 )
 from dataclasses import dataclass
 from langgraph.graph import StateGraph
-from ..common import TaskStatus
+from . import TaskStatus
+
 
 def add_message(left: list, right: list):
     """Add-don't-overwrite."""
     return left + right
 
+
 @dataclass
-class AgencyStateSchema(TypedDict):
+class WorkflowStateSchema(TypedDict):
     """The schema for the state of the tasks."""
+
     task: Annotated[str, "The task to be completed"]
     task_status: Annotated[TaskStatus, "The status of the task"]
     messages: Annotated[List[str], add_message]
     guidelines: Annotated[str, "guidelines on completing the task"]
-    accepted_result: Annotated[str, "The result of the task"]
-    state: Annotated[str, "The state of the task"]
+    feedback: Annotated[str, "Feedback from the reviewer"]
 
-class AgencyState(StateGraph):
+
+class WorkflowState(StateGraph):
     """The state of all tasks to be performed."""
+
     def __init__(self, task: str):
         """
         Initialize the state of the tasks.
         """
-        state_schema = AgencyStateSchema(
+        state_schema = WorkflowStateSchema(
             task=task,
             task_status=TaskStatus.PENDING,
             messages=[],
             guidelines="",
-            accepted_result="",
-            state="",
+            feedback="",
         )
         super().__init__(state_schema=state_schema)
 

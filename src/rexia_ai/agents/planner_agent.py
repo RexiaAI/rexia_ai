@@ -1,52 +1,51 @@
-"""Manager Agent for ReXia AI."""
+"""Planner Agent for ReXia AI."""
 
-import json
-import unicodedata
 from ..llms import RexiaAIChatOpenAI
-from ..common import AgencyStateSchema, TaskStatus
+from ..common import WorkflowStateSchema, TaskStatus
+from ..base import BaseAgent
 
-class PlanningAgent:
-    """Manager Agent for ReXia AI."""
+
+class PlanAgent(BaseAgent):
+    """Planner Agent for ReXia AI."""
 
     def __init__(self, model: RexiaAIChatOpenAI, verbose: bool = False):
-        self.name = "Manager"
-        self.model = model
-        self.verbose = verbose
+        super().__init__(model, verbose=verbose)
+        self.name = "Planner"
 
-    def work(self, agency_state: AgencyStateSchema) -> AgencyStateSchema:
+    def action(self, agency_state: WorkflowStateSchema) -> WorkflowStateSchema:
         """Work on the current task."""
         if self.verbose:
-            print(f"Planner working on task: {agency_state['task']}")
+            print(
+                f"Planner working on task: {self.get_value_or_default(agency_state, 'task')}"
+            )
 
-        return self._handle_pending_task(agency_state)
-        
-    def _handle_pending_task(self, agency_state: AgencyStateSchema) -> AgencyStateSchema:
+        return self._plan_task(agency_state)
+
+    def _plan_task(self, agency_state: WorkflowStateSchema) -> WorkflowStateSchema:
         """Handle the task when its status is PENDING."""
         agency_state["task_status"] = TaskStatus.WORKING
-        prompt = self._create_pending_task_prompt(agency_state["task"])
-        planner_guidelines = self._invoke_model(prompt)
-        agency_state["guidelines"] = planner_guidelines["guidelines"]
+        prompt = self._create_plan_prompt(
+            self.get_value_or_default(agency_state, "task")
+        )
+        planner_guidelines = self._invoke_model(prompt, "guidelines")
+        agency_state["guidelines"] = self.get_value_or_default(
+            planner_guidelines, "guidelines"
+        )
         if self.verbose:
-            print(f"Planner guidelines: {planner_guidelines['guidelines']}")
+            print(
+                f"Planner guidelines: {self.get_value_or_default(planner_guidelines, 'guidelines')}"
+            )
         return agency_state
 
-    def _create_pending_task_prompt(self, task: str) -> dict:
+    def _create_plan_prompt(self, task: str) -> dict:
         """Create a prompt for a pending task."""
         return {
             "instructions": (
                 "Read the task, explain to an AI your guidelines on how to complete it. "
-                "Use the response format provided. Ensure that no control characters are included in the JSON."
+                "All guidelines should be something that can be completed by an AI. "
+                "Use the response format provided."
             ),
             "task": task,
-            "response format": "{\"guidelines\": \"Your guidelines here.\"}"
+            "response format": {"guidelines": "Your guidelines here"},
+            "example response": {"guidelines": "Your guidelines here"},
         }
-
-    def _invoke_model(self, prompt: dict) -> dict:
-        """Invoke the model with the given prompt and return the response."""
-        response = self.model.invoke(json.dumps(prompt)).content
-        cleaned_response = self._strip_control_characters(response)
-        return json.loads(cleaned_response)
-
-    def _strip_control_characters(self, s: str) -> str:
-        """Remove control characters from a string."""
-        return "".join(ch for ch in s if unicodedata.category(ch) != "Cc")
