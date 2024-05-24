@@ -44,8 +44,42 @@ class PlanAgent(BaseAgent):
                 "Read the task, explain to an AI your guidelines on how to complete it. "
                 "All guidelines should be something that can be completed by an AI. "
                 "Use the response format provided."
+                "Always respond in valid JSON format."
             ),
             "task": task,
             "response format": {"guidelines": "Your guidelines here"},
-            "example response": {"guidelines": "Your guidelines here"},
+            "examples": {
+                "example response 1": {"guidelines": "Your guidelines here"},
+                "example response 2": {
+                    "guidelines": """To complete this task of answering the sum of 2+2, follow these simple guidelines: 
+            1. Understand that the task requires you to perform a basic arithmetic operation.
+            2. Recognize that the problem is asking for the result of adding two numbers together - in this case, 2 and 2.
+            3. Apply your knowledge of addition or use an appropriate computational method to determine the sum.
+            4. Return the answer as a single numerical value."""
+                },
+                "example response 3": {
+                    "guidelines": """To complete this task, follow these guidelines:
+            1. Read the task carefully and understand the requirements.
+            2. Identify the key elements of the task, such as the input values and the operation to be performed.
+            3. Perform the required calculation using the appropriate method.
+            4. Check your answer for accuracy and correctness."""
+                },
+                "example response 4": {
+                    "guidelines": """To complete this task, follow these guidelines:
+            1. Read the task carefully and understand the requirements.
+            2. Identify the key elements of the task, such as the input values and the operation to be performed.
+            3. Perform the required calculation using the appropriate method.
+            4. Check your answer for accuracy and correctness.
+            5. Provide a clear and concise explanation of your solution."""
+                },
+                "example response 5": {
+                    "guidelines": """To complete this task, follow these guidelines:
+            1. Read the task carefully and understand the requirements.
+            2. Identify the key elements of the task, such as the input values and the operation to be performed.
+            3. Perform the required calculation using the appropriate method.
+            4. Check your answer for accuracy and correctness.
+            5. Provide a clear and concise explanation of your solution.
+            6. Format your response according to the provided instructions."""
+                },
+            },
         }

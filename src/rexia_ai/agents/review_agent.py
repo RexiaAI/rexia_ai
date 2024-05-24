@@ -60,6 +60,7 @@ class ReviewAgent(BaseAgent):
                 "of the task as per the guidelines. If it is complete then mark the task as "
                 "complete by returning COMPLETED. If it is not complete, then return "
                 "REJECTED, using the response format provided."
+                "Always respond in valid JSON format."
             ),
             "task": self.get_value_or_default(agency_state, "task"),
             "guidelines": self.get_value_or_default(agency_state, "guidelines"),
@@ -68,12 +69,26 @@ class ReviewAgent(BaseAgent):
                 "status": "COMPLETED or REJECTED",
                 "feedback": "Your feedback here",
             },
-            "example response": {
-                "status": "COMPLETED",
-                "feedback": "The task has been completed. Well done!",
-            },
-            "example response 2": {
-                "status": "REJECTED",
-                "feedback": "The task has not been completed. Please try again.",
+            "examples": {
+                "example response": {
+                    "status": "COMPLETED",
+                    "feedback": "The task has been completed. Well done!",
+                },
+                "example response 2": {
+                    "status": "REJECTED",
+                    "feedback": "The task has not been completed. Please try again.",
+                },
+                "example response 3": {
+                    "status": "COMPLETED",
+                    "feedback": "The task has been completed. Great job!",
+                },
+                "example response 4": {
+                    "status": "REJECTED",
+                    "feedback": "The task has not been completed. Please follow the guidelines.",
+                },
+                "example response 5": {
+                    "status": "COMPLETED",
+                    "feedback": "The task has been completed acording to the task description and guidelines.",
+                },
             },
         }
