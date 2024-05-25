@@ -18,50 +18,38 @@ class IntrospectiveAgent(BaseAgent):
     ):
         super().__init__(model, instructions=instructions, verbose=verbose)
 
-    def action(self, agency_state: WorkflowStateSchema) -> WorkflowStateSchema:
+    def action(self, graph_state: WorkflowStateSchema) -> WorkflowStateSchema:
         """Perform introspection on the current task."""
-        graph_state = agency_state
 
         if self.verbose:
             print(
-                f"Performing introspection on task: {self.get_value_or_default(graph_state, 'task')}"
+                f"Performing introspection on task: {graph_state['task']}"
             )
 
-        prompt = {
-            "instructions": (
-                self.instructions
-                + " Based on the latest message, guidelines, and task, "
-                "provide an improved version of the last message. "
-                "Ensure the response adheres to the provided format and guidelines."
-                "Always respond in valid JSON format."
-            ),
-            "task": self.get_value_or_default(graph_state, "task"),
-            "reviewer feedback": self.get_value_or_default(graph_state, "feedback"),
-            "guidelines": self.get_value_or_default(graph_state, "guidelines"),
-            "messages": self.get_value_or_default(graph_state, "messages"),
-            "response format": {"message": "Your response here"},
-            "examples": {
-                "example reponse 1": {
-                    "message": "This is a good start, but here is an improved version: ..."
-                },
-                "example reponse 2": {
-                    "message": "You are on the right track, but consider this: ..."
-                },
-                "example reponse 3": {
-                    "message": "Good effort, but try this instead: ..."
-                },
-                "example reponse 4": {
-                    "message": "Almost there, but this is a better version: ..."
-                },
-            },
-        }
+        prompt = self._create_prompt(graph_state)
 
-        agent_response = self._invoke_model(prompt, "message")
+        agent_response = self._invoke_model(prompt)
 
         if self.verbose:
             print(
-                f"Introspection suggestion: {self.get_value_or_default(agent_response, 'message')}"
+                f"Introspection suggestion: {agent_response}"
             )
 
-        graph_state["messages"] = self.get_value_or_default(agent_response, "message")
+        graph_state["messages"] = agent_response
         return graph_state
+
+    def _create_prompt(self, graph_state: WorkflowStateSchema) -> dict:
+        prompt = f"""
+            task: {graph_state["task"]}\n\n
+            feedback: {graph_state["feedback"]}\n\n
+            guidelines: {graph_state["guidelines"]}\n\n
+            messages: {graph_state["messages"]}\n\n
+            instructions:\n
+                Based on the latest message, guidelines, feedback and task,
+                provide an improved version of the last message.
+                Follow the guidelines step by step.
+                Listen to feedback and adjust the message accordingly.
+                Respond with nothing but the improved message.
+        """
+
+        return prompt

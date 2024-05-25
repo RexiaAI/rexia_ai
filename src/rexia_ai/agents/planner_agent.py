@@ -12,74 +12,42 @@ class PlanAgent(BaseAgent):
         super().__init__(model, verbose=verbose)
         self.name = "Planner"
 
-    def action(self, agency_state: WorkflowStateSchema) -> WorkflowStateSchema:
+    def action(self, graph_state: WorkflowStateSchema) -> WorkflowStateSchema:
         """Work on the current task."""
         if self.verbose:
             print(
-                f"Planner working on task: {self.get_value_or_default(agency_state, 'task')}"
+                f"Planner working on task: {graph_state['task']}"
             )
 
-        return self._plan_task(agency_state)
+        return self._plan_task(graph_state)
 
-    def _plan_task(self, agency_state: WorkflowStateSchema) -> WorkflowStateSchema:
+    def _plan_task(self, graph_state: WorkflowStateSchema) -> WorkflowStateSchema:
         """Handle the task when its status is PENDING."""
-        agency_state["task_status"] = TaskStatus.WORKING
-        prompt = self._create_plan_prompt(
-            self.get_value_or_default(agency_state, "task")
-        )
-        planner_guidelines = self._invoke_model(prompt, "guidelines")
-        agency_state["guidelines"] = self.get_value_or_default(
-            planner_guidelines, "guidelines"
-        )
+        graph_state["task_status"] = TaskStatus.WORKING
+        prompt = self._create_prompt(graph_state)
+        planner_guidelines = self._invoke_model(prompt)
+        graph_state["guidelines"] = planner_guidelines
         if self.verbose:
             print(
-                f"Planner guidelines: {self.get_value_or_default(planner_guidelines, 'guidelines')}"
+                f"Planner guidelines: {planner_guidelines}"
             )
-        return agency_state
+        return graph_state
 
-    def _create_plan_prompt(self, task: str) -> dict:
+    def _create_prompt(self, graph_state: str) -> dict:
         """Create a prompt for a pending task."""
-        return {
-            "instructions": (
-                "Read the task, explain to an AI your guidelines on how to complete it. "
-                "All guidelines should be something that can be completed by an AI. "
-                "Use the response format provided."
-                "Always respond in valid JSON format."
-            ),
-            "task": task,
-            "response format": {"guidelines": "Your guidelines here"},
-            "examples": {
-                "example response 1": {"guidelines": "Your guidelines here"},
-                "example response 2": {
-                    "guidelines": """To complete this task of answering the sum of 2+2, follow these simple guidelines: 
-            1. Understand that the task requires you to perform a basic arithmetic operation.
-            2. Recognize that the problem is asking for the result of adding two numbers together - in this case, 2 and 2.
-            3. Apply your knowledge of addition or use an appropriate computational method to determine the sum.
-            4. Return the answer as a single numerical value."""
-                },
-                "example response 3": {
-                    "guidelines": """To complete this task, follow these guidelines:
-            1. Read the task carefully and understand the requirements.
-            2. Identify the key elements of the task, such as the input values and the operation to be performed.
-            3. Perform the required calculation using the appropriate method.
-            4. Check your answer for accuracy and correctness."""
-                },
-                "example response 4": {
-                    "guidelines": """To complete this task, follow these guidelines:
-            1. Read the task carefully and understand the requirements.
-            2. Identify the key elements of the task, such as the input values and the operation to be performed.
-            3. Perform the required calculation using the appropriate method.
-            4. Check your answer for accuracy and correctness.
-            5. Provide a clear and concise explanation of your solution."""
-                },
-                "example response 5": {
-                    "guidelines": """To complete this task, follow these guidelines:
-            1. Read the task carefully and understand the requirements.
-            2. Identify the key elements of the task, such as the input values and the operation to be performed.
-            3. Perform the required calculation using the appropriate method.
-            4. Check your answer for accuracy and correctness.
-            5. Provide a clear and concise explanation of your solution.
-            6. Format your response according to the provided instructions."""
-                },
-            },
-        }
+        prompt = f"""
+            role: "You are a helpful planner who always generates detailed chain of 
+            thought plans that complete the given task.\n\n
+            task: {graph_state['task']}\n\n
+            instructions:\n
+            The plan should always result in a completed task.\n\n
+            For example, if the task is to write a blog post, the guidelines should result in a finished blog post.
+            If the task is to write a code snippet, the guidelines should result in a working code snippet.
+            If the task is to write a report, the guidelines should result in a completed report.
+            Each step in the plan be an action to be taken.
+            All plans should be detailed and actionable.
+            Do not add any extra information that is not part of the plan, or required to complete the task.
+            Respond only with your plan and nothing else.\n\n
+        """
+
+        return prompt

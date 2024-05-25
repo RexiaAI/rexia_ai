@@ -18,51 +18,22 @@ class WorkAgent(BaseAgent):
     ):
         super().__init__(model, instructions=instructions, verbose=verbose)
 
-    def action(self, agency_state: WorkflowStateSchema) -> WorkflowStateSchema:
+    def action(self, graph_state: WorkflowStateSchema) -> WorkflowStateSchema:
         """Work on the current task."""
-        graph_state = agency_state
 
         if self.verbose:
             print(
-                f"Worker working on task: {self.get_value_or_default(graph_state, 'task')}"
+                f"Worker working on task: {graph_state['task']}"
             )
 
-        prompt = {
-            "instructions": (
-                self.instructions
-                + " Ensure the response adheres to the provided format and guidelines. "
-                "Do not give instructions to perform the task. "
-                "Your response should be a completion of the task. "
-                "Always make changes according to reviewer feedback."
-                "Always respond in valid JSON format."
-            ),
-            "task": self.get_value_or_default(graph_state, "task"),
-            "reviewer feedback": self.get_value_or_default(graph_state, "feedback"),
-            "guidelines": self.get_value_or_default(graph_state, "guidelines"),
-            "messages": self.get_value_or_default(graph_state, "messages"),
-            "response format": {"message": "Your response here"},
-                "examples": {
-                    "example 1": {"message": "This is an example response."},
-                    "example 2": {
-                        "message": "import numpy as np\n\nx = np.array([1, 2, 3])\nprint(x)"
-                    },
-                    "example 3": {
-                        "message": "import numpy as np\n\nx = np.array([1, 2, 3])\nprint(x)\n\n# Output: [1 2 3]"
-                    },
-                    "example 4": {
-                        "message": "import numpy as np\n\nx = np.array([1, 2, 3])\nprint(x)\n\n# Output: [1 2 3]\n\n# This code creates a numpy array and prints it."
-                    },
-                    "example 5": {"message": "2 + 2 = 4"},
-                    "example 6": {"message": "3 * 6 = 18"},
-            }
-        }
+        prompt = self._create_prompt(graph_state)
 
-        agent_response = self._invoke_model(prompt, "message")
+        agent_response = self._invoke_model(prompt)
 
         if self.verbose:
             print(
-                f"Worker response: {self.get_value_or_default(agent_response, 'message')}"
+                f"Worker response: {agent_response}"
             )
 
-        graph_state["messages"] = self.get_value_or_default(agent_response, "message")
+        graph_state["messages"] = agent_response
         return graph_state
