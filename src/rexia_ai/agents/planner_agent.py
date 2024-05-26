@@ -1,6 +1,6 @@
 """Planner Agent for ReXia AI."""
 
-from ..llms import RexiaAIChatOpenAI
+from ..llms import ReXiaAIChatOpenAI
 from ..common import WorkflowStateSchema, TaskStatus
 from ..base import BaseAgent
 
@@ -8,7 +8,7 @@ from ..base import BaseAgent
 class PlanAgent(BaseAgent):
     """Planner Agent for ReXia AI."""
 
-    def __init__(self, model: RexiaAIChatOpenAI, verbose: bool = False):
+    def __init__(self, model: ReXiaAIChatOpenAI, verbose: bool = False):
         super().__init__(model, verbose=verbose)
         self.name = "Planner"
 
@@ -34,7 +34,7 @@ class PlanAgent(BaseAgent):
         return graph_state
 
     def _create_prompt(self, graph_state: str) -> dict:
-        """Create a prompt for a pending task."""
+        """Create a prompt for a planning task."""
         prompt = f"""
             role: "You are a helpful planner who always generates detailed chain of 
             thought plans that complete the given task.\n\n

@@ -24,3 +24,7 @@ class BaseWorkflow:
 
     def _create_task_graph(self) -> None:
         pass
+    
+    def _get_latest_message(self, graph_state: WorkflowStateSchema) -> str:
+        """Get the result from the graph state."""
+        return graph_state["messages"][-1]

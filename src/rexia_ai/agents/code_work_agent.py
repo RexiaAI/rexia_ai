@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from langchain_core.tools import Tool
-from ..llms import RexiaAIChatOpenAI
+from ..llms import ReXiaAIChatOpenAI
 from ..common import WorkflowStateSchema
 from ..base import BaseAgent
 
@@ -10,11 +10,11 @@ from ..base import BaseAgent
 class CodeWorkAgent(BaseAgent):
     """CodeWorkAgent for ReXia AI. A worker agent specialised in coding tasks."""
 
-    model: RexiaAIChatOpenAI
+    model: ReXiaAIChatOpenAI
     tools: Optional[List[Tool]]
 
     def __init__(
-        self, model: RexiaAIChatOpenAI, instructions: str = "", verbose: bool = False
+        self, model: ReXiaAIChatOpenAI, instructions: str = "", verbose: bool = False
     ):
         super().__init__(model, instructions=instructions, verbose=verbose)
 
@@ -39,6 +39,7 @@ class CodeWorkAgent(BaseAgent):
         return graph_state
     
     def _create_prompt(self, graph_state: WorkflowStateSchema) -> dict:
+        """Create a prompt for a coding task."""
         prompt = f"""role: You are a senior developer. You read the task, guidelines, messages, and feeddback
             and generate code that represents a completion of the task. You always listen to feedback.
             Ensure that code you write adheres to industry best practices, including readability, efficiency, and 

@@ -2,7 +2,7 @@
 
 from langchain_openai import ChatOpenAI
 
-class RexiaAIChatOpenAI(ChatOpenAI):
+class ReXiaAIChatOpenAI(ChatOpenAI):
     """The RexiaAIChatOpenAI class, extends ChatOpenAI so we can ensure JSON object responses."""
 
     def __init__(self, base_url: str, model: str, api_key: str = ""):

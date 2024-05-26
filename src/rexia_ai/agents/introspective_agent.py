@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from langchain_core.tools import Tool
-from ..llms import RexiaAIChatOpenAI
+from ..llms import ReXiaAIChatOpenAI
 from ..common import WorkflowStateSchema
 from ..base import BaseAgent
 
@@ -10,11 +10,11 @@ from ..base import BaseAgent
 class IntrospectiveAgent(BaseAgent):
     """IntrospectiveAgent for ReXia AI."""
 
-    model: RexiaAIChatOpenAI
+    model: ReXiaAIChatOpenAI
     tools: Optional[List[Tool]]
 
     def __init__(
-        self, model: RexiaAIChatOpenAI, instructions: str = "", verbose: bool = False
+        self, model: ReXiaAIChatOpenAI, instructions: str = "", verbose: bool = False
     ):
         super().__init__(model, instructions=instructions, verbose=verbose)
 
@@ -39,6 +39,7 @@ class IntrospectiveAgent(BaseAgent):
         return graph_state
 
     def _create_prompt(self, graph_state: WorkflowStateSchema) -> dict:
+        """Create a prompt for introspection on a task."""
         prompt = f"""
             task: {graph_state["task"]}\n\n
             feedback: {graph_state["feedback"]}\n\n

@@ -3,18 +3,18 @@
 import re
 from typing import List, Optional
 from langchain_core.tools import Tool
-from ..llms import RexiaAIChatOpenAI
+from ..llms import ReXiaAIChatOpenAI
 from ..common import WorkflowStateSchema
 
 
 class BaseAgent:
     """BaseAgent for ReXia AI."""
 
-    model: RexiaAIChatOpenAI
+    model: ReXiaAIChatOpenAI
     tools: Optional[List[Tool]]
 
     def __init__(
-        self, model: RexiaAIChatOpenAI, instructions: str = "", verbose: bool = False
+        self, model: ReXiaAIChatOpenAI, instructions: str = "", verbose: bool = False
     ):
         self.model = model
         self.instructions = instructions
@@ -31,6 +31,7 @@ class BaseAgent:
     def _invoke_model(self, prompt) -> str:
         """Invoke the model with the given prompt and return the response."""
         response = self.model.invoke(prompt).content
+        response = self._clean_response(response)
             
         return response
     
