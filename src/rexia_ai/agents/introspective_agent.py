@@ -35,7 +35,7 @@ class IntrospectiveAgent(BaseAgent):
                 f"Introspection suggestion: {agent_response}"
             )
 
-        graph_state["messages"] = agent_response
+        graph_state["messages"].append(agent_response)
         return graph_state
 
     def _create_prompt(self, graph_state: WorkflowStateSchema) -> dict:

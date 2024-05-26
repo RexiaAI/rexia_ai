@@ -35,5 +35,5 @@ class WorkAgent(BaseAgent):
                 f"Worker response: {agent_response}"
             )
 
-        graph_state["messages"] = agent_response
+        graph_state["messages"].append(agent_response)
         return graph_state
