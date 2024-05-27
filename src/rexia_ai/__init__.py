@@ -14,6 +14,7 @@ from rexia_ai.common import TaskStatus
 from rexia_ai.llms import ReXiaAIChatOpenAI
 from rexia_ai.base import BaseAgent, BaseWorkflow
 from rexia_ai.workflows import ReflectiveWorkflow
+from rexia_ai.tools import RexiaAIGooleSearch
 
 __all__ = [
     "BaseWorkflow",
@@ -28,5 +29,6 @@ __all__ = [
     "CodeWorkAgent",
     "ActionAgent",
     "ThoughtAgent",
-    "ObserverAgent"
+    "ObserverAgent",
+    "RexiaAIGooleSearch"
 ]
