@@ -4,25 +4,23 @@ import re
 from typing import List, Optional
 from langchain_core.tools import Tool
 from ..llms import ReXiaAIChatOpenAI
-from ..common import WorkflowStateSchema
 
 
-class BaseAgent:
+class BaseWorker:
     """BaseAgent for ReXia AI."""
 
     model: ReXiaAIChatOpenAI
     tools: Optional[List[Tool]]
 
     def __init__(
-        self, model: ReXiaAIChatOpenAI, instructions: str = "", verbose: bool = False
+        self, model: ReXiaAIChatOpenAI, verbose: bool = False
     ):
         self.model = model
-        self.instructions = instructions
         self.verbose = verbose
 
-    def action(self, graph_state: WorkflowStateSchema) -> WorkflowStateSchema:
+    def action(self, task: str, messages: List[str]) -> str:
         """Work on the current task."""
-        return graph_state
+        return task + " " + str(messages)
 
     def remove_system_tokens(self, s: str):
         """Remove system tokens from the string."""
@@ -39,17 +37,3 @@ class BaseAgent:
         """Clean the response from the model."""
         cleaned_response = self.remove_system_tokens(response)
         return cleaned_response
-
-    def _create_prompt(
-        self, graph_state: WorkflowStateSchema
-    ) -> dict:
-        """Create a prompt for a task."""
-        prompt = f"""role: You are a helpful agent. You read the task, guidelines, messages and feeddback
-            and generate a completion of the task. You always listen to feedback. You always follow the guidelines
-            step by step.\n\n
-            task: {graph_state["task"]},\n\n
-            feedback: {graph_state["feedback"]},\n\n
-            guidelines: {graph_state["guidelines"]},\n\n
-            instructions: {self.instructions}"""
-
-        return prompt

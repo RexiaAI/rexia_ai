@@ -1,9 +1,9 @@
 """Common module for ReXia AI."""
 
-from .task_statuses import TaskStatus
+from .sprint_status import SprintStatus
 from .workflow_state import (
     WorkflowState,
     WorkflowStateSchema
 )
 
-__all__ = ["WorkflowState", "TaskStatus", "WorkflowStateSchema"]
+__all__ = ["WorkflowState", "SprintStatus", "WorkflowStateSchema"]
