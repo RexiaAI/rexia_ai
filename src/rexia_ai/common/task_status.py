@@ -3,7 +3,7 @@
 from enum import Enum
 
 
-class SprintStatus(Enum):
+class TaskStatus(Enum):
     """
     Represents the status of a task.
 

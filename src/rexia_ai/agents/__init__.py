@@ -1,11 +1,19 @@
 """task module for ReXia AI."""
 
-from .agent_worker import AgentWorker
-from .scrum_master_worker import ScrumMasterWorker
-from .product_owner_worker import ProductOwnerWorker
+from .tool import ToolWorker
+from .work import Worker
+from .plan import PlanWorker
+from .reflect import ReflectWorker
+from .rexia_ai_agent import ReXiaAIAgent
+from .approve import ApproveWorker
+from .task import TaskWorker
 
 __all__ = [
-    "AgentWorker",
-    "ScrumMasterWorker",
-    "ProductOwnerWorker",
+    "Worker",
+    "ToolWorker",
+    "PlanWorker",
+    "ReflectWorker",
+    "ReXiaAIAgent",
+    "ApproveWorker",
+    "TaskWorker"
 ]

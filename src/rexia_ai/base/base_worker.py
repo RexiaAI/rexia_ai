@@ -18,9 +18,15 @@ class BaseWorker:
         self.model = model
         self.verbose = verbose
 
-    def action(self, task: str, messages: List[str]) -> str:
+    def action(self, prompt: str, worker_name: str,) -> str:
         """Work on the current task."""
-        return task + " " + str(messages)
+
+        agent_response = self._invoke_model(prompt)
+
+        if self.verbose:
+            print(f"{worker_name}: {agent_response}")
+
+        return f"{worker_name}: " + agent_response
 
     def remove_system_tokens(self, s: str):
         """Remove system tokens from the string."""
