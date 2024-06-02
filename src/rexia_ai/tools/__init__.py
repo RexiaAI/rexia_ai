@@ -1,4 +1,4 @@
-"""Workflows module for the rexia_ai package."""
+"""workflows module for the rexia_ai package."""
 
 from .google_search import RexiaAIGooleSearch
 

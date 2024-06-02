@@ -1,4 +1,4 @@
-"""Common module for ReXia AI."""
+"""common module for ReXia AI."""
 
 from .task_status import TaskStatus
 from .collaboration_channel import CollaborationChannel

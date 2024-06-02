@@ -1,7 +1,9 @@
 """Workflows module for the rexia_ai package."""
 
-from .collabortative_workflow import CollaborativeWorkflow
+from .reflect_workflow import ReflectWorkflow
+from .task_breakdown_workflow import TaskBreakdownWorkflow
 
 __all__ = [
-    "CollaborativeWorkflow"
+    "ReflectWorkflow",
+    "TaskBreakdownWorkflow"
 ]

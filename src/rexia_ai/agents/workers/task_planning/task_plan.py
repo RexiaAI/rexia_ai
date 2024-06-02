@@ -1,12 +1,12 @@
-"""TaskWorker class for ReXia.AI."""
+"""TaskPlanningWorker class for ReXia.AI."""
 
 from typing import List, Optional
 from langchain_core.tools import Tool
-from ..llms import ReXiaAIChatOpenAI
-from ..base import BaseWorker
+from ....llms import ReXiaAIChatOpenAI
+from ....base import BaseWorker
 
 
-class TaskWorker(BaseWorker):
+class TaskPlanningWorker(BaseWorker):
     """A worker agent for breaking a main task into many sub-tasks."""
 
     model: ReXiaAIChatOpenAI

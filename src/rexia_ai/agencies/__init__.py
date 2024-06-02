@@ -1,1 +1,1 @@
-"""task module for ReXia AI."""
+"""Agency module for ReXia AI."""

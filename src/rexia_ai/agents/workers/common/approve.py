@@ -2,8 +2,8 @@
 
 from typing import List, Optional
 from langchain_core.tools import Tool
-from ..llms import ReXiaAIChatOpenAI
-from ..base import BaseWorker
+from ....llms import ReXiaAIChatOpenAI
+from ....base import BaseWorker
 
 
 class ApproveWorker(BaseWorker):
