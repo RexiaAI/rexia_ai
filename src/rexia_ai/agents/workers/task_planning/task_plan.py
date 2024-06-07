@@ -1,20 +1,17 @@
 """TaskPlanningWorker class for ReXia.AI."""
 
-from typing import List, Optional
-from langchain_core.tools import Tool
-from ....llms import ReXiaAIChatOpenAI
+from typing import Any
 from ....base import BaseWorker
 
 
 class TaskPlanningWorker(BaseWorker):
     """A worker agent for breaking a main task into many sub-tasks."""
 
-    model: ReXiaAIChatOpenAI
-    tools: Optional[List[Tool]]
+    model: Any
 
     def __init__(
         self,
-        model: ReXiaAIChatOpenAI,
+        model: Any,
         verbose: bool = False,
     ):
         super().__init__(model, verbose=verbose)

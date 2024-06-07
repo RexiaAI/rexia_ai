@@ -1,20 +1,17 @@
 """planWorker class for ReXia AI."""
 
-from typing import List, Optional
-from langchain_core.tools import Tool
-from ....llms import ReXiaAIChatOpenAI
+from typing import Any, List
 from ....base import BaseWorker
 
 
 class PlanWorker(BaseWorker):
     """A specialised planning worker for a ReXia.AI agent."""
 
-    model: ReXiaAIChatOpenAI
-    tools: Optional[List[Tool]]
+    model: Any
 
     def __init__(
         self,
-        model: ReXiaAIChatOpenAI,
+        model: Any,
         verbose: bool = False,
     ):
         super().__init__(model, verbose=verbose)

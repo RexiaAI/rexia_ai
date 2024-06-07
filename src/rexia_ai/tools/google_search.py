@@ -1,16 +1,26 @@
-""" Rexia AI Google Search Tool - Google Search Tool that works with OllamaFunctions"""
+""" Rexia AI Google Search Tool - Google Search Tool that works with ReXia.AI"""
 
 from langchain_google_community import GoogleSearchAPIWrapper
+from ..base import BaseTool
 
 
-class RexiaAIGooleSearch(GoogleSearchAPIWrapper):
-    """Tool that works with OllamaFunctions."""
+class RexiaAIGoogleSearch(BaseTool):
+    """Tool that works with ReXia.AI."""
+    api_key: str
+    engine_id: str
+    
+    def __init__(self, api_key: str, engine_id: str):
+        super().__init__(name="google_search", func=self.google_search, description="Perform a Google search")
+        self.api_key = api_key
+        self.engine_id = engine_id
+        self.google_search_api = GoogleSearchAPIWrapper(google_api_key=api_key, google_cse_id=engine_id)
+    
     def google_search(self, query: str) -> str:
         """Run query through GoogleSearch and parse result."""
-        super().run(query)
+        return self.google_search_api.run(query)
 
-    def to_ollama_tool(self):
-        """Return the tool as a JSON object for OllamaFunctions."""
+    def to_rexiaai_tool(self):
+        """Return the tool as a JSON object for ReXia.AI."""
 
         tool = [
             {
@@ -32,8 +42,8 @@ class RexiaAIGooleSearch(GoogleSearchAPIWrapper):
 
         return tool
 
-    def to_ollama_function_call(self):
-        """Return the tool as a JSON object for OllamaFunctions."""
+    def to_rexiaai_function_call(self):
+        """Return the tool as a dictionary object for ReXia.AI."""
         function_call = {"name": "google_search"}
 
         return function_call

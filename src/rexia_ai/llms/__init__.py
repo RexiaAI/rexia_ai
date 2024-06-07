@@ -1,6 +1,5 @@
-"""llms module for ReXia AI."""
+"""llms module for ReXia.AI."""
 
-from .rexia_ai_chat_open_ai import ReXiaAIChatOpenAI
-from .rexia_ai_ollama_functions import ReXiaAIOllamaFunctions
+from .llm import LLM
 
-__all__ = ["ReXiaAIChatOpenAI", "ReXiaAIOllamaFunctions"]
+__all__ = ["LLM"]

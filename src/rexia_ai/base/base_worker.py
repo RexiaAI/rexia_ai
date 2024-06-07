@@ -1,19 +1,14 @@
 """BaseAgent class for ReXia AI."""
 
 import re
-from typing import List, Optional
-from langchain_core.tools import Tool
-from ..llms import ReXiaAIChatOpenAI
+from typing import Any
 
 
 class BaseWorker:
     """BaseAgent for ReXia AI."""
 
-    model: ReXiaAIChatOpenAI
-    tools: Optional[List[Tool]]
-
     def __init__(
-        self, model: ReXiaAIChatOpenAI, verbose: bool = False
+        self, model: Any, verbose: bool = False
     ):
         self.model = model
         self.verbose = verbose
@@ -42,4 +37,9 @@ class BaseWorker:
     def _clean_response(self, response: str) -> str:
         """Clean the response from the model."""
         cleaned_response = self.remove_system_tokens(response)
+        cleaned_response = self._strip_python_tags(cleaned_response)
         return cleaned_response
+    
+    def _strip_python_tags(self, code: str) -> str:
+        """Strip python tags from the start and end of a string of code."""
+        return re.sub(r"^```python\n|```$", "", code, flags=re.MULTILINE)
