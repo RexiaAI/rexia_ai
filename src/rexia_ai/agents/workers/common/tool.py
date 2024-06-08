@@ -2,6 +2,7 @@
 
 import json
 import re
+import secrets
 from typing import List, Dict, Tuple
 from ....base import BaseWorker
 from ....llms import LLM
@@ -29,6 +30,8 @@ class ToolWorker(BaseWorker):
 
     def create_prompt(self, task: str, messages: List[str]) -> str:
         """Create a prompt for the model."""
+        unique_id = self._get_unique_id()
+        
         prompt = (
             """
             ***Role: Tool Agent***
@@ -49,7 +52,7 @@ class ToolWorker(BaseWorker):
                         "arg1": "value1",
                         "arg2": "value2"
                     },
-                    "id": "unique_identifier"
+                    "id": "UNIQUE_ID_PLACEHOLDER"
                     }
                 ]
                 }
@@ -64,11 +67,11 @@ class ToolWorker(BaseWorker):
                         "a": 3,
                         "b": 12
                     },
-                    "id": "call_12345"
+                    "id": "UNIQUE_ID_PLACEHOLDER"
                     }
                 ]
                 }
-            """ + 
+            """ +
             f"""
             **Task:** {task}
 
@@ -79,6 +82,8 @@ class ToolWorker(BaseWorker):
             """
             + "\n\n".join(messages)
         )
+        prompt = prompt.replace("UNIQUE_ID_PLACEHOLDER", unique_id)
+        
         return prompt
     
     def _get_available_tools(self):
@@ -132,7 +137,11 @@ class ToolWorker(BaseWorker):
     def _format_response(self, worker_name: str, agent_response: str, json_part: str, results: Dict) -> str:
         """Format the response."""
         if self.verbose:
-            print(f"{worker_name}: {agent_response}\n\n JSON Part: {json_part}\n\n Results: {results}")
+            print(f"{worker_name}: {agent_response}\n\n JSON: {json_part}\n\n Results: {results}")
 
         return f"{worker_name}: " + f"{results}"
+    
+    def _get_unique_id(self):
+        """Get a unique id."""
+        return secrets.token_hex(16)
         

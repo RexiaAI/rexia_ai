@@ -24,12 +24,13 @@ class ApproveWorker(BaseWorker):
                 You are part of a team working on a task.
                 Your job is to read the collaboration chat and decide if the task has been completed
                 and give feedback.
-                Your feedback should consist of a chain of thought explaining your decision followed be
-                either "COMPLETED" or "NOT COMPLETED" depending on your decision.
                 If the task has been completed, you should approve it by saying "COMPLETED".
                 If the task has not been completed, you should say "NOT COMPLETED".
                 Only use "COMPLETED" or "NOT COMPLETED" when deciding approval.
+                If the task has been completed, include the accepted answer in the feedback as per the provided format.
             """
+            + "\n\n"
+            + self.get_approval_structured_output_prompt()
             + "\n\n"
             + "Task: "
             + task

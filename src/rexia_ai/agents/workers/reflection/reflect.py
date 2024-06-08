@@ -27,6 +27,8 @@ class ReflectWorker(BaseWorker):
                 improves on the original answer.
             """
             + "\n\n"
+            + self.get_structured_output_prompt()
+            + "\n\n"
             + "Task: "
             + task
             + "\n\n"

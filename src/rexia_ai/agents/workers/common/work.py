@@ -22,13 +22,12 @@ class Worker(BaseWorker):
             """
                 You are a worker agent.
                 You are part of a team working on a task.
-                Read the collaboration chat and the task fully to understand the context.
-                Your job is to follow the plan in the collaboration chat and complete the task.
-                Make sure to follow the plan and complete the task.
-                Do not deviate from the plan.
-                Your result should be the completion of the task.
-                Do not do anything that is not part of the plan.
+                Read the collaboration chat and the task fully to understand the context and plan.
+                Your job is to complete the task.
+                Do not add any explanation or reasoning to your answer outside your chain of reasoning.
             """
+            + "\n\n"
+            + self.get_structured_output_prompt()
             + "\n\n"
             + "Task: "
             + task

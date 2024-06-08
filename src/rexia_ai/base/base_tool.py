@@ -22,3 +22,4 @@ class BaseTool():
         function_call = {}
 
         return function_call
+    

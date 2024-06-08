@@ -26,13 +26,12 @@ class PlanWorker(BaseWorker):
                 Only plan steps that are relevant to the task.
                 Make sure to include all the necessary steps to complete the task.
                 The result of following the plan should be a completion of the task.
-                You should explain your reasoning before giving the plan.
-                Your reasoning should be in the form of a chain of logic.
-                Your plan should be in the form of a list of steps.
-                Your plan should only include steps that can be formed right now.
+                Your plan should only include steps that can be performed right now.
                 Your plan should only include steps an AI can complete.
                 Your plan should not include steps that continue after the task is completed, such as review or promotion.
             """
+            + "\n\n"
+            + self.get_plan_structured_output_prompt()
             + "\n\n"
             + "Task: "
             + task
