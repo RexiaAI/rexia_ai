@@ -1,7 +1,7 @@
 """Worker class for ReXia AI."""
 
 from typing import Any, List
-from ....base import BaseWorker
+from ...base import BaseWorker
 
 
 class Worker(BaseWorker):

@@ -1,9 +1,9 @@
 """Agents module for ReXia AI."""
 
-from .rexia_ai_agent import ReXiaAIAgent
-from .reflect_agent import ReflectAgent
+from .component import Component
+from .agent import Agent
 
 __all__ = [
-    "ReXiaAIAgent",
-    "ReflectAgent"
+    "Component",
+    "Agent"
 ]

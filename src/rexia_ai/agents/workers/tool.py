@@ -4,8 +4,8 @@ import json
 import re
 import secrets
 from typing import List, Dict, Tuple
-from ....base import BaseWorker
-from ....llms import LLM
+from ...base import BaseWorker
+from ...llms import LLM
 
 
 class ToolWorker(BaseWorker):
