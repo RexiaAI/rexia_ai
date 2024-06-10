@@ -1,7 +1,6 @@
 """agent class for ReXia AI."""
 
 import re
-import json
 from ..workflows import ReflectWorkflow
 from ..thought_buffer import BufferManager
 
@@ -28,26 +27,18 @@ class Agent:
     def extract_accepted_answer(self, task_result):
         """Use a regular expression to extract the accepted answer."""
         try:
-            # Remove "approval: " from the task_result string
-            json_start = task_result.find('{')
-            if json_start == -1:
-                print("Error: Task result does not contain a valid JSON string.")
-                return None
-            task_result = task_result[json_start:]
-
-            task_result_dict = json.loads(task_result)
-            accepted_answer = task_result_dict.get('accepted answer')
-            if accepted_answer:
-                if isinstance(accepted_answer, dict):
-                    accepted_answer = json.dumps(accepted_answer)
-                return accepted_answer
+            # Search for the pattern 'accepted_answer": {' followed by any characters until '}' 
+            match = re.search(r'accepted_answer": \{\s*?"type":\s*?"Text",\s*?"value":\s*?"(.*?)"\s*?\}', task_result, re.DOTALL)
+            if match:
+                answer_value = match.group(1)
+                return answer_value
             else:
                 print("Error: Failed to extract accepted answer.")
                 return None
-        except json.JSONDecodeError:
-            print("Error: Task result is not a valid JSON string.")
+        except Exception as e:
+            print(f"Unexpected error: {e}")
             return None
-
+        
     def reflect(self):
         """Reflect method for the agent."""
         try:

@@ -44,10 +44,13 @@ class LLMOutput:
         """Get the approval output structure"""
         return (
             "{\n"
-            "    \"task\": \"string\",\n"
-            "    \"approval\": \"string\",\n"
-            "    \"confidence_score\": \"Number between 0 and 100 percent\",\n"
-            "    \"chain of reasoning\": [\"string\"],\n"
-            "    \"accepted answer\": \"string\"\n"
+            "    \"task\": \"<Task Name>\",\n"
+            "    \"approval\": \"<Approval Status>\",\n"
+            "    \"confidence_score\": <Confidence Score>,\n"
+            "    \"chain_of_reasoning\": [<Reasoning Steps>],\n"
+            "    \"accepted_answer\": {\n"
+            "        \"type\": \"<Answer Type>\",\n"
+            "        \"value\": \"<Answer Value>\"\n"
+            "    }\n"
             "}"
         )

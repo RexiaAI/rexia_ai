@@ -1,8 +1,7 @@
 """buffer manager class for ReXia.AI."""
 import os
 from qdrant_client import QdrantClient
-from qdrant_client.grpc import PointStruct
-from qdrant_client.models import Distance, VectorParams
+from qdrant_client.models import Distance, VectorParams, PointStruct
 from langchain_community.embeddings.huggingface import HuggingFaceEmbeddings
 
 THOUGHT_BUFFER_PATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), "buffer")
@@ -55,6 +54,9 @@ class BufferManager:
             task_embedding = self.embeddings.embed_documents([task])[0]
             plan_embedding = self.embeddings.embed_documents([plan])[0]
 
+            # Get information about the collection
+            collection_info = self.qdrant_client.get_collection(THOUGHT_BUFFER_NAME)
+
             # Check if a plan for the current task exists in the thought_buffer
             results = self.qdrant_client.search(
                 collection_name=THOUGHT_BUFFER_NAME,
@@ -64,16 +66,25 @@ class BufferManager:
 
             if results:
                 # If a plan exists, update it
-                result_id = results[0]['id']
-                point = PointStruct({
-                    'id': result_id,
-                    'vector': plan_embedding,
-                    'payload': {"task": task, "plan": plan}
-                })
-                self.qdrant_client.upsert(
-                    collection_name=THOUGHT_BUFFER_NAME,
-                    points=[point]
+                vector_id = results[0].id if results[0].id is not None else 0
+                point = PointStruct(
+                    id=vector_id,
+                    vector=plan_embedding,
+                    payload={"task": task, "plan": plan}
                 )
+            else:
+                # If no plan exists, create a new one
+                vector_id = collection_info.vectors_count if collection_info.vectors_count is not None else 0
+                point = PointStruct(
+                    id=vector_id,
+                    vector=plan_embedding,
+                    payload={"task": task, "plan": plan}
+                )
+
+            self.qdrant_client.upsert(
+                collection_name=THOUGHT_BUFFER_NAME,
+                points=[point]
+            )
         except ValueError as e:
             print(f"Value error occurred: {e}")
         except TypeError as e:
@@ -86,6 +97,13 @@ class BufferManager:
         # Convert the task into an embedding
         thought_embedding = self.embeddings.embed_documents([task])[0]
 
+        # Use the Qdrant client to find vectors that are similar to the zero vector
+        results = self.qdrant_client.search(
+            collection_name=THOUGHT_BUFFER_NAME,
+            query_vector=thought_embedding,
+            limit=1
+        )
+
         # Use the Qdrant client to find the most similar templates
         results = self.qdrant_client.search(
             collection_name=THOUGHT_BUFFER_NAME,
@@ -93,15 +111,7 @@ class BufferManager:
             limit=1
         )
 
-        # Retrieve the plan associated with the most similar task
-        if results:
-            result = results[0]
-            if 'payload' in result:
-                payload = result['payload']
-                if 'plan' in payload:
-                    return payload['plan']
-
-        return None
+        return results
     
     def delete_collection(self):
         """Delete the existing Qdrant collection. WARNING: This will delete all data in the collection.
