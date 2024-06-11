@@ -25,6 +25,8 @@ class ReflectWorker(BaseWorker):
                 Your job is to read the collaboration chat and reflect on how to improve the answer to the task.
                 Based on your reflection, you should provide a revised answer to the task that
                 improves on the original answer.
+                Don't use abreveations or shorthand in your reflection if they are not explained in the answer.
+                Don't give instructions on how to improve the answer, just provide the improved answer.
             """
             + "\n\n"
             + self.get_structured_output_prompt()

@@ -9,6 +9,7 @@ THOUGHT_BUFFER_NAME = "thought_buffer"
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 MODEL_KWARGS = {'device': 'cuda'}
 ENCODE_KWARGS = {'normalize_embeddings': False}
+SIMILARITY_THRESHOLD = 0.3
 
 class BufferManager:
     """BufferManager class for ReXia AI."""
@@ -97,13 +98,6 @@ class BufferManager:
         # Convert the task into an embedding
         thought_embedding = self.embeddings.embed_documents([task])[0]
 
-        # Use the Qdrant client to find vectors that are similar to the zero vector
-        results = self.qdrant_client.search(
-            collection_name=THOUGHT_BUFFER_NAME,
-            query_vector=thought_embedding,
-            limit=1
-        )
-
         # Use the Qdrant client to find the most similar templates
         results = self.qdrant_client.search(
             collection_name=THOUGHT_BUFFER_NAME,
@@ -111,8 +105,13 @@ class BufferManager:
             limit=1
         )
 
-        return results
-    
+        # If the similarity score of the most similar template is above the threshold, return the template
+        if results[0].score >= SIMILARITY_THRESHOLD:
+            return results[0]
+        else:
+            print("No template found with similarity above the threshold.")
+            return None
+
     def delete_collection(self):
         """Delete the existing Qdrant collection. WARNING: This will delete all data in the collection.
         Only use this method if you are sure you want to delete the collection."""

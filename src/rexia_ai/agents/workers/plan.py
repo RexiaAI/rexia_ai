@@ -27,6 +27,8 @@ class PlanWorker(BaseWorker):
                 Your job is to think through the task and create a plan to complete it.
                 If you are provided with a plan, you should review it and provide a refined version if nessecary, or
                 simply supply the plan if it is correct.
+                Don't use abreveations or shorthand in your plan.
+                The plan should always be as simple and clear as possible.
             """
             + "\n\n"
             + f"Previous Plan: {self._get_thought_template(task)}"

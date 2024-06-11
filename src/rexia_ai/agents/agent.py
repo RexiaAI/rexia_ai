@@ -4,8 +4,10 @@ import re
 from ..workflows import ReflectWorkflow
 from ..thought_buffer import BufferManager
 
+
 class Agent:
     """Agent class for ReXia AI."""
+
     def __init__(self, llm, task: str, verbose: bool = False):
         self.workflow = ReflectWorkflow(llm, task, verbose)
         self.buffer_manager = BufferManager()
@@ -27,10 +29,14 @@ class Agent:
     def extract_accepted_answer(self, task_result):
         """Use a regular expression to extract the accepted answer."""
         try:
-            # Search for the pattern 'accepted_answer": {' followed by any characters until '}' 
-            match = re.search(r'accepted_answer": \{\s*?"type":\s*?"Text",\s*?"value":\s*?"(.*?)"\s*?\}', task_result, re.DOTALL)
+            # Search for the pattern 'accepted_answer": ' followed by any characters until the next closing quote
+            match = re.search(
+                r'accepted_answer": "(.*?)"',
+                task_result,
+                re.DOTALL | re.IGNORECASE,
+            )
             if match:
-                answer_value = match.group(1)
+                answer_value = match.group(1).strip()
                 return answer_value
             else:
                 print("Error: Failed to extract accepted answer.")
@@ -38,7 +44,7 @@ class Agent:
         except Exception as e:
             print(f"Unexpected error: {e}")
             return None
-        
+            
     def reflect(self):
         """Reflect method for the agent."""
         try:
@@ -51,11 +57,11 @@ class Agent:
                 return accepted_answer
         except Exception as e:
             print(f"Unexpected error: {e}")
-    
+
     def get_plan(self, messages):
         """Get the plan from the workflow."""
         for message in messages:
-            match = re.search(r'plan: (.*?)(, \w+:|$)', message, re.DOTALL)
+            match = re.search(r"plan: (.*?)(, \w+:|$)", message, re.DOTALL)
             if match:
                 plan = match.group(1)
                 # Remove leading and trailing whitespace
