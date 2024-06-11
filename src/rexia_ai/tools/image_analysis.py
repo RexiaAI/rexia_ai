@@ -1,4 +1,5 @@
-""" Rexia AI Image Analysis Tool"""
+""" Rexia AI Image Analysis Tool - Let your text based models call a vision model to analyse images.
+Should work with any vision or multimodal model. Tested on GPT-4o and llava phi 3."""
 
 import base64
 import requests

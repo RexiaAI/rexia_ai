@@ -27,24 +27,14 @@ class Agent:
             return None
 
     def extract_accepted_answer(self, task_result):
-        """Use a regular expression to extract the accepted answer."""
-        try:
-            # Search for the pattern 'accepted_answer": ' followed by any characters until the next closing quote
-            match = re.search(
-                r'accepted_answer": "(.*?)"',
-                task_result,
-                re.DOTALL | re.IGNORECASE,
-            )
-            if match:
-                answer_value = match.group(1).strip()
-                return answer_value
-            else:
-                print("Error: Failed to extract accepted answer.")
-                return None
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-            return None
-            
+        """Extract the accepted answer from the task result."""
+        accepted_answer = self.workflow.llm.invoke(
+            "Extract the accepted answer from this. Include nothing but the accepted answer in your response"
+            + task_result
+        ).content
+        
+        return accepted_answer
+
     def reflect(self):
         """Reflect method for the agent."""
         try:

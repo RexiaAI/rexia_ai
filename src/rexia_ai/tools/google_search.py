@@ -1,4 +1,6 @@
-""" Rexia AI Google Search Tool - Google Search Tool that works with ReXia.AI"""
+""" Rexia AI Google Search Tool - Google Search Tool from langchain_community extended to work more 
+consistently with open source models within ReXia.AI. Credit to the original authors who did most of 
+the work."""
 
 from langchain_google_community import GoogleSearchAPIWrapper
 from ..base import BaseTool
@@ -6,15 +8,22 @@ from ..base import BaseTool
 
 class RexiaAIGoogleSearch(BaseTool):
     """Tool that works with ReXia.AI."""
+
     api_key: str
     engine_id: str
-    
+
     def __init__(self, api_key: str, engine_id: str):
-        super().__init__(name="google_search", func=self.google_search, description="Perform a Google search")
+        super().__init__(
+            name="google_search",
+            func=self.google_search,
+            description="Perform a Google search",
+        )
         self.api_key = api_key
         self.engine_id = engine_id
-        self.google_search_api = GoogleSearchAPIWrapper(google_api_key=api_key, google_cse_id=engine_id)
-    
+        self.google_search_api = GoogleSearchAPIWrapper(
+            google_api_key=api_key, google_cse_id=engine_id
+        )
+
     def google_search(self, query: str) -> str:
         """Run query through GoogleSearch and parse result."""
         return self.google_search_api.run(query)

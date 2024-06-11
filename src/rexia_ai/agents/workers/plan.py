@@ -40,12 +40,17 @@ class PlanWorker(BaseWorker):
             + "\n\n"
             "Collaboration Chat:" + "\n\n".join(messages)
         )
+        
         return prompt
     
     def _get_thought_template(self, task: str) -> str:
         thought_template = self.buffer.get_template(task)
         if thought_template:
-            return thought_template
+            thought_template_str = str(thought_template)  # convert ScoredPoint object to string
+            start_index = thought_template_str.find("'plan': '") + len("'plan': '")
+            end_index = thought_template_str.find("'}", start_index)
+            plan = thought_template_str[start_index:end_index]
+            return plan
         else:
             return "No thought template found for task."
 

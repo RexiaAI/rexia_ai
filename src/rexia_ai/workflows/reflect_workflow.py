@@ -25,7 +25,8 @@ class ReflectWorkflow(BaseWorkflow):
         print("ReXia.AI is working on the task: " + self.channel.task)
 
         self.plan.run()
-        while self.channel.status != TaskStatus.COMPLETED:
+        counter = 0
+        while self.channel.status != TaskStatus.COMPLETED and counter < 3:
             self.channel.status = TaskStatus.WORKING
             if self.llm.tools != {}:
                 self.tool.run()
@@ -34,6 +35,7 @@ class ReflectWorkflow(BaseWorkflow):
             self.approval.run()
             if "COMPLETED" in self.channel.messages[-1]:
                 self.channel.status = TaskStatus.COMPLETED
+            counter += 1
 
         print("ReXia.AI has completed the task: " + self.channel.task)
         if self.verbose:
