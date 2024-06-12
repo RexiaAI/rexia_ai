@@ -13,7 +13,8 @@ class RexiaAIImageAnalysis(BaseTool):
     to be set up and supplied"""
 
     api_key: str
-    engine_id: str
+    vision_model_base_url: str
+    vision_model: str
 
     def __init__(self, vision_model_base_url: str, vision_model: str, api_key: str):
         super().__init__(

@@ -26,6 +26,7 @@ class Worker(BaseWorker):
                 Your job is to complete the task.
                 Do not add any explanation or reasoning to your answer outside your chain of reasoning.
                 Don't use abreveations or shorthand in your work if they are not explained in the answer.
+                If there is a message from tools in the collaboration chat, use the output from the tools in your work.
             """
             + "\n\n"
             + self.get_structured_output_prompt()

@@ -27,6 +27,7 @@ class ReflectWorker(BaseWorker):
                 improves on the original answer.
                 Don't use abreveations or shorthand in your reflection if they are not explained in the answer.
                 Don't give instructions on how to improve the answer, just provide the improved answer.
+                If there is a message from tools in the collaboration chat, use the output from the tools in your work.
             """
             + "\n\n"
             + self.get_structured_output_prompt()

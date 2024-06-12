@@ -6,6 +6,7 @@ import secrets
 from typing import List, Dict, Tuple
 from ...base import BaseWorker
 from ...llms import LLM
+import pandas as pd
 
 
 class ToolWorker(BaseWorker):
@@ -127,7 +128,14 @@ class ToolWorker(BaseWorker):
                     function_name = tool.to_rexiaai_function_call().get('name')
                     function_to_call = getattr(tool, function_name, None)
                     if function_to_call:
-                        results[tool_id] = function_to_call(**tool_args)
+                        try:
+                            result = function_to_call(**tool_args)
+                            df = pd.DataFrame(result)
+                            # Generate summary statistics of the data
+                            summary = df.describe(include='all').to_dict()
+                            results[tool_id] = summary
+                        except Exception as e:
+                            results[tool_id] = str(e)
                     else:
                         print(f"Function {function_name} not found in tool {tool_name}")
                 else:

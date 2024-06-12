@@ -2,6 +2,7 @@
 
 from .google_search import RexiaAIGoogleSearch
 from .image_analysis import RexiaAIImageAnalysis
+from .youtube_video_analysis import RexiaAIYoutubeVideoAnalysis
 from .alpha_vantage import (
     RexiaAIAlphaVantageExchangeRate,
     RexiaAIAlphaVantageMarketNewsSentiment,
@@ -22,4 +23,5 @@ __all__ = [
     "RexiaAIAlphaVantageTimeSeriesDaily",
     "RexiaAIAlphaVantageTimeSeriesWeekly",
     "RexiaAIAlphaVantageTopGainersLosers",
+    "RexiaAIYoutubeVideoAnalysis",
 ]
