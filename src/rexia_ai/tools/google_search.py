@@ -7,12 +7,37 @@ from ..base import BaseTool
 
 
 class RexiaAIGoogleSearch(BaseTool):
-    """Tool that works with ReXia.AI."""
+    """
+    Google Search Tool that works with ReXia.AI.
 
-    api_key: str
-    engine_id: str
+    Attributes
+    ----------
+    api_key : str
+        The API key for Google Search.
+    engine_id : str
+        The engine ID for Google Search.
+
+    Methods
+    -------
+    google_search(query: str) -> str:
+        Run a query through Google Search and parse the result.
+    to_rexiaai_tool() -> list:
+        Return the tool as a JSON object for ReXia.AI.
+    to_rexiaai_function_call() -> dict:
+        Return the tool as a dictionary object for ReXia.AI.
+    """
 
     def __init__(self, api_key: str, engine_id: str):
+        """
+        Constructs all the necessary attributes for the RexiaAIGoogleSearch object.
+
+        Parameters
+        ----------
+            api_key : str
+                The API key for Google Search.
+            engine_id : str
+                The engine ID for Google Search.
+        """
         super().__init__(
             name="google_search",
             func=self.google_search,
@@ -25,12 +50,30 @@ class RexiaAIGoogleSearch(BaseTool):
         )
 
     def google_search(self, query: str) -> str:
-        """Run query through GoogleSearch and parse result."""
+        """
+        Run a query through Google Search and parse the result.
+
+        Parameters
+        ----------
+            query : str
+                The search query you wish to execute.
+
+        Returns
+        -------
+            str
+                The search result.
+        """
         return self.google_search_api.run(query)
 
-    def to_rexiaai_tool(self):
-        """Return the tool as a JSON object for ReXia.AI."""
+    def to_rexiaai_tool(self) -> list:
+        """
+        Return the tool as a JSON object for ReXia.AI.
 
+        Returns
+        -------
+            list
+                The tool as a JSON object.
+        """
         tool = [
             {
                 "name": "google_search",
@@ -51,8 +94,15 @@ class RexiaAIGoogleSearch(BaseTool):
 
         return tool
 
-    def to_rexiaai_function_call(self):
-        """Return the tool as a dictionary object for ReXia.AI."""
+    def to_rexiaai_function_call(self) -> dict:
+        """
+        Return the tool as a dictionary object for ReXia.AI.
+
+        Returns
+        -------
+            dict
+                The tool as a dictionary object.
+        """
         function_call = {"name": "google_search"}
 
         return function_call

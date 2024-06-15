@@ -9,14 +9,42 @@ from ..structure import LLMOutput
 
 
 class RexiaAIImageAnalysis(BaseTool):
-    """Image Analysis Tool that works with ReXia.AI. Note: This tool requires a vision model or multimodal model
-    to be set up and supplied"""
+    """
+    Image Analysis Tool that works with ReXia.AI. 
+    Note: This tool requires a vision model or multimodal model to be set up and supplied.
 
-    api_key: str
-    vision_model_base_url: str
-    vision_model: str
+    Attributes
+    ----------
+    api_key : str
+        The API key for OpenAI.
+    vision_model_base_url : str
+        The base URL for the vision model.
+    vision_model : str
+        The name of the vision model.
+
+    Methods
+    -------
+    analyse(query: str, image_path: str) -> str:
+        Process an image and get a response.
+    to_rexiaai_tool() -> list:
+        Return the tool as a JSON object for ReXia.AI.
+    to_rexiaai_function_call() -> dict:
+        Return the tool as a dictionary object for ReXia.AI.
+    """
 
     def __init__(self, vision_model_base_url: str, vision_model: str, api_key: str):
+        """
+        Constructs all the necessary attributes for the RexiaAIImageAnalysis object.
+
+        Parameters
+        ----------
+            vision_model_base_url : str
+                The base URL for the vision model.
+            vision_model : str
+                The name of the vision model.
+            api_key : str
+                The API key for OpenAI.
+        """
         super().__init__(
             name="image_analysis",
             func=self.analyse,
@@ -28,7 +56,21 @@ class RexiaAIImageAnalysis(BaseTool):
         self.llm = OpenAI(base_url=vision_model_base_url, api_key=api_key)
 
     def analyse(self, query: str, image_path: str) -> str:
-        """Process an image and get a response."""
+        """
+        Process an image and get a response.
+
+        Parameters
+        ----------
+            query : str
+                The query to analyze.
+            image_path : str
+                The path to the image file.
+
+        Returns
+        -------
+            str
+                The analysis result.
+        """
         # Check if the input is a URL or a local path
         if image_path.startswith("http://") or image_path.startswith("https://"):
             # It's a URL, download the image
@@ -68,9 +110,15 @@ class RexiaAIImageAnalysis(BaseTool):
         )
         return response.choices[0].message.content
 
-    def to_rexiaai_tool(self):
-        """Return the tool as a JSON object for ReXia.AI."""
+    def to_rexiaai_tool(self) -> list:
+        """
+        Return the tool as a JSON object for ReXia.AI.
 
+        Returns
+        -------
+            list
+                The tool as a JSON object.
+        """
         tool = [
             {
                 "name": "image_analysis",
@@ -96,8 +144,15 @@ class RexiaAIImageAnalysis(BaseTool):
 
         return tool
 
-    def to_rexiaai_function_call(self):
-        """Return the tool as a dictionary object for ReXia.AI."""
+    def to_rexiaai_function_call(self) -> dict:
+        """
+        Return the tool as a dictionary object for ReXia.AI.
+
+        Returns
+        -------
+            dict
+                The tool as a dictionary object.
+        """
         function_call = {"name": "analyse"}
 
         return function_call

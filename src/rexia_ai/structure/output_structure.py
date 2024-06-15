@@ -1,12 +1,20 @@
-""" llm output structure for ReXiaAI """
-
+"""LLM output structure for ReXiaAI."""
 
 class LLMOutput:
-    """llm output structure for ReXiaAI"""
+    """
+    LLM output structure for ReXiaAI.
+
+    This class provides static methods to get the output structure for different types of responses.
+    """
 
     @staticmethod
-    def get_output_structure():
-        """Get the output structure with examples"""
+    def get_output_structure() -> str:
+        """
+        Get the output structure with examples.
+
+        Returns:
+            A string representing the output structure with examples.
+        """
         return (
             "{\n"
             "    \"question\": \"string\",\n"
@@ -17,8 +25,13 @@ class LLMOutput:
         )
 
     @staticmethod
-    def get_plan_output_structure():
-        """Get the plan output structure"""
+    def get_plan_output_structure() -> str:
+        """
+        Get the plan output structure.
+
+        Returns:
+            A string representing the plan output structure.
+        """
         return (
             "{\n"
             "    \"task\": \"[Task/Problem Type]\",\n"
@@ -31,18 +44,5 @@ class LLMOutput:
             "    },\n"
             "    \"confidence_score\": \"[Number between 0 and 100 percent]\",\n"
             "    \"chain_of_reasoning\": \"[Describe the logical steps taken to arrive at the solution.]\"\n"
-            "}"
-        )
-
-    @staticmethod
-    def get_approval_output_structure():
-        """Get the approval output structure"""
-        return (
-            "{\n"
-            "    \"task\": \"<Task Name: String>\",\n"
-            "    \"approval\": \"<Approval Status: String, either 'COMPLETED' or 'INCOMPLETE'>\",\n"
-            "    \"confidence_score\": <Confidence Score: Integer between 0 and 100>,\n"
-            "    \"chain_of_reasoning\": [<Reasoning Steps: List of strings, each string is a step in the reasoning process>],\n"
-            "    \"accepted_answer\": \"<Answer Value: String, the final answer to the task. If the answer is a list or another data structure, convert it to a string representation.>\"\n"
             "}"
         )

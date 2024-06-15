@@ -1,4 +1,5 @@
-"""buffer manager class for ReXia.AI."""
+"""Buffer manager class for ReXia.AI."""
+
 import os
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
@@ -9,10 +10,15 @@ THOUGHT_BUFFER_NAME = "thought_buffer"
 MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 MODEL_KWARGS = {'device': 'cuda'}
 ENCODE_KWARGS = {'normalize_embeddings': False}
-SIMILARITY_THRESHOLD = 0.3
+SIMILARITY_THRESHOLD = 0.0
+
 
 class BufferManager:
-    """BufferManager class for ReXia AI."""
+    """
+    BufferManager class for ReXia AI.
+
+    This class is a singleton, meaning that only one instance of it can exist at a time.
+    """
     _instance = None
     _initialized = False
 
@@ -106,7 +112,7 @@ class BufferManager:
         )
 
         # If the similarity score of the most similar template is above the threshold, return the template
-        if results[0].score >= SIMILARITY_THRESHOLD:
+        if results[0].score > SIMILARITY_THRESHOLD:
             return results[0]
         else:
             print("No template found with similarity above the threshold.")
