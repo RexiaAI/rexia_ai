@@ -90,16 +90,20 @@ class Agent:
         if not answer:
             return None
 
-        # Remove 'finalise: ' from the string
-        answer = answer.replace('finalise: ', '')
-        
-        # Remove escape characters
-        answer = answer.encode('utf-8').decode('unicode_escape')
+        try:
+            # Remove 'finalise: ' from the string
+            answer = answer.replace('finalise: ', '')
+            
+            # Remove escape characters
+            answer = answer.encode('utf-8').decode('unicode_escape')
 
-        # Convert the string to a JSON object
-        answer_json = json.loads(answer)
-        
-        return answer_json
+            # Convert the string to a JSON object
+            answer_json = json.loads(answer)
+            
+            return answer_json
+        except Exception as e:
+            print(f"Error while formatting the answer: {e}")
+            return None
 
     def get_plan(self, messages: List[str]) -> Optional[str]:
         """
@@ -111,13 +115,16 @@ class Agent:
         Returns:
             The plan if it exists, None otherwise.
         """
-        for message in messages:
-            match = re.search(r"plan: (.*?)(, \w+:|$)", message, re.DOTALL)
-            if match:
-                plan = match.group(1)
-                # Remove leading and trailing whitespace
-                plan = plan.strip()
-                return plan
+        try:
+            for message in messages:
+                match = re.search(r"plan: (.*?)(, \w+:|$)", message, re.DOTALL)
+                if match:
+                    plan = match.group(1)
+                    # Remove leading and trailing whitespace
+                    plan = plan.strip()
+                    return plan
+        except Exception as e:
+            print(f"Error while extracting the plan: {e}")
 
         print("Error: Failed to extract plan.")
         return None
