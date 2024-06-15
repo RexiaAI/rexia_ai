@@ -1,4 +1,4 @@
-"""Base Workflow for ReXia AI."""
+"""Base Workflow for ReXia.AI."""
 
 from typing import Any
 

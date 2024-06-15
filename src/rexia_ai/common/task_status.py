@@ -1,4 +1,4 @@
-"""This module contains the TaskStatus enum."""
+"""TaskStatus enum for ReXia.AI."""
 
 from enum import Enum
 

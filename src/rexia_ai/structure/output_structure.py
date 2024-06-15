@@ -1,4 +1,4 @@
-"""LLM output structure for ReXiaAI."""
+"""LLM output structure for ReXia.AI."""
 
 class LLMOutput:
     """

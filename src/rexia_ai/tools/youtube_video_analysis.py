@@ -1,3 +1,5 @@
+"""Youtube video analysis tool for ReXia.AI - Currently only works with OpenAI, hope to expand this to open source."""
+
 import uuid
 import os
 import base64

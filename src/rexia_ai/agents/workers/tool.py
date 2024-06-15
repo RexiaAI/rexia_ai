@@ -1,4 +1,4 @@
-"""Module for the ToolWorker class in ReXia AI."""
+"""ToolWorker class in ReXia.AI."""
 
 import json
 import re

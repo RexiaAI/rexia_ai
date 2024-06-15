@@ -1,4 +1,4 @@
-"""Collaboration Channel class."""
+"""Collaboration Channel class for ReXia.AI."""
 
 from typing import Any
 from ..common import TaskStatus

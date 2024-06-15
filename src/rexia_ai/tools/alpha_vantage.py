@@ -1,4 +1,4 @@
-""" Rexia AI Alpha Vantage Tool - Alpha Vantage API responses can be very large datasets, 
+""" ReXia.AI Alpha Vantage Tool - Alpha Vantage API responses can be very large datasets, 
 do not use with a small model or context window."""
 
 from typing import Dict, List

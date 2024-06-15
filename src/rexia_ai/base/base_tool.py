@@ -1,4 +1,4 @@
-"""Rexia AI BaseTool - Tools that work with ReXia.AI"""
+"""Rexia.AI BaseTool - Tools that work with ReXia.AI"""
 
 from typing import Any, Dict, List
 

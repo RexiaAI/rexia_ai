@@ -1,4 +1,4 @@
-"""llms module for ReXia.AI."""
+"""Llms module for ReXia.AI."""
 
 from .llm import LLM
 

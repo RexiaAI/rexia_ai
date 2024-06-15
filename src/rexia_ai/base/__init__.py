@@ -1,4 +1,4 @@
-"""basemodule for ReXia AI."""
+"""Base module for ReXia.AI."""
 
 from .base_worker import BaseWorker
 from .base_workflow import BaseWorkflow

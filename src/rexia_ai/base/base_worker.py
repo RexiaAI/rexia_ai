@@ -1,4 +1,4 @@
-"""BaseWorker class for ReXia AI."""
+"""BaseWorker class for ReXia.AI."""
 
 import re
 from typing import Any

@@ -1,1 +1,1 @@
-"""Rexia AI package."""
+"""ReXia.AI package."""

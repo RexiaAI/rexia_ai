@@ -1,4 +1,4 @@
-""" thought buffer model for ReXia.AI."""
+"""Thought buffer model for ReXia.AI."""
 
 from .buffer_manager import BufferManager
 

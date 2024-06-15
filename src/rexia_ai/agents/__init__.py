@@ -1,4 +1,4 @@
-"""Agents module for ReXia AI."""
+"""agents module for ReXia.AI."""
 
 from .component import Component
 from .agent import Agent

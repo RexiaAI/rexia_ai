@@ -1,4 +1,4 @@
-"""tools module for the ReXia.AI package."""
+"""Tools module for the ReXia.AI package."""
 
 from .google_search import RexiaAIGoogleSearch
 from .image_analysis import RexiaAIImageAnalysis

@@ -1,4 +1,4 @@
-"""Agent class for ReXia AI."""
+"""Agent class for ReXia.AI."""
 
 import re
 from typing import List, Optional

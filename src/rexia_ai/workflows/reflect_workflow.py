@@ -1,4 +1,4 @@
-"""Reflect workflow for ReXia AI."""
+"""Reflect workflow for ReXia.AI."""
 
 from ..base import BaseWorkflow
 from ..common import CollaborationChannel, TaskStatus

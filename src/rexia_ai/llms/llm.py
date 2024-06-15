@@ -1,4 +1,4 @@
-"""ReXiaAI LLM class for Open AI compatible endpoints."""
+"""LLM class for Open AI compatible endpoints in ReXia.AI."""
 
 from typing import Dict, Optional
 from pydantic import Field

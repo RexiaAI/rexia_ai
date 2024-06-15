@@ -1,4 +1,4 @@
-"""The Component class for ReXia.AI."""
+"""Component class for ReXia.AI."""
 
 from typing import Any
 

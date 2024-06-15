@@ -1,4 +1,4 @@
-"""structure module for ReXiaAI"""
+"""Structure module for ReXia.AI"""
 
 from .output_structure import LLMOutput
 

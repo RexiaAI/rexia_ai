@@ -1,4 +1,4 @@
-"""Module for the FinaliseWorker class in ReXia AI."""
+"""FinaliseWorker class in ReXia.AI."""
 
 from typing import Any, List
 from ...base import BaseWorker

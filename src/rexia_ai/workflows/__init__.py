@@ -1,4 +1,4 @@
-"""Workflows module for the rexia_ai package."""
+"""Workflows module for the ReXia.AI package."""
 
 from .reflect_workflow import ReflectWorkflow
 

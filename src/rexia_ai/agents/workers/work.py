@@ -1,4 +1,4 @@
-"""Worker class for ReXia AI."""
+"""Worker class for ReXia.AI."""
 
 from typing import Any, List
 from ...base import BaseWorker

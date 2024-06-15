@@ -1,4 +1,4 @@
-""" Rexia AI Google Search Tool - Google Search Tool from langchain_community extended to work more 
+""" ReXia.AI Google Search Tool - Google Search Tool from langchain_community extended to work more 
 consistently with open source models within ReXia.AI. Credit to the original authors who did most of 
 the work."""
 

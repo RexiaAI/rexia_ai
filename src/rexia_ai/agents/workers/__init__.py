@@ -1,4 +1,4 @@
-"""common workers module for ReXia AI."""
+"""Workers module for ReXia.AI."""
 
 from .tool import ToolWorker
 from .work import Worker
