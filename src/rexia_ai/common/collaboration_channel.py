@@ -1,8 +1,7 @@
 """Collaboration Channel class for ReXia.AI."""
 
-from typing import Any
+from typing import Any, List
 from ..common import TaskStatus
-
 
 class CollaborationChannel:
     """
@@ -21,7 +20,7 @@ class CollaborationChannel:
             task: The task that the channel is associated with.
         """
         self.task = task
-        self.messages = []
+        self.messages: List[Any] = []
         self.status = TaskStatus.PENDING
 
     def put(self, item: Any):
@@ -31,4 +30,7 @@ class CollaborationChannel:
         Args:
             item: The item to put into the channel.
         """
-        self.messages.append(item)
+        if item:
+            self.messages.append(item)
+        else:
+            print("Error: Cannot add empty item to the channel.")

@@ -46,6 +46,10 @@ class Component:
         """
         task = self.channel.task
         messages = self.channel.messages
+        if not task or not messages:
+            print("Error: Task or messages cannot be empty.")
+            return None
+
         print(f"{self.name} task: {task}")
         prompt = self.worker.create_prompt(task, messages)
         response = self.worker.action(prompt, self.name)

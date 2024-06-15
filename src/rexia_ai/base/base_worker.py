@@ -4,7 +4,6 @@ import re
 from typing import Any
 from ..structure import LLMOutput
 
-
 class BaseWorker:
     """
     BaseWorker for ReXia AI.

@@ -4,6 +4,15 @@ from typing import Any, List
 from ...base import BaseWorker
 from ...thought_buffer import BufferManager
 
+PREDEFINED_PROMPT = """
+    You are a specialist planning agent.
+    You are part of a team working on a task.
+    Your job is to think through the task and create a plan to complete it.
+    If you are provided with a plan, you should review it, check its accuracy, and provide a refined
+    version if necessary, or simply supply the plan if it is correct.
+    Don't use abbreviations or shorthand in your plan.
+    The plan should always be as simple and clear as possible.
+"""
 
 class PlanWorker(BaseWorker):
     """
@@ -48,22 +57,17 @@ class PlanWorker(BaseWorker):
         Returns:
             The created prompt as a string.
         """
+        if not messages:
+            raise ValueError("Messages cannot be empty")
+
         prompt = (
-            f"""
-                You are a specialist planning agent.
-                You are part of a team working on a task.
-                Your job is to think through the task and create a plan to complete it.
-                If you are provided with a plan, you should review it, check its accuracy, and provide a refined
-                version if necessary, or simply supply the plan if it is correct.
-                Don't use abbreviations or shorthand in your plan.
-                The plan should always be as simple and clear as possible.
-            """
+            PREDEFINED_PROMPT
             + "\n\n"
             + f"Previous Plan: {self._get_thought_template(task)}"
             + "\n\n"
             + self.get_plan_structured_output_prompt()
             + "\n\n"
-            + f"Task: {task}\n\nCollaboration Chat:\n\n" + "\n\n".join(messages)
+            + self.format_task_and_messages(task, messages)
         )
         return prompt
 
@@ -86,3 +90,17 @@ class PlanWorker(BaseWorker):
             return plan
         else:
             return "No thought template found for task."
+
+    def format_task_and_messages(self, task: str, messages: List[str]) -> str:
+        """
+        Format the task and messages for the prompt.
+
+        Args:
+            task: The task for which the prompt is created.
+            messages: The messages from the collaboration chat.
+
+        Returns:
+            The formatted task and messages as a string.
+        """
+        formatted = f"Task: {task}\n\nCollaboration Chat:\n\n" + "\n\n".join(messages)
+        return formatted

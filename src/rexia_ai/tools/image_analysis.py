@@ -55,6 +55,28 @@ class RexiaAIImageAnalysis(BaseTool):
         self.api_key = api_key
         self.llm = OpenAI(base_url=vision_model_base_url, api_key=api_key)
 
+    def _get_image_data(self, image_path: str) -> bytes:
+        """
+        Get image data from a URL or a local path.
+
+        Parameters
+        ----------
+            image_path : str
+                The path to the image file.
+
+        Returns
+        -------
+            bytes
+                The image data.
+        """
+        if image_path.startswith("http://") or image_path.startswith("https://"):
+            response = requests.get(image_path, timeout=10)
+            response.raise_for_status()
+            return response.content
+        else:
+            with open(image_path, "rb") as f:
+                return f.read()
+
     def analyse(self, query: str, image_path: str) -> str:
         """
         Process an image and get a response.
@@ -71,18 +93,7 @@ class RexiaAIImageAnalysis(BaseTool):
             str
                 The analysis result.
         """
-        # Check if the input is a URL or a local path
-        if image_path.startswith("http://") or image_path.startswith("https://"):
-            # It's a URL, download the image
-            response = requests.get(image_path, timeout=10)
-            response.raise_for_status()  # Raise an exception if the request was not successful
-            image_data = response.content
-        else:
-            # It's a local path, read the image
-            with open(image_path, "rb") as f:
-                image_data = f.read()
-
-        # Encode the image
+        image_data = self._get_image_data(image_path)
         image_b64 = base64.b64encode(image_data).decode()
 
         response = self.llm.chat.completions.create(

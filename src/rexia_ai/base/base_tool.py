@@ -1,9 +1,9 @@
 """Rexia.AI BaseTool - Tools that work with ReXia.AI"""
 
 from typing import Any, Dict, List
+from abc import ABC, abstractmethod
 
-
-class BaseTool:
+class BaseTool(ABC):
     """
     A base tool that works with ReXia.AI.
 
@@ -25,6 +25,7 @@ class BaseTool:
         self.func = func
         self.description = description
 
+    @abstractmethod
     def to_rexiaai_tool(self) -> List:
         """
         Return the tool as a JSON object for ReXia.AI.
@@ -32,9 +33,9 @@ class BaseTool:
         Returns:
             An empty list. This method should be overridden in a subclass.
         """
-        tool = []
-        return tool
+        pass
 
+    @abstractmethod
     def to_rexiaai_function_call(self) -> Dict:
         """
         Return the tool as a dictionary object for ReXia.AI.
@@ -42,5 +43,4 @@ class BaseTool:
         Returns:
             An empty dictionary. This method should be overridden in a subclass.
         """
-        function_call = {}
-        return function_call
+        pass

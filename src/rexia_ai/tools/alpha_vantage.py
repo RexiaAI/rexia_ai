@@ -1,5 +1,6 @@
-""" ReXia.AI Alpha Vantage Tool - Alpha Vantage API responses can be very large datasets, 
-do not use with a small model or context window."""
+""" ReXia.AI Alpha Vantage Tool - AlphaVantageAPIWrapper extended to work with ReXia.AI. 
+Credit to the original authors who did most of the work. Alpha Vantage API responses can be very
+large datasets, do not use with a small model or context window."""
 
 from typing import Dict, List
 from langchain_community.utilities.alpha_vantage import AlphaVantageAPIWrapper
@@ -56,7 +57,11 @@ class RexiaAIAlphaVantageSearchSymbols(BaseTool):
             str
                 The search result.
         """
-        result = self.alpha_vantage_api.search_symbols(keywords)
+        try:
+            result = self.alpha_vantage_api.search_symbols(keywords)
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
         return result
 
     def to_rexiaai_tool(self) -> list:
@@ -136,7 +141,11 @@ class RexiaAIAlphaVantageMarketNewsSentiment(BaseTool):
         Returns:
             str: The market news sentiment data.
         """
-        result = self.alpha_vantage_api._get_market_news_sentiment(symbol)
+        try:
+            result = self.alpha_vantage_api._get_market_news_sentiment(symbol)
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
         return result
 
     def to_rexiaai_tool(self) -> List[Dict]:
@@ -209,7 +218,11 @@ class RexiaAIAlphaVantageTimeSeriesDaily(BaseTool):
         Returns:
             str: The time series daily data.
         """
-        result = self.alpha_vantage_api._get_time_series_daily(symbol)
+        try:
+            result = self.alpha_vantage_api._get_time_series_daily(symbol)
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
         return result
 
     def to_rexiaai_tool(self) -> List[Dict]:
@@ -301,7 +314,11 @@ class RexiaAIAlphaVantageTimeSeriesWeekly(BaseTool):
         Returns:
             str: The time series weekly data.
         """
-        result = self.alpha_vantage_api._get_time_series_weekly(symbol)
+        try:
+            result = self.alpha_vantage_api._get_time_series_weekly(symbol)
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
         return result
 
     def to_rexiaai_tool(self) -> List[Dict]:
@@ -371,7 +388,11 @@ class RexiaAIAlphaVantageTopGainersLosers(BaseTool):
         Returns:
             str: The top gainers and losers data.
         """
-        result = self.alpha_vantage_api._get_top_gainers_losers()
+        try:
+            result = self.alpha_vantage_api._get_top_gainers_losers()
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
         return result
 
     def to_rexiaai_tool(self) -> List[Dict]:
@@ -435,7 +456,11 @@ class RexiaAIAlphaVantageExchangeRate(BaseTool):
         Returns:
             str: The exchange rate data.
         """
-        result = self.alpha_vantage_api._get_exchange_rate(from_currency, to_currency)
+        try:
+            result = self.alpha_vantage_api._get_exchange_rate(from_currency, to_currency)
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
         return result
 
     def to_rexiaai_tool(self) -> List[Dict]:

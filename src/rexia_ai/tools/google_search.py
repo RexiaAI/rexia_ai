@@ -63,6 +63,8 @@ class RexiaAIGoogleSearch(BaseTool):
             str
                 The search result.
         """
+        if not query:
+            raise ValueError("Query must not be empty")
         return self.google_search_api.run(query)
 
     def to_rexiaai_tool(self) -> list:
