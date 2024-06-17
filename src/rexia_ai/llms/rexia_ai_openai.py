@@ -1,4 +1,4 @@
-"""LLM class for Open AI compatible endpoints in ReXia.AI."""
+"""RexiaAIOpenAI class for Open AI compatible endpoints in ReXia.AI."""
 
 from typing import Dict, Optional
 from pydantic import Field
@@ -6,7 +6,7 @@ from langchain_openai import ChatOpenAI
 from ..base import BaseTool
 
 
-class LLM(ChatOpenAI):
+class RexiaAIOpenAI(ChatOpenAI):
     """
     ReXiaAI LLM class for Open AI compatible endpoints.
 
@@ -15,7 +15,7 @@ class LLM(ChatOpenAI):
     """
     tools: Optional[Dict[str, BaseTool]] = Field(default_factory=dict)
 
-    def __init__(self, base_url: str, model: str, temperature: int, tools: Optional[Dict[str, BaseTool]] = None, api_key: Optional[str] = None):
+    def __init__(self, base_url: str, model: str, temperature: float, tools: Optional[Dict[str, BaseTool]] = None, api_key: Optional[str] = None):
         """
         Initialize a LLM instance.
 
@@ -28,3 +28,17 @@ class LLM(ChatOpenAI):
         """
         super().__init__(base_url=base_url, model=model, temperature=temperature, api_key=api_key)
         self.tools = tools or {}
+        
+    def invoke(self, query: str) -> Optional[str]:
+        """
+        Perform inference using the language model.
+
+        Args:
+            query: The query to perform inference on.
+            add_context: Additional context to add to the query. Defaults to an empty string.
+
+        Returns:
+            The response from the language model.
+        """
+        response = super().invoke(query).content
+        return response

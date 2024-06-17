@@ -63,7 +63,7 @@ class BaseWorker:
         Returns:
             The response from the model.
         """
-        response = self.model.invoke(prompt).content
+        response = self.model.invoke(prompt)
         response = self._clean_response(response)
         return response
 

@@ -1,8 +1,13 @@
-"""Youtube video analysis tool for ReXia.AI - Currently only works with OpenAI, hope to expand this to open source."""
+"""
+Rexia AI Youtube Video Analysis Tool
+Use a multimodal model to analyse and extract insights from a YouTube video.
+Uses OpenAI's Whisper to transcribe the audio and a multimodal model to analyse the video frames and transcript.
+"""
 
 import uuid
 import os
 import base64
+from typing import Tuple
 from pytube import YouTube
 import cv2
 from moviepy.editor import AudioFileClip
@@ -12,29 +17,19 @@ from ..base import BaseTool
 
 class RexiaAIYoutubeVideoAnalysis(BaseTool):
     """
-    A class used to analyze YouTube videos using OpenAI's whisper for audio transcription 
-    and a multimodal model for video frame analysis.
+    Tool that works with ReXia.AI to analyse YouTube videos.
 
-    Attributes
-    ----------
-    openai_api_key : str
-        The API key for OpenAI.
-    vision_model_base_url : str
-        The base URL for the vision model.
-    vision_model : str
-        The name of the vision model.
-    whisper_model : str
-        The name of the whisper model.
-
-    Methods
-    -------
-    analyse_video(query: str, video_path: str) -> str:
-        Analyzes the video and extracts insights.
-    _process_video(video_path: str, seconds_per_frame=2):
-        Extracts frames and audio from a video file.
-    _transcribe(audio_path):
-        Generates a summary of the audio transcription.
+    Attributes:
+        openai_api_key (str): OpenAI API key for accessing the models.
+        vision_model_base_url (str): Base URL for the vision model.
+        vision_model (str): Name of the vision model to use.
+        whisper_model (str): Name of the Whisper model to use for transcription (default: "base").
     """
+
+    openai_api_key: str
+    vision_model_base_url: str
+    vision_model: str
+    whisper_model: str
 
     def __init__(
         self,
@@ -43,48 +38,37 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
         openai_api_key: str,
         whisper_model: str = "base",
     ):
-        """
-        Constructs all the necessary attributes for the YoutubeVideoAnalysis object.
-
-        Parameters
-        ----------
-            vision_model_base_url : str
-                The base URL for the vision model.
-            vision_model : str
-                The name of the vision model.
-            openai_api_key : str
-                The API key for OpenAI.
-            whisper_model : str
-                The name of the whisper model.
-        """
+        super().__init__(
+            name="analyse_video",
+            func=self.analyse_video,
+            description="Analyse the video and extract insights",
+        )
         self.vision_model_base_url = vision_model_base_url
         self.vision_model = vision_model
         self.llm = OpenAI(base_url=vision_model_base_url, api_key=openai_api_key)
         self.whisper_model = whisper_model
 
-    def analyse_video(self, query: str, video_path: str) -> str:
+    def analyse_video(self, query: str, video_url: str) -> str:
         """
-        Analyzes the video and extracts insights.
+        Analyse the video and extract insights based on the given query.
 
-        Parameters
-        ----------
-            query : str
-                The query to analyze.
-            video_path : str
-                The path to the video file.
+        Args:
+            query (str): The query or question about the video.
+            video_path (str): The path or URL of the YouTube video to analyse.
 
-        Returns
-        -------
-            str
-                The analysis result.
+        Returns:
+            str: The analysis and insights extracted from the video.
+
+        Raises:
+            Exception: If an error occurs during the analysis process.
         """
         try:
-            base64_frames, audio_path = self._process_video(video_path)
+            base64_frames, audio_path = self._process_video(video_url)
             audio_transcription = self._transcribe(audio_path)
-        except Exception as e:
-            return f"Error processing video: {str(e)}"
+            os.remove(audio_path)  # Remove the temporary audio file
 
-        try:
+            filtered_frames = base64_frames[::5]  # Send only every 5th frame to reduce API calls
+
             response = self.llm.chat.completions.create(
                 model=self.vision_model,
                 messages=[
@@ -106,61 +90,58 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
                                         "detail": "low",
                                     },
                                 },
-                                base64_frames[::5],
+                                filtered_frames,
                             ),
                         ],
                     },
                 ],
                 temperature=0,
             )
+            return response.choices[0].message.content
         except Exception as e:
-            return f"Error creating completion: {str(e)}"
+            return f"An error occurred during the analysis: {str(e)}"
 
-        return response.choices[0].message.content
-
-    def _process_video(self, video_path: str, seconds_per_frame: int = 2) -> tuple:
+    def _process_video(self, video_url: str, seconds_per_frame: int = 2) -> Tuple[list, str]:
         """
-        Extracts frames and audio from a video file.
+        Extract frames and audio from a video file.
 
-        Parameters
-        ----------
-            video_path : str
-                The path to the video file.
-            seconds_per_frame : int, optional
-                The number of seconds per frame (default is 2).
+        Args:
+            video_path (str): The path or URL of the YouTube video.
+            seconds_per_frame (int): The number of seconds between each frame (default: 2).
 
-        Returns
-        -------
-            tuple
-                The list of base64-encoded frames and the path to the audio file.
+        Returns:
+            Tuple[list, str]: A list of base64-encoded frames and the path to the temporary audio file.
+
+        Raises:
+            Exception: If an error occurs during video processing.
         """
         base64_frames = []
 
-        # Define the directory for temporary files
-        temp_dir = os.path.join(os.path.dirname(__file__), "temp_tool_files")
-
-        # Make sure the directory exists
-        os.makedirs(temp_dir, exist_ok=True)
-
-        # Create a YouTube object
-        yt = YouTube(video_path)
-
-        # Generate a unique identifier for the video
-        video_id = str(uuid.uuid4())
-
-        # Download the video file
-        yt.streams.first().download(output_path=temp_dir, filename=f"{video_id}.mp4")
-
-        # Define the path for the temporary video file
-        temp_file_path = os.path.join(temp_dir, f"{video_id}.mp4")
-
-        # Update the video path to the temporary file path
-        video_path = temp_file_path
-
-        base_video_path, _ = os.path.splitext(video_path)
-
         try:
-            video = cv2.VideoCapture(video_path)
+            # Define the directory for temporary files
+            temp_dir = os.path.join(os.path.dirname(__file__), 'temp_tool_files')
+
+            # Make sure the directory exists
+            os.makedirs(temp_dir, exist_ok=True)
+
+            # Create a YouTube object
+            yt = YouTube(video_url)
+
+            # Generate a unique identifier for the video
+            video_id = str(uuid.uuid4())
+
+            # Download the video file
+            yt.streams.first().download(output_path=temp_dir, filename=f'{video_id}.mp4')
+
+            # Define the path for the temporary video file
+            temp_file_path = os.path.join(temp_dir, f'{video_id}.mp4')
+
+            # Update the video path to the temporary file path
+            video_url = temp_file_path
+
+            base_video_path, _ = os.path.splitext(video_url)
+
+            video = cv2.VideoCapture(video_url)
             total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
             fps = video.get(cv2.CAP_PROP_FPS)
             frames_to_skip = int(fps * seconds_per_frame)
@@ -178,31 +159,30 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
 
             # Extract audio with moviepy
             audio_path = f"{base_video_path}.mp3"
-            audio_clip = AudioFileClip(video_path)
+            audio_clip = AudioFileClip(video_url)
             audio_clip.write_audiofile(audio_path, bitrate="32k")
             audio_clip.close()
+
+            # Once done, delete the video file
+            os.remove(video_url)
+
         except Exception as e:
             raise Exception(f"Error processing video: {str(e)}")
-        finally:
-            # Once done, delete the video file
-            if os.path.exists(video_path):
-                os.remove(video_path)
 
         return base64_frames, audio_path
 
     def _transcribe(self, audio_path: str) -> str:
         """
-        Generates a summary of the audio transcription.
+        Generate a transcription of the audio file.
 
-        Parameters
-        ----------
-            audio_path : str
-                The path to the audio file.
+        Args:
+            audio_path (str): The path to the audio file.
 
-        Returns
-        -------
-            str
-                The transcription text.
+        Returns:
+            str: The transcription of the audio.
+
+        Raises:
+            Exception: If an error occurs during transcription.
         """
         try:
             with open(audio_path, "rb") as audio_file:
@@ -211,7 +191,46 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
                     file=audio_file,
                 )
             return transcription.text
-        finally:
-            # Once done, delete the audio file
-            if os.path.exists(audio_path):
-                os.remove(audio_path)
+        except Exception as e:
+            raise Exception(f"Error transcribing audio: {str(e)}")
+
+    def to_rexiaai_tool(self) -> list:
+        """
+        Return the tool as a JSON object for ReXia.AI.
+
+        Returns:
+            list: A list containing the tool's JSON representation.
+        """
+        tool = [
+            {
+                "name": "video_analysis",
+                "description": "Use a vision model to analyse a video",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "query": {
+                            "type": "string",
+                            "description": "What you want to analyse in the video, e.g., 'What is this video about?'",
+                        },
+                        "video_path": {
+                            "type": "string",
+                            "description": "The video you wish to analyse, e.g., 'https://www.youtube.com/watch?v=c0m6yaGlZh4&ab_channel=DukeUniversity'",
+                        },
+                    },
+                    "required": ["query", "video_path"],
+                },
+            }
+        ]
+
+        return tool
+
+    def to_rexiaai_function_call(self) -> dict:
+        """
+        Return the tool as a dictionary object for ReXia.AI.
+
+        Returns:
+            dict: A dictionary representing the function call for the tool.
+        """
+        function_call = {"name": "analyse_video"}
+
+        return function_call

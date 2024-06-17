@@ -4,7 +4,7 @@ import secrets
 import re
 from typing import List, Dict, Tuple
 from ...base import BaseWorker
-from ...llms import LLM
+from ...llms import RexiaAIOpenAI
 
 PREDEFINED_PROMPT = """
 You are a function calling agent for the ReXia.AI system, an advanced AI
@@ -49,11 +49,11 @@ class ToolWorker(BaseWorker):
         model: The model used by the worker.
     """
 
-    model: LLM
+    model: RexiaAIOpenAI
 
     def __init__(
         self,
-        model: LLM,
+        model: RexiaAIOpenAI,
         verbose: bool = False,
     ):
         """

@@ -4,7 +4,7 @@ from ..base import BaseWorkflow
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
 from ..agents.workers import PlanWorker, FinaliseWorker, Worker, ToolWorker
-from ..llms import LLM
+from ..llms import RexiaAIOpenAI
 
 
 class ReflectWorkflow(BaseWorkflow):
@@ -18,7 +18,7 @@ class ReflectWorkflow(BaseWorkflow):
         work: The work component of the workflow.
         finalise: The finalise component of the workflow.
     """
-    def __init__(self, llm: LLM, task: str, verbose: bool = False) -> None:
+    def __init__(self, llm: RexiaAIOpenAI, task: str, verbose: bool = False) -> None:
         super().__init__(llm, task, verbose)
         self.channel = CollaborationChannel(task)
         self.plan = Component("plan", self.channel, PlanWorker(model=llm, verbose=verbose))
