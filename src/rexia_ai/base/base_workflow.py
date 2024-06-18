@@ -11,6 +11,11 @@ class BaseWorkflow:
         task: The task that the workflow is designed to perform.
         verbose: A flag used for enabling verbose mode.
     """
+    
+    llm: Any
+    task: str
+    verbose: bool
+    
     def __init__(self, llm: Any, task: str, verbose: bool = False):
         """
         Initialize a BaseWorkflow instance.

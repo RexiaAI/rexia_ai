@@ -11,6 +11,11 @@ class Component:
         channel: The channel used by the component.
         worker: The worker used by the component.
     """
+    
+    name: str
+    channel: Any
+    worker: Any
+    
     def __init__(self, name: str, channel: Any, worker: Any):
         """
         Initialize a Component instance.
@@ -46,17 +51,7 @@ class Component:
         """
         task = self.channel.task
         messages = self.channel.messages
-        print(f"{self.name} task: {task}")
         prompt = self.worker.create_prompt(task, messages)
         response = self.worker.action(prompt, self.name)
         self.channel.put(response)
         return response
-    
-    def get_tool_results(self) -> str:
-        """
-        Get the results of the tools used by the component.
-
-        Returns:
-            A string indicating that the tool results are not implemented.
-        """
-        return "Tool results: NOT IMPLEMENTED"

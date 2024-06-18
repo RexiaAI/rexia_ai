@@ -54,9 +54,11 @@ class FinaliseWorker(BaseWorker):
 
     Attributes:
         model: The model used by the worker.
+        verbose: A flag used for enabling verbose mode.
     """
 
     model: Any
+    verbose: bool
 
     def __init__(
         self,

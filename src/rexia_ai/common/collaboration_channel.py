@@ -12,6 +12,10 @@ class CollaborationChannel:
         messages: A list of messages in the channel.
         status: The status of the task.
     """
+    task: str
+    messages: List[Any]
+    status: TaskStatus
+    
     def __init__(self, task: str):
         """
         Initialize a CollaborationChannel instance.

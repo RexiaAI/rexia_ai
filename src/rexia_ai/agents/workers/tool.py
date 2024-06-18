@@ -2,12 +2,11 @@
 import json
 import secrets
 import re
-from typing import List, Dict, Tuple
+from typing import Any, List, Dict, Tuple
 from ...base import BaseWorker
-from ...llms import RexiaAIOpenAI
 
 PREDEFINED_PROMPT = """
-You are a function calling agent for the ReXia.AI system, an advanced AI
+You are a tool calling agent for the ReXia.AI system, an advanced AI
 platform designed to tackle complex tasks and problems. Your role is crucial in
 gathering the necessary information and resources to support the team in
 completing the given task effectively and efficiently.
@@ -36,7 +35,7 @@ selection and usage accordingly.
 
 To call a tool, use the JSON format provided below, ensuring that your tool
 calls are properly formatted JSON with the correct tool names and arguments.
-Do not generate incomplete JSON or JSON with syntax errors. 
+Do not generate incomplete JSON or JSON with syntax errors.
 """
 
 class ToolWorker(BaseWorker):
@@ -47,13 +46,15 @@ class ToolWorker(BaseWorker):
 
     Attributes:
         model: The model used by the worker.
+        verbose: A flag used for enabling verbose mode.
     """
 
-    model: RexiaAIOpenAI
+    model: Any
+    verbose: bool
 
     def __init__(
         self,
-        model: RexiaAIOpenAI,
+        model: Any,
         verbose: bool = False,
     ):
         """
@@ -141,6 +142,8 @@ class ToolWorker(BaseWorker):
             Collaboration Chat:
             """
             + "\n\n".join(messages)
+            + "\n\n"
+            + self.get_structured_output_prompt()
         ).replace("{unique_id}", unique_id)
 
         return prompt

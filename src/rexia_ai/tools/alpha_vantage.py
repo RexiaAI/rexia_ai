@@ -277,7 +277,65 @@ class RexiaAIAlphaVantageQuoteEndpoint(BaseTool):
         Args:
             api_key (str): The API key for AlphaVantage.
         """
-        super().__init__()
+        super().__init__(
+            name="get_quote_endpoint",
+            func=self.get_quote_endpoint,
+            description="Make a request to the AlphaVantage API to get quote data for a given symbol.",
+        )
+        self.api_key = api_key
+        self.alpha_vantage_api = AlphaVantageAPIWrapper(alphavantage_api_key=api_key)
+
+    def get_quote_endpoint(self, symbol: str) -> str:
+        """
+        Make a request to the AlphaVantage API to get quote data for a given symbol.
+
+        Args:
+            symbol (str): The symbol you wish to search for results on.
+
+        Returns:
+            str: The quote data.
+        """
+        try:
+            result = self.alpha_vantage_api._get_quote_endpoint(symbol)
+        except Exception as e:
+            print(f"An error occurred while searching symbols: {e}")
+            return None
+        return result
+
+    def to_rexiaai_tool(self) -> List[Dict]:
+        """
+        Return the tool as a JSON object for ReXia.AI.
+
+        Returns:
+            List[Dict]: The tool as a JSON object.
+        """
+        tool = [
+            {
+                "name": "get_quote_endpoint",
+                "description": "Make a request to the AlphaVantage API to get quote data for a given symbol.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "symbol": {
+                            "type": "string",
+                            "description": "The symbol you wish to search for results on. Should contain only the stock symbols. e.g. 'AAPL', 'GOOGL', 'TSLA', 'AMZN', 'MSFT', 'NVDA'",
+                        }
+                    },
+                    "required": ["symbol"],
+                },
+            }
+        ]
+        return tool
+
+    def to_rexiaai_function_call(self) -> Dict:
+        """
+        Return the tool as a dictionary object for ReXia.AI.
+
+        Returns:
+            Dict: The tool as a dictionary object.
+        """
+        function_call = {"name": "get_quote_endpoint"}
+        return function_call
 
 
 class RexiaAIAlphaVantageTimeSeriesWeekly(BaseTool):
@@ -457,7 +515,9 @@ class RexiaAIAlphaVantageExchangeRate(BaseTool):
             str: The exchange rate data.
         """
         try:
-            result = self.alpha_vantage_api._get_exchange_rate(from_currency, to_currency)
+            result = self.alpha_vantage_api._get_exchange_rate(
+                from_currency, to_currency
+            )
         except Exception as e:
             print(f"An error occurred while searching symbols: {e}")
             return None

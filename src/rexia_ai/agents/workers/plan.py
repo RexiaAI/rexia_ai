@@ -2,37 +2,36 @@
 
 from typing import Any, List
 from ...base import BaseWorker
-from ...thought_buffer import BufferManager
 
 PREDEFINED_PROMPT = """
 You are a specialist planning agent for the ReXia.AI system, which is designed
 to tackle complex tasks and problems. Your role is to create a comprehensive
 plan that will guide the team in completing the given task effectively and
-efficiently. The plan should outline a step-by-step approach, breaking down
-the task into manageable components and addressing potential challenges or
-obstacles. Your plan should be clear, concise, and easy to follow, ensuring
-that all team members understand their roles and responsibilities.
+efficiently. 
 
-It is crucial that your plan follows the structured output format specified by
-the get_plan_structured_output_prompt() function. This format includes
-sections for understanding the problem, decomposing it into parts,
-representing the problem using appropriate tools or models, solving the
-problem, and verifying the solution. Adhering to this structure will ensure
-that your plan is comprehensive and easy to follow.
+You are an advanced AI system capable of performing a wide range of tasks. 
+Before executing any task, it's important to devise a plan that breaks down the 
+problem into a sequence of steps or subtasks that you can execute directly.
+When presented with a task, your first step should be to generate a plan that 
+outlines the necessary actions you need to take to complete the task successfully. 
+This plan should be tailored for your own execution, not for human comprehension.
+The plan should be structured as a numbered list of concise, executable instructions. 
+Each step should involve specific operations, calculations, logical operations, or
+information retrieval that you can perform directly. Avoid including explanations,
+rationales, or justifications for each step, as the plan is intended solely for your
+own execution.
 
-Your plan should be as clear and simple as possible, avoiding unnecessary
-jargon or complexity. Use plain language and straightforward explanations to
-ensure that your plan can be easily understood and followed by all team
-members, regardless of their technical expertise.
+Keep the plan focused and concise, including only the essential steps required to solve
+the problem. The plan should be self-contained and not rely on external resources or human
+intervention.
 
-If an existing plan or thought template is provided, carefully review it for
-accuracy and completeness. Identify any areas that may require refinement or
-additional details. If the existing plan is satisfactory, you may choose to
-provide it as is. However, if you believe improvements can be made, provide a
-refined version of the plan that addresses any shortcomings or gaps.
+Once you have generated the plan, you can proceed to execute each step sequentially,
+using your capabilities to perform the necessary operations and actions.
+If any step requires additional planning or decomposition, you should generate
+a sub-plan following the same principles.
 
-Don't use abbreviations or shorthand in your plan unless they are clearly
-explained. The plan should always be as simple and clear as possible.
+Remember, the goal is to create a plan that serves as a clear roadmap for your own execution,
+without the need for human interpretation or guidance.
 """
 
 class PlanWorker(BaseWorker):
@@ -43,12 +42,12 @@ class PlanWorker(BaseWorker):
 
     Attributes:
         model: The model used by the worker.
-        buffer: The buffer manager used for storing and retrieving thought templates.
+        verbose: A flag used for enabling verbose mode.
     """
 
     model: Any
-    buffer: BufferManager
-
+    verbose: bool
+    
     def __init__(
         self,
         model: Any,
@@ -62,7 +61,6 @@ class PlanWorker(BaseWorker):
             verbose: A flag used for enabling verbose mode. Defaults to False.
         """
         super().__init__(model, verbose=verbose)
-        self.buffer = BufferManager()
 
     def create_prompt(self, task: str, messages: List[str]) -> str:
         """
@@ -82,33 +80,11 @@ class PlanWorker(BaseWorker):
         prompt = (
             PREDEFINED_PROMPT
             + "\n\n"
-            + f"Previous Plan: {self._get_thought_template(task)}"
-            + "\n\n"
-            + self.get_plan_structured_output_prompt()
+            + self.get_structured_output_prompt()
             + "\n\n"
             + self.format_task_and_messages(task, messages)
         )
         return prompt
-
-    def _get_thought_template(self, task: str) -> str:
-        """
-        Retrieve the thought template for the given task.
-
-        Args:
-            task: The task for which the thought template is retrieved.
-
-        Returns:
-            The thought template as a string, or a message indicating that no thought template was found.
-        """
-        thought_template = self.buffer.get_template(task)
-        if thought_template:
-            thought_template_str = str(thought_template)  # convert ScoredPoint object to string
-            start_index = thought_template_str.find("'plan': '") + len("'plan': '")
-            end_index = thought_template_str.find("'}", start_index)
-            plan = thought_template_str[start_index:end_index]
-            return plan
-        else:
-            return "No thought template found for task."
 
     def format_task_and_messages(self, task: str, messages: List[str]) -> str:
         """

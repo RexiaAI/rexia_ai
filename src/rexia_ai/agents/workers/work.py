@@ -25,8 +25,10 @@ collaboration chat as needed.
 Here is an example of a task with varying levels of complexity:
 
 Simple Task: "What is the capital city of France?"
+
 Moderate Task: "Provide a brief overview of the French Revolution, including
 the key events, leaders, and its impact on France and Europe."
+
 Complex Task: "Analyze the social, political, and economic factors that
 contributed to the outbreak of the French Revolution, and discuss how its
 ideals and consequences influenced subsequent revolutions and democratic
@@ -68,9 +70,11 @@ class Worker(BaseWorker):
 
     Attributes:
         model: The model used by the worker.
+        verbose: A flag used for enabling verbose mode.
     """
 
     model: Any
+    verbose: bool
 
     def __init__(
         self,

@@ -12,6 +12,10 @@ class BaseWorker:
         model: The model used by the worker.
         verbose: A flag used for enabling verbose mode.
     """
+    
+    model: Any
+    verbose: bool
+    
     def __init__(self, model: Any, verbose: bool = False):
         """
         Initialize a BaseWorker instance.
@@ -102,28 +106,6 @@ class BaseWorker:
         """
         return f"""Structure your response using the following format, include no information outside this structure:
                 {LLMOutput.get_output_structure()}
-                """
-
-    def get_plan_structured_output_prompt(self) -> str:
-        """
-        Get the structured output prompt for planning.
-
-        Returns:
-            The structured output prompt for planning.
-        """
-        return f"""Structure your response using the following format, include no information outside this structure:
-                {LLMOutput.get_plan_output_structure()}
-                """
-
-    def get_approval_structured_output_prompt(self) -> str:
-        """
-        Get the structured output prompt for approval.
-
-        Returns:
-            The structured output prompt for approval.
-        """
-        return f"""Structure your response using the following format, include no information outside this structure:
-                {LLMOutput.get_approval_output_structure()}
                 """
 
     def _get_available_tools(self) -> str:

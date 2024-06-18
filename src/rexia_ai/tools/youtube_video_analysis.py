@@ -203,7 +203,7 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
         """
         tool = [
             {
-                "name": "video_analysis",
+                "name": "analyse_video",
                 "description": "Use a vision model to analyse a video",
                 "parameters": {
                     "type": "object",
@@ -212,7 +212,7 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
                             "type": "string",
                             "description": "What you want to analyse in the video, e.g., 'What is this video about?'",
                         },
-                        "video_path": {
+                        "video_url": {
                             "type": "string",
                             "description": "The video you wish to analyse, e.g., 'https://www.youtube.com/watch?v=c0m6yaGlZh4&ab_channel=DukeUniversity'",
                         },

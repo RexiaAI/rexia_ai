@@ -10,12 +10,12 @@ class TestAgent(unittest.TestCase):
         OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 
         # Create an instance of the RexiaAIYoutubeVideoAnalysis tool
-        self.video_analysis = RexiaAIYoutubeVideoAnalysis(
+        self.analyse_video = RexiaAIYoutubeVideoAnalysis(
             vision_model_base_url="https://api.openai.com/v1",
             vision_model="gpt-4o",
             openai_api_key=OPEN_AI_API_KEY,
         )
-        tools = {"video_analysis": self.video_analysis}
+        tools = {"analyse_video": self.analyse_video}
 
         # Create an instance of the RexiaAI LLM with the specified tools
         self.llm = RexiaAIOpenAI(
@@ -28,7 +28,7 @@ class TestAgent(unittest.TestCase):
         # Create an instance of the RexiaAI Agent with the specified task and LLM
         self.agent = Agent(
             llm=self.llm,
-            task="Analyze the provided video and describe the objects, people, and activities present.",
+            task="Where is this video showing images of? https://www.youtube.com/watch?v=EEeu7-xJX_c&ab_channel=MinutesofPlaces",
             verbose=True,
         )
 
@@ -36,7 +36,7 @@ class TestAgent(unittest.TestCase):
         result = self.agent.reflect()
 
         self.assertIsInstance(result, dict)
-        expected_keys = ['question', 'answer', 'confidence_score', 'chain_of_reasoning']
+        expected_keys = ['question', 'plan', 'answer', 'confidence_score', 'chain_of_reasoning', 'tool_calls']
         self.assertEqual(set(result.keys()), set(expected_keys))
 
 if __name__ == '__main__':

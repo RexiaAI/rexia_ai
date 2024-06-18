@@ -12,6 +12,11 @@ class BaseTool(ABC):
         func: The function that the tool performs.
         description: A description of the tool.
     """
+    
+    name: str
+    func: Any
+    description: str
+    
     def __init__(self, name: str, func: Any, description: str):
         """
         Initialize a BaseTool instance.

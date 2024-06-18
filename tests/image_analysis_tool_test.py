@@ -7,11 +7,14 @@ from rexia_ai.tools import RexiaAIImageAnalysis
 class TestAgent(unittest.TestCase):
     def setUp(self):
         # Retrieve the necessary credentials/keys from environment variables
-        IMAGE_ANALYSIS_API_KEY = os.getenv("IMAGE_ANALYSIS_API_KEY")
-        IMAGE_ANALYSIS_ENDPOINT = os.getenv("IMAGE_ANALYSIS_ENDPOINT")
+        OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
 
         # Create an instance of the RexiaAIImageAnalysis tool
-        self.image_analysis = RexiaAIImageAnalysis(api_key=IMAGE_ANALYSIS_API_KEY, endpoint=IMAGE_ANALYSIS_ENDPOINT)
+        self.image_analysis = RexiaAIImageAnalysis(
+            vision_model_base_url="https://api.openai.com/v1",
+            vision_model="gpt-4o",
+            api_key=OPEN_AI_API_KEY,
+        )
 
         # Create a dictionary mapping the tool name to its instance
         tools = {"image_analysis": self.image_analysis}
@@ -27,7 +30,7 @@ class TestAgent(unittest.TestCase):
         # Create an instance of the RexiaAI Agent with the specified task and LLM
         self.agent = Agent(
             llm=self.llm,
-            task="Analyze the provided image and describe the objects, people, and activities present.",
+            task="Where is this a picture of? https://media.istockphoto.com/id/1465834906/photo/eiffel-tower-against-a-mesmerizing-pink-cloudy-sky-in-paris-france.webp?b=1&s=170667a&w=0&k=20&c=DK4yIG2IpJh-N_ln81vIrXIaqJKa5sQME67TBj9SxCc=",
             verbose=True,
         )
 
@@ -35,7 +38,7 @@ class TestAgent(unittest.TestCase):
         response = self.agent.reflect()
 
         self.assertIsInstance(response, dict)
-        expected_keys = ['question', 'answer', 'confidence_score', 'chain_of_reasoning']
+        expected_keys = ['question', 'plan', 'answer', 'confidence_score', 'chain_of_reasoning', 'tool_calls']
         self.assertEqual(set(response.keys()), set(expected_keys))
 
 if __name__ == '__main__':

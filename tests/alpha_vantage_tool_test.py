@@ -16,6 +16,8 @@ class TestAgent(unittest.TestCase):
     def setUp(self):
         # Retrieve the AlphaVantage API key from the environment variable
         ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
+        if not ALPHA_VANTAGE_API_KEY:
+            self.skipTest("AlphaVantage API key not found in environment variables.")
 
         self.symbol_search = RexiaAIAlphaVantageSearchSymbols(api_key=ALPHA_VANTAGE_API_KEY)
         self.top_gainers_losers = RexiaAIAlphaVantageTopGainersLosers(api_key=ALPHA_VANTAGE_API_KEY)
@@ -51,9 +53,15 @@ class TestAgent(unittest.TestCase):
     def test_response_format(self):
         response = self.agent.reflect()
 
-        self.assertIsInstance(response, dict)
-        expected_keys = ['question', 'answer', 'confidence_score', 'chain_of_reasoning']
-        self.assertEqual(set(response.keys()), set(expected_keys))
+        self.assertIsInstance(response, dict, "Response is not a dictionary.")
+        expected_keys = ['question', 'plan', 'answer', 'confidence_score', 'chain_of_reasoning', 'tool_calls']
+        missing_keys = set(expected_keys) - set(response.keys())
+        extra_keys = set(response.keys()) - set(expected_keys)
+
+        if missing_keys:
+            self.fail(f"Response is missing the following keys: {', '.join(missing_keys)}")
+        if extra_keys:
+            self.fail(f"Response contains unexpected keys: {', '.join(extra_keys)}")
 
 if __name__ == '__main__':
     unittest.main()

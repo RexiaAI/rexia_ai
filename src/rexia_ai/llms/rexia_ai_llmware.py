@@ -11,8 +11,10 @@ class RexiaAILLMWare:
 
     Attributes:
         tools: A dictionary of tools available for the LLM.
+        model: The model used for the LLM.
     """
     tools: Optional[Dict[str, BaseTool]] = Field(default_factory=dict)
+    model: ModelCatalog
         
     def __init__(self, model: str, temperature: float, tools: Optional[Dict[str, BaseTool]] = None, use_gpu: bool = False):
         """

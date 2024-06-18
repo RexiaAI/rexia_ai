@@ -1,5 +1,6 @@
 """LLM output structure for ReXia.AI."""
 
+
 class LLMOutput:
     """
     LLM output structure for ReXiaAI.
@@ -17,32 +18,42 @@ class LLMOutput:
         """
         return (
             "{\n"
-            "    \"question\": \"string\",\n"
-            "    \"answer\": \"string\",\n"
-            "    \"confidence_score\": \"number between 0 and 100 percent\",\n"
-            "    \"chain of reasoning\": [\"string\"]\n"
+            '    "question": "string",\n'
+            '    "plan": "list",\n'
+            '    "answer": "string",\n'
+            '    "confidence_score": "number between 0 and 100 percent",\n'
+            '    "chain_of_reasoning": ["list"]\n'
+            '    "tool_calls": ["list of tool calls, leave blank if you are not a tool calling agent."]\n'
             "}"
         )
 
     @staticmethod
-    def get_plan_output_structure() -> str:
+    def get_json_scehma():
         """
-        Get the plan output structure.
+        Get the output schema.
 
         Returns:
-            A string representing the plan output structure.
+            A string representing the output schema.
         """
-        return (
-            "{\n"
-            "    \"task\": \"[Task/Problem Type]\",\n"
-            "    \"plan\": {\n"
-            "        \"Understand\": \"[Describe the problem and its key elements.]\",\n"
-            "        \"Decompose\": \"[Break the problem into manageable parts.]\",\n"
-            "        \"Represent\": \"[Represent the problem using appropriate tools or models.]\",\n"
-            "        \"Solve\": \"[Apply techniques or algorithms to solve the problem.]\",\n"
-            "        \"Verify\": \"[Check the solution against the problem statement.]\"\n"
-            "    },\n"
-            "    \"confidence_score\": \"[Number between 0 and 100 percent]\",\n"
-            "    \"chain_of_reasoning\": \"[Describe the logical steps taken to arrive at the solution.]\"\n"
-            "}"
-        )
+
+        schema = {
+            "type": "object",
+            "properties": {
+                "question": {"type": "string"},
+                "plan": {"type": "array", "items": {"type": "string"}},
+                "answer": {"type": "string"},
+                "confidence_score": {"type": "integer"},
+                "chain_of_reasoning": {"type": "array", "items": {"type": "string"}},
+                "tool_calls": {"type": "array", "items": {"type": "string"}},
+            },
+            "required": [
+                "question",
+                "answer",
+                "confidence_score",
+                "chain_of_reasoning",
+                "plan",
+                "tool_calls",
+            ],
+        }
+
+        return schema

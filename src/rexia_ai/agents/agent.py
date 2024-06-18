@@ -1,22 +1,22 @@
 """Agent class for ReXia.AI."""
 
-import re
 import json
 from typing import List, Optional
 from ..workflows import ReflectWorkflow
-from ..thought_buffer import BufferManager
 
 class Agent:
     """
     Agent class for ReXia AI.
 
-    This agent is responsible for running the workflow, managing the buffer, and reflecting on the task.
+    This agent is responsible for running the workflow, and reflecting on the task.
 
     Attributes:
         workflow: The workflow used by the agent.
-        buffer_manager: The buffer manager used by the agent.
         task: The task assigned to the agent.
     """
+    
+    workflow: ReflectWorkflow
+    task: str
 
     def __init__(self, llm, task: str, verbose: bool = False):
         """
@@ -28,7 +28,6 @@ class Agent:
             verbose: A flag used for enabling verbose mode. Defaults to False.
         """
         self.workflow = ReflectWorkflow(llm, task, verbose)
-        self.buffer_manager = BufferManager()
         self.task = task
 
     def run_workflow(self) -> List[str]:
@@ -70,8 +69,6 @@ class Agent:
         try:
             messages = self.run_workflow()
             task_result = self.get_task_result(messages)
-            plan = self.get_plan(messages)
-            self.buffer_manager.insert_or_update_plan(task=self.task, plan=plan)
             accepted_answer = self.format_accepted_answer(task_result)
             return accepted_answer
         except Exception as e:
@@ -104,27 +101,3 @@ class Agent:
         except Exception as e:
             print(f"Error while formatting the answer: {e}")
             return None
-
-    def get_plan(self, messages: List[str]) -> Optional[str]:
-        """
-        Get the plan from the workflow.
-
-        Args:
-            messages: The messages from which to extract the plan.
-
-        Returns:
-            The plan if it exists, None otherwise.
-        """
-        try:
-            for message in messages:
-                match = re.search(r"plan: (.*?)(, \w+:|$)", message, re.DOTALL)
-                if match:
-                    plan = match.group(1)
-                    # Remove leading and trailing whitespace
-                    plan = plan.strip()
-                    return plan
-        except Exception as e:
-            print(f"Error while extracting the plan: {e}")
-
-        print("Error: Failed to extract plan.")
-        return None
