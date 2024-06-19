@@ -1,41 +1,61 @@
 """RexiaAIResponse class for ReXia.AI."""
-from typing import List
-from pydantic import BaseModel, Field, model_validator
-import json
 
-class RexiaAIResponse(BaseModel):
+import json
+from typing import List, Optional, Union
+
+class RexiaAIResponse:
     """
     Represents the response from an LLM using ReXia.AI.
     """
-    question: str
-    plan: List[str] = Field(..., description="A list of steps or subtasks to execute the task.")
-    answer: str
-    confidence_score: int = Field(..., ge=0, le=100, description="Confidence score for the answer (0-100).")
-    chain_of_reasoning: List[str] = Field(..., description="A list of reasoning steps or explanations.")
-    tool_calls: List[str] = Field(..., description="A list of tool calls or external resources used.")
 
-    @model_validator(pre=True)
-    def parse_lists_from_json(cls, values):
-        """
-        Parse list fields from JSON strings if necessary.
-        """
-        for field_name, field_value in values.items():
-            field_definition = cls.model_fields_set.get(field_name)
-            if isinstance(field_value, str) and field_definition and field_definition.outer_type_ == List[str]:
-                values[field_name] = cls.parse_json_list(field_value)
-        return values
+    def __init__(
+        self,
+        question: str,
+        plan: Optional[List[str]] = None,
+        answer: str = "",
+        confidence_score: int = 0,
+        chain_of_reasoning: Optional[List[str]] = None,
+        tool_calls: Optional[List[str]] = None,
+    ):
+        self.question = question
+        self.plan = plan or []
+        self.answer = answer
+        self.confidence_score = confidence_score
+        self.chain_of_reasoning = chain_of_reasoning or []
+        self.tool_calls = tool_calls or []
 
     @classmethod
-    def from_json(cls, json_str: str):
+    def from_json(cls, json_data: Union[str, dict]):
         """
-        Create a RexiaAIResponse instance from a JSON string.
+        Create a RexiaAIResponse instance from a JSON string or dictionary.
         """
-        data = cls.model_validate(json.loads(json_str), strict=True)
-        return data
+        if isinstance(json_data, str):
+            json_data = json.loads(json_data)
 
-    @staticmethod
-    def parse_json_list(json_str: str) -> List[str]:
+        return cls(
+            question=json_data.get("question", ""),
+            plan=json_data.get("plan", []),
+            answer=json_data.get("answer", ""),
+            confidence_score=float(json_data.get("confidence_score", 0)),
+            chain_of_reasoning=json_data.get("chain_of_reasoning", []),
+            tool_calls=json_data.get("tool_calls", []),
+        )
+
+    def to_dict(self) -> dict:
         """
-        Parse a JSON string into a list of strings.
+        Convert the RexiaAIResponse instance to a dictionary.
         """
-        return [str(item) for item in json.loads(json_str)]
+        return {
+            "question": self.question,
+            "plan": self.plan,
+            "answer": self.answer,
+            "confidence_score": self.confidence_score,
+            "chain_of_reasoning": self.chain_of_reasoning,
+            "tool_calls": self.tool_calls,
+        }
+
+    def __str__(self) -> str:
+        """
+        Return a string representation of the RexiaAIResponse instance.
+        """
+        return json.dumps(self.__dict__, indent=4)

@@ -45,7 +45,6 @@ class ReflectWorkflow(BaseWorkflow):
             print(f"ReXia.AI has completed the task: {self.channel.task}")
         except Exception as e:
             print(f"An error occurred while running the task: {e}")
-            self.channel.status = TaskStatus.ERROR
     
     def run(self):
         """Run the agent."""

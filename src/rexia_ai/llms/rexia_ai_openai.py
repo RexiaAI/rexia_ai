@@ -15,7 +15,7 @@ class RexiaAIOpenAI(ChatOpenAI):
     """
     tools: Optional[Dict[str, BaseTool]] = Field(default_factory=dict)
 
-    def __init__(self, base_url: str, model: str, temperature: float, tools: Optional[Dict[str, BaseTool]] = None, api_key: Optional[str] = None):
+    def __init__(self, base_url: str, model: str, temperature: float, tools: Optional[Dict[str, BaseTool]] = None, api_key: Optional[str] = None, max_tokens: int = 4096):
         """
         Initialize a LLM instance.
 
@@ -25,8 +25,9 @@ class RexiaAIOpenAI(ChatOpenAI):
             temperature: The temperature to use for the LLM.
             tools: A dictionary of tools available for the LLM. Defaults to None.
             api_key: The API key for the OpenAI API. Defaults to None.
+            max_tokens: The maximum number of tokens to generate. Defaults to 1024.
         """
-        super().__init__(base_url=base_url, model=model, temperature=temperature, api_key=api_key)
+        super().__init__(base_url=base_url, model=model, temperature=temperature, api_key=api_key, max_tokens=max_tokens)
         self.tools = tools or {}
         
     def invoke(self, query: str) -> Optional[str]:

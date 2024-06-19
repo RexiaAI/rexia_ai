@@ -3,6 +3,7 @@
 import json
 from typing import List, Optional
 from ..workflows import ReflectWorkflow
+from ..structure import RexiaAIResponse
 
 class Agent:
     """
@@ -91,13 +92,10 @@ class Agent:
             # Remove 'finalise: ' from the string
             answer = answer.replace('finalise: ', '')
             
-            # Remove escape characters
-            answer = answer.encode('utf-8').decode('unicode_escape')
-
-            # Convert the string to a JSON object
-            answer_json = json.loads(answer)
+            # 
+            rexia_ai_response = RexiaAIResponse.from_json(answer)
             
-            return answer_json
+            return rexia_ai_response
         except Exception as e:
             print(f"Error while formatting the answer: {e}")
             return None

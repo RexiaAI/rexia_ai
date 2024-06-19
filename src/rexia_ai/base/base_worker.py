@@ -3,6 +3,8 @@
 import re
 from typing import Any
 from ..structure import LLMOutput
+from ..structure import RexiaAIResponse
+
 
 class BaseWorker:
     """
@@ -12,10 +14,10 @@ class BaseWorker:
         model: The model used by the worker.
         verbose: A flag used for enabling verbose mode.
     """
-    
+
     model: Any
     verbose: bool
-    
+
     def __init__(self, model: Any, verbose: bool = False):
         """
         Initialize a BaseWorker instance.
@@ -57,7 +59,7 @@ class BaseWorker:
         """
         return re.sub(r"<\|.*\|>", "", s)
 
-    def _invoke_model(self, prompt: str) -> str:
+    def _invoke_model(self, prompt: str) -> RexiaAIResponse:
         """
         Invoke the model with the given prompt and return the response.
 
@@ -67,9 +69,28 @@ class BaseWorker:
         Returns:
             The response from the model.
         """
-        response = self.model.invoke(prompt)
-        response = self._clean_response(response)
-        return response
+        max_attempts = 3
+        attempt = 0
+        while attempt < max_attempts:
+            try:
+                response = self.model.invoke(prompt)
+                cleaned_response = self._clean_response(response)
+                rexia_ai_response = RexiaAIResponse.from_json(cleaned_response)
+                return rexia_ai_response
+            except Exception as e:
+                # Append the error message to the prompt for the next attempt
+                prompt += f"Your previous generation was incorrectly formatted, please resolve this issue: {str(e)}"
+                print(
+                    "Failed to get a valid response from the model. "
+                    f"Error: {str(e)}\n\nModel "
+                    f"Response: {response}\n\nRetrying..."
+                )
+            attempt += 1
+
+        # If we reach here, we've failed after max_attempts
+        raise Exception(
+            "Failed to get a valid response from the model after maximum attempts"
+        )
 
     def _clean_response(self, response: str) -> str:
         """
