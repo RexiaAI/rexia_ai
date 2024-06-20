@@ -5,7 +5,7 @@ from abc import ABC, abstractmethod
 
 class BaseTool(ABC):
     """
-    A base tool that works with ReXia.AI.
+    BaseTool class, definies a standard interface for tools in ReXia.AI.
 
     Attributes:
         name: The name of the tool.

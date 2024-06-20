@@ -1,9 +1,10 @@
 """Agent class for ReXia.AI."""
 
-import json
 from typing import List, Optional
 from ..workflows import ReflectWorkflow
 from ..structure import RexiaAIResponse
+from ..memory import WorkingMemory
+from ..base import BaseMemory
 
 class Agent:
     """
@@ -19,7 +20,7 @@ class Agent:
     workflow: ReflectWorkflow
     task: str
 
-    def __init__(self, llm, task: str, verbose: bool = False):
+    def __init__(self, llm, task: str, memory: BaseMemory = WorkingMemory(), verbose: bool = False):
         """
         Initialize an Agent instance.
 
@@ -28,8 +29,9 @@ class Agent:
             task: The task assigned to the agent.
             verbose: A flag used for enabling verbose mode. Defaults to False.
         """
-        self.workflow = ReflectWorkflow(llm, task, verbose)
+        self.workflow = ReflectWorkflow(llm=llm, task=task, memory=memory, verbose=verbose)
         self.task = task
+        self.memory = memory
 
     def run_workflow(self) -> List[str]:
         """
@@ -57,7 +59,7 @@ class Agent:
 
         return messages[-1]
 
-    def reflect(self) -> Optional[str]:
+    def reflect(self, task: str = None) -> Optional[str]:
         """
         Reflect method for the agent.
 
@@ -68,6 +70,10 @@ class Agent:
             The accepted answer if it exists, None otherwise.
         """
         try:
+            if task:
+                self.task = task
+                self.workflow.channel.task = task
+            
             messages = self.run_workflow()
             task_result = self.get_task_result(messages)
             accepted_answer = self.format_accepted_answer(task_result)

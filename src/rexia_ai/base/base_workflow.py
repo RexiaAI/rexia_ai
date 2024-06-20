@@ -1,10 +1,11 @@
 """Base Workflow for ReXia.AI."""
 
 from typing import Any
+from abc import ABC, abstractmethod
 
-class BaseWorkflow:
+class BaseWorkflow(ABC):
     """
-    BaseWorkflow class for ReXia AI, refactored for better design principles.
+    BaseWorkflow class for ReXia AI, allows for the creation of workflows from a standard interface.
 
     Attributes:
         llm: The language model used by the workflow.
@@ -28,3 +29,7 @@ class BaseWorkflow:
         self.llm = llm
         self.task = task
         self.verbose = verbose
+    
+    @abstractmethod
+    def run(self) -> str:
+        pass

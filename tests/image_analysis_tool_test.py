@@ -3,8 +3,9 @@ import os
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
 from rexia_ai.tools import RexiaAIImageAnalysis
+from rexia_ai.structure import RexiaAIResponse
 
-class TestAgent(unittest.TestCase):
+class TestImageAnalysisTool(unittest.TestCase):
     def setUp(self):
         # Retrieve the necessary credentials/keys from environment variables
         OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
@@ -37,9 +38,12 @@ class TestAgent(unittest.TestCase):
     def test_response_format(self):
         response = self.agent.reflect()
 
-        self.assertIsInstance(response, dict)
-        expected_keys = ['question', 'plan', 'answer', 'confidence_score', 'chain_of_reasoning', 'tool_calls']
-        self.assertEqual(set(response.keys()), set(expected_keys))
+        # Assert that the response is a RexiaAIResponse
+        self.assertIsInstance(response, RexiaAIResponse, f"Expected RexiaAIResponse but got {type(response).__name__}")
+        
+        # Assert that the response contains the expected answer
+        expected_answer = "Paris"
+        self.assertIn(expected_answer, response.answer, "Response does not contain the expected answer.")
 
 if __name__ == '__main__':
     unittest.main()

@@ -52,12 +52,16 @@ llm = RexiaAIOpenAI(
 # Create an instance of the RexiaAI Agent with the specified task and LLM
 agent = Agent(
     llm=llm,
-    task="Give me a report on NVIDIA's (Stock Symbol NASDAQ: NVDA) performance this week, including market sentiment.",
+    task="What is the stock price for NVIDIA (Stock Symbol NASDAQ: NVDA).",
     verbose=True,
 )
+
+api_result = quote_endpoint.get_quote_endpoint(symbol="NVDA")
 
 # Generate the response from the agent
 response = agent.reflect()
 
 # Print the response
 print("Response:", response)
+
+print("API Result:", api_result)

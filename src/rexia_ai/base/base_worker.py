@@ -1,14 +1,20 @@
 """BaseWorker class for ReXia.AI."""
 
 import re
-from typing import Any
+from typing import Any, List
+from abc import ABC
 from ..structure import LLMOutput
 from ..structure import RexiaAIResponse
 
+PREDEFINED_PROMPT = """You are an AI assistant helping a user with a task. 
+                The user asks you a question or gives you a task. 
+                You need to provide a response or perform the task.
+            """
 
-class BaseWorker:
+
+class BaseWorker(ABC):
     """
-    BaseWorker for ReXia AI.
+    BaseWorker for ReXia.AI. Allows for the creation of workers from a standard interface.
 
     Attributes:
         model: The model used by the worker.
@@ -46,6 +52,52 @@ class BaseWorker:
             print(f"{worker_name}: {agent_response}")
 
         return f"{worker_name}: {agent_response}"
+    
+    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+        """
+        Create a prompt for the model.
+
+        The prompt is created by combining a predefined string with the task
+        and the messages from the collaboration chat.
+
+        Args:
+            task: The task for which the prompt is created.
+            messages: The messages from the collaboration chat.
+            memory: The memory object containing the history of the agent's tasks.
+
+        Returns:
+            The created prompt as a string.
+        """
+
+        prompt = (
+            PREDEFINED_PROMPT
+            + "\n\n"
+            + self.get_structured_output_prompt()
+            + "\n\n"
+            + self.format_additional_context(task, messages, memory)
+        )
+        return prompt
+    
+    def format_additional_context(
+        self, task: str, messages: List[str], memory: Any
+    ) -> str:
+        """
+        Format the task, messages and memory for the prompt.
+
+        Args:
+            task: The task for which the prompt is created.
+            messages: The messages from the collaboration chat.
+
+        Returns:
+            The formatted task and messages as a string.
+        """
+        formatted = (
+            f"Task: {task}\n\nCollaboration Chat:\n\n"
+            + "\n\n".join(messages)
+            + "\n\nPrevious Task Results"
+            + memory.get_messages_as_string()
+        )
+        return formatted
 
     def remove_system_tokens(self, s: str) -> str:
         """

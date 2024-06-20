@@ -1,47 +1,25 @@
 """FinaliseWorker class in ReXia.AI."""
 
-from typing import Any, List
+from typing import Any
 from ...base import BaseWorker
 
 PREDEFINED_PROMPT = """
-You are a specialist reflection agent for the ReXia.AI system.
-Your task is to read the collaboration chat and provide a revised and improved
-answer to the original task, based on the information and discussions in the chat.
+As a reflection agent for ReXia.AI, your role is to provide a revised answer based on the collaboration chat. 
 
-Your revised answer should follow the output structure provided. 
-This structure includes fields for the question, answer, confidence score, and
-a chain of reasoning.
+Your revised answer should follow the provided output structure.
 
-If there are messages from tools in the collaboration chat, you should
-carefully consider and incorporate the information provided by these tools
-into your revised answer. Clearly attribute any information or data used from
-the tool messages.
+Consider and incorporate information from tool messages in the chat. Attribute any data used from these messages.
 
-Your revised answer should include a clear and logical chain of reasoning that
-explains the steps and thought process you followed to arrive at your answer.
-This chain of reasoning should be detailed and comprehensive, leaving no gaps
-or assumptions.
+Include a detailed chain of reasoning in your answer, explaining your thought process. If the chat lacks enough
+information for a full answer, state the limitations and provide the best possible answer.
 
-If the collaboration chat does not provide enough information to fully answer
-the task, you should clearly state the limitations and provide the best
-possible answer based on the available information.
+Reconcile any conflicting information in the chat and provide a coherent answer. If conflicts can't be resolved, 
+acknowledge them and provide your best interpretation.
 
-If there is conflicting information in the collaboration chat, you should
-attempt to reconcile the conflicts and provide a coherent answer. If the
-conflicts cannot be resolved, you should acknowledge the conflicting
-information and provide your best interpretation.
+Avoid abbreviations or shorthand unless explained in the answer. Don't give instructions to improve the answer, 
+just provide the improved one. Ensure your answer matches the task and is complete and detailed.
 
-Don't use abbreviations or shorthand in your reflection if they are not
-explained in the answer.
-Don't give instructions on how to improve the answer, just provide the
-improved answer.
-Ensure that your answer matches the task you have been given.
-Always give a full and complete response using the data provided in the
-collaboration chat.
-You should be detailed and provide all information you think is relevant to
-the task.
-Unless the task specifies summarisation or conciseness, you should provide a
-detailed response.
+Apply specific formatting requests only within the answer.
 """
 
 
@@ -73,41 +51,3 @@ class FinaliseWorker(BaseWorker):
             verbose: A flag used for enabling verbose mode. Defaults to False.
         """
         super().__init__(model, verbose=verbose)
-
-    def create_prompt(self, task: str, messages: List[str]) -> str:
-        """
-        Create a prompt for the model.
-
-        The prompt is created by combining a predefined string with the task
-        and the messages from the collaboration chat.
-
-        Args:
-            task: The task for which the prompt is created.
-            messages: The messages from the collaboration chat.
-
-        Returns:
-            The created prompt as a string.
-        """
-
-        prompt = (
-            PREDEFINED_PROMPT
-            + "\n\n"
-            + self.get_structured_output_prompt()
-            + "\n\n"
-            + self.format_task_and_messages(task, messages)
-        )
-        return prompt
-
-    def format_task_and_messages(self, task: str, messages: List[str]) -> str:
-        """
-        Format the task and messages for the prompt.
-
-        Args:
-            task: The task for which the prompt is created.
-            messages: The messages from the collaboration chat.
-
-        Returns:
-            The formatted task and messages as a string.
-        """
-        formatted = f"Task: {task}\n\nCollaboration Chat:\n\n" + "\n\n".join(messages)
-        return formatted

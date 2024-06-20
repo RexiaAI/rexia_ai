@@ -1,43 +1,26 @@
 """ToolWorker class in ReXia.AI."""
-import json
 import secrets
-import re
-from typing import Any, List, Dict, Tuple
+from typing import Any, List, Dict
 from ...base import BaseWorker
 from ...structure import RexiaAIResponse
 
 PREDEFINED_PROMPT = """
-You are a tool calling agent for the ReXia.AI system, an advanced AI
-platform designed to tackle complex tasks and problems. Your role is crucial in
-gathering the necessary information and resources to support the team in
-completing the given task effectively and efficiently.
+    As a tool calling agent for ReXia.AI, your role is key in supporting task completion. 
 
-When selecting tools, consider their capabilities, limitations, and potential
-trade-offs. Choose the most appropriate tools that can provide the required
-information while minimizing redundancy and optimizing the overall process.
+    Select tools based on their capabilities, limitations, and trade-offs. Aim for efficiency and minimal redundancy.
 
-Use the tools efficiently and avoid unnecessary or redundant tool calls. You
-can make multiple tool calls based on the output of previous tool calls,
-iteratively refining your approach and gathering more targeted information as
-needed.
+    Use tools wisely. Make multiple calls if needed, refining your approach based on previous outputs.
 
-After calling a tool, carefully handle and interpret its output. Parse the
-output, handle errors or edge cases, and incorporate the tool output into the
-overall solution. If a tool's output is unclear or insufficient, consider
-calling additional tools or seeking clarification from the team.
+    After a tool call, parse the output, handle errors, and integrate the results into the solution. 
+    If output is unclear, consider using additional tools or asking the team for clarification.
 
-Remember, you are part of a collaborative team. Communicate effectively with
-other team members, share relevant information, and coordinate your efforts to
-ensure a cohesive and efficient approach to the task.
+    Communicate effectively with the team, share important information, and coordinate your efforts for a unified approach.
 
-Be mindful of potential limitations or constraints, such as resource
-constraints, time constraints, or ethical considerations, and adjust your tool
-selection and usage accordingly.
+    Be aware of limitations like resource and time constraints, or ethical considerations, and adjust 
+    your tool usage accordingly.
 
-To call a tool, use the JSON format provided below, ensuring that your tool
-calls are properly formatted JSON with the correct tool names and arguments.
-Do not generate incomplete JSON or JSON with syntax errors.
-"""
+    If the task has specific formatting requests, apply them only within the answer.
+    """
 
 class ToolWorker(BaseWorker):
     """
@@ -84,7 +67,7 @@ class ToolWorker(BaseWorker):
         formatted_response = self._format_response(worker_name, agent_response, results)
         return formatted_response
 
-    def create_prompt(self, task: str, messages: List[str]) -> str:
+    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
         """
         Create a prompt for the model.
 
@@ -103,6 +86,13 @@ class ToolWorker(BaseWorker):
         prompt = (
             PREDEFINED_PROMPT
             + """
+                To call a tool, use the JSON format provided below, ensuring that your tool
+                calls are properly formatted JSON with the correct tool names and arguments.
+                Do not generate incomplete JSON or JSON with syntax errors.
+                
+                Your tool calls should all be contained within the "tool_calls" list of the
+                structured format requested below.
+
                 {
                 "tool_calls": [
                     {
@@ -142,6 +132,8 @@ class ToolWorker(BaseWorker):
             """
             + "\n\n".join(messages)
             + "\n\n"
+            + "Previous Task Results"
+            + "\n\n" + memory.get_messages_as_string()
             + self.get_structured_output_prompt()
         ).replace("{unique_id}", unique_id)
 

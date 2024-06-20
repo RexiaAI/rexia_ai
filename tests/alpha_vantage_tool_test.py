@@ -2,6 +2,7 @@ import unittest
 import os
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
+from rexia_ai.structure import RexiaAIResponse
 from rexia_ai.tools import (
     RexiaAIAlphaVantageTopGainersLosers,
     RexiaAIAlphaVantageSearchSymbols,
@@ -12,7 +13,7 @@ from rexia_ai.tools import (
     RexiaAIAlphaVantageExchangeRate,
 )
 
-class TestAgent(unittest.TestCase):
+class TestAlphaVantageTools(unittest.TestCase):
     def setUp(self):
         # Retrieve the AlphaVantage API key from the environment variable
         ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
@@ -46,22 +47,14 @@ class TestAgent(unittest.TestCase):
 
         self.agent = Agent(
             llm=self.llm,
-            task="Give me a report on NVIDIA's (Stock Symbol NASDAQ: NVDA) performance this week, including market sentiment.",
+            task="What is the stock price for NVIDIA (Stock Symbol NASDAQ: NVDA).",
             verbose=True,
         )
 
     def test_response_format(self):
         response = self.agent.reflect()
 
-        self.assertIsInstance(response, dict, "Response is not a dictionary.")
-        expected_keys = ['question', 'plan', 'answer', 'confidence_score', 'chain_of_reasoning', 'tool_calls']
-        missing_keys = set(expected_keys) - set(response.keys())
-        extra_keys = set(response.keys()) - set(expected_keys)
-
-        if missing_keys:
-            self.fail(f"Response is missing the following keys: {', '.join(missing_keys)}")
-        if extra_keys:
-            self.fail(f"Response contains unexpected keys: {', '.join(extra_keys)}")
+        self.assertIsInstance(response, RexiaAIResponse, "Response is not RexiaAIResponse.")
 
 if __name__ == '__main__':
     unittest.main()
