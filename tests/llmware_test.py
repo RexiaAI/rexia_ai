@@ -1,6 +1,7 @@
 import unittest
 from rexia_ai.llms import RexiaAILLMWare
 
+
 class TestRexiaAILLMWare(unittest.TestCase):
     def setUp(self):
         # Create an instance of the RexiaAILLMWare LLM
@@ -14,5 +15,6 @@ class TestRexiaAILLMWare(unittest.TestCase):
         response = self.llm.invoke("What is the capital of France?")
         self.assertIn("Paris", response, "Response does not contain 'Paris'")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

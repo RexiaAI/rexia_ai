@@ -4,6 +4,7 @@ from typing import Any
 from ..base import BaseMemory, BaseWorker
 from ..common import CollaborationChannel
 
+
 class Component:
     """
     A general component that uses specialised workers to perform different tasks.
@@ -13,13 +14,19 @@ class Component:
         channel: The channel used by the component.
         worker: The worker used by the component.
     """
-    
+
     name: str
     channel: CollaborationChannel
     worker: BaseWorker
     memory: BaseMemory
-    
-    def __init__(self, name: str, channel: CollaborationChannel, worker: BaseWorker, memory: BaseMemory):
+
+    def __init__(
+        self,
+        name: str,
+        channel: CollaborationChannel,
+        worker: BaseWorker,
+        memory: BaseMemory,
+    ):
         """
         Initialize a Component instance.
 
@@ -43,7 +50,7 @@ class Component:
         """
         response = self.perform_task()
         return response
-                
+
     def perform_task(self) -> Any:
         """
         Perform the task assigned to the component and return the response.

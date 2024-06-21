@@ -21,6 +21,7 @@ The goal is to create a clear roadmap for your execution, without human interpre
 Apply specific formatting requests only within the answer.
 """
 
+
 class PlanWorker(BaseWorker):
     """
     A specialised planning worker for a ReXia.AI agent.
@@ -34,7 +35,7 @@ class PlanWorker(BaseWorker):
 
     model: Any
     verbose: bool
-    
+
     def __init__(
         self,
         model: Any,

@@ -5,10 +5,12 @@ from rexia_ai.agents import Agent
 from rexia_ai.tools import RexiaAIImageAnalysis
 from rexia_ai.structure import RexiaAIResponse
 
+
 class TestImageAnalysisTool(unittest.TestCase):
     def setUp(self):
         # Retrieve the necessary credentials/keys from environment variables
         OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
+        YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 
         # Create an instance of the RexiaAIImageAnalysis tool
         self.image_analysis = RexiaAIImageAnalysis(
@@ -20,11 +22,12 @@ class TestImageAnalysisTool(unittest.TestCase):
         # Create a dictionary mapping the tool name to its instance
         tools = {"image_analysis": self.image_analysis}
 
-        # Create an instance of the RexiaAI LLM with the specified tools
+        # Create an instance of the RexiaAI LLM
         self.llm = RexiaAIOpenAI(
-            base_url="http://localhost:1234/v1",
-            model="lm-studio-server",
+            base_url="https://api.01.ai/v1",
+            model="yi-large",
             temperature=0,
+            api_key=YI_LARGE_API_KEY,
             tools=tools,
         )
 
@@ -39,11 +42,20 @@ class TestImageAnalysisTool(unittest.TestCase):
         response = self.agent.reflect()
 
         # Assert that the response is a RexiaAIResponse
-        self.assertIsInstance(response, RexiaAIResponse, f"Expected RexiaAIResponse but got {type(response).__name__}")
-        
+        self.assertIsInstance(
+            response,
+            RexiaAIResponse,
+            f"Expected RexiaAIResponse but got {type(response).__name__}",
+        )
+
         # Assert that the response contains the expected answer
         expected_answer = "Paris"
-        self.assertIn(expected_answer, response.answer, "Response does not contain the expected answer.")
+        self.assertIn(
+            expected_answer,
+            response.answer,
+            "Response does not contain the expected answer.",
+        )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

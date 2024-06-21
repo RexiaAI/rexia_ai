@@ -52,13 +52,10 @@ class BaseWorker(ABC):
             print(f"{worker_name}: {agent_response}")
 
         return f"{worker_name}: {agent_response}"
-    
+
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
         """
         Create a prompt for the model.
-
-        The prompt is created by combining a predefined string with the task
-        and the messages from the collaboration chat.
 
         Args:
             task: The task for which the prompt is created.
@@ -68,17 +65,18 @@ class BaseWorker(ABC):
         Returns:
             The created prompt as a string.
         """
+        additional_context = self._format_additional_context(task, messages, memory)
+        structured_output_prompt = self.get_structured_output_prompt()
 
         prompt = (
-            PREDEFINED_PROMPT
-            + "\n\n"
-            + self.get_structured_output_prompt()
-            + "\n\n"
-            + self.format_additional_context(task, messages, memory)
+            f"{PREDEFINED_PROMPT}\n\n"
+            f"{additional_context}\n\n"
+            f"{structured_output_prompt}"
         )
+
         return prompt
-    
-    def format_additional_context(
+
+    def _format_additional_context(
         self, task: str, messages: List[str], memory: Any
     ) -> str:
         """
@@ -87,6 +85,7 @@ class BaseWorker(ABC):
         Args:
             task: The task for which the prompt is created.
             messages: The messages from the collaboration chat.
+            memory: The memory object containing the history of the agent's tasks.
 
         Returns:
             The formatted task and messages as a string.
@@ -123,6 +122,7 @@ class BaseWorker(ABC):
         """
         max_attempts = 3
         attempt = 0
+
         while attempt < max_attempts:
             try:
                 response = self.model.invoke(prompt)

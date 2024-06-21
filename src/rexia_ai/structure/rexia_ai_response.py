@@ -3,6 +3,7 @@
 import json
 from typing import List, Optional, Union
 
+
 class RexiaAIResponse:
     """
     Represents the response from an LLM using ReXia.AI.

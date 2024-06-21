@@ -13,6 +13,7 @@ import cv2
 from moviepy.editor import AudioFileClip
 from openai import OpenAI
 from ..base import BaseTool
+from ..structure import LLMOutput
 
 
 class RexiaAIYoutubeVideoAnalysis(BaseTool):
@@ -67,7 +68,9 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
             audio_transcription = self._transcribe(audio_path)
             os.remove(audio_path)  # Remove the temporary audio file
 
-            filtered_frames = base64_frames[::5]  # Send only every 5th frame to reduce API calls
+            filtered_frames = base64_frames[
+                ::5
+            ]  # Send only every 5th frame to reduce API calls
 
             response = self.llm.chat.completions.create(
                 model=self.vision_model,
@@ -81,6 +84,7 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
                         "content": [
                             f"This is the query: {query}",
                             f"This is the video's audio transcription: {audio_transcription}",
+                            f"\n\n Structure your response in the following format: {LLMOutput.get_output_structure()}"
                             "Here are the frames from the video.",
                             *map(
                                 lambda x: {
@@ -101,7 +105,9 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
         except Exception as e:
             return f"An error occurred during the analysis: {str(e)}"
 
-    def _process_video(self, video_url: str, seconds_per_frame: int = 2) -> Tuple[list, str]:
+    def _process_video(
+        self, video_url: str, seconds_per_frame: int = 2
+    ) -> Tuple[list, str]:
         """
         Extract frames and audio from a video file.
 
@@ -119,7 +125,7 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
 
         try:
             # Define the directory for temporary files
-            temp_dir = os.path.join(os.path.dirname(__file__), 'temp_tool_files')
+            temp_dir = os.path.join(os.path.dirname(__file__), "temp_tool_files")
 
             # Make sure the directory exists
             os.makedirs(temp_dir, exist_ok=True)
@@ -131,10 +137,12 @@ class RexiaAIYoutubeVideoAnalysis(BaseTool):
             video_id = str(uuid.uuid4())
 
             # Download the video file
-            yt.streams.first().download(output_path=temp_dir, filename=f'{video_id}.mp4')
+            yt.streams.first().download(
+                output_path=temp_dir, filename=f"{video_id}.mp4"
+            )
 
             # Define the path for the temporary video file
-            temp_file_path = os.path.join(temp_dir, f'{video_id}.mp4')
+            temp_file_path = os.path.join(temp_dir, f"{video_id}.mp4")
 
             # Update the video path to the temporary file path
             video_url = temp_file_path

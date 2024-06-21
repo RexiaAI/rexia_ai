@@ -148,6 +148,9 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+# huggingface files
+.huggingface/
+
 # Cython debug symbols
 cython_debug/
 

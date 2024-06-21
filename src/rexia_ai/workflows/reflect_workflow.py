@@ -23,6 +23,7 @@ class ReflectWorkflow(BaseWorkflow):
         work: The work component of the workflow.
         finalise: The finalise component of the workflow.
     """
+
     llm: RexiaAIOpenAI
     task: str
     verbose: bool
@@ -32,16 +33,35 @@ class ReflectWorkflow(BaseWorkflow):
     tool: Component
     work: Component
     finalise: Component
-    
-    def __init__(self, llm: RexiaAIOpenAI, task: str, memory: BaseMemory, verbose: bool = False) -> None:
+
+    def __init__(
+        self, llm: RexiaAIOpenAI, task: str, memory: BaseMemory, verbose: bool = False
+    ) -> None:
         super().__init__(llm, task, verbose)
         self.channel = CollaborationChannel(task)
         self.memory = memory
-        self.plan = Component("plan", self.channel, PlanWorker(model=llm, verbose=verbose), memory=self.memory)
-        self.tool = Component("tool", self.channel, ToolWorker(model=llm, verbose=verbose), memory=self.memory)
-        self.work = Component("work", self.channel, Worker(model=llm, verbose=verbose), memory=self.memory)
-        self.finalise = Component("finalise", self.channel, FinaliseWorker(model=llm, verbose=verbose), memory=self.memory)
-        
+        self.plan = Component(
+            "plan",
+            self.channel,
+            PlanWorker(model=llm, verbose=verbose),
+            memory=self.memory,
+        )
+        self.tool = Component(
+            "tool",
+            self.channel,
+            ToolWorker(model=llm, verbose=verbose),
+            memory=self.memory,
+        )
+        self.work = Component(
+            "work", self.channel, Worker(model=llm, verbose=verbose), memory=self.memory
+        )
+        self.finalise = Component(
+            "finalise",
+            self.channel,
+            FinaliseWorker(model=llm, verbose=verbose),
+            memory=self.memory,
+        )
+
     def _run_task(self):
         """Run the agent process."""
         try:
@@ -49,15 +69,15 @@ class ReflectWorkflow(BaseWorkflow):
 
             self.channel.status = TaskStatus.WORKING
             self.plan.run()
-            
+
             if self.llm.tools:
                 self.tool.run()
             self.work.run()
-            
+
             self.finalise.run()
-            
+
             self.channel.status = TaskStatus.COMPLETED
-            
+
             # Add the final message to the memory
             self.memory.add_message(self.channel.messages[-1])
 
@@ -65,7 +85,7 @@ class ReflectWorkflow(BaseWorkflow):
         except Exception as e:
             print(f"An error occurred while running the task: {e}")
             print(traceback.format_exc())
-        
+
     def run(self):
         """Run the agent."""
         self._run_task()

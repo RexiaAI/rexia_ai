@@ -23,7 +23,8 @@ llm = RexiaAIOpenAI(
     base_url="https://api.01.ai/v1",
     model="yi-large",
     temperature=0,
-    api_key=YI_LARGE_API_KEY
+    api_key=YI_LARGE_API_KEY,
+    max_tokens=4000,
 )
 
 # Create an instance of the RexiaAI Agent with the specified task and LLM

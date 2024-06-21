@@ -3,6 +3,7 @@
 from typing import Any, Dict, List
 from abc import ABC, abstractmethod
 
+
 class BaseTool(ABC):
     """
     BaseTool class, definies a standard interface for tools in ReXia.AI.
@@ -12,11 +13,11 @@ class BaseTool(ABC):
         func: The function that the tool performs.
         description: A description of the tool.
     """
-    
+
     name: str
     func: Any
     description: str
-    
+
     def __init__(self, name: str, func: Any, description: str):
         """
         Initialize a BaseTool instance.

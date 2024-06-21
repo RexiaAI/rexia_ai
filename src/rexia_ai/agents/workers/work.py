@@ -26,8 +26,11 @@ Ensure your response is clear, concise, and informative. Avoid unnecessary compl
 Don't add reasoning outside your chain of reasoning. Don't use unexplained abbreviations or shorthand. 
 Use messages from tools in your answer. Ensure your answer matches the task and is complete and detailed.
 
+Consider and incorporate information from tool messages in the chat. Attribute any data used from these messages.
+
 Apply specific formatting requests only within the answer.
 """
+
 
 class Worker(BaseWorker):
     """

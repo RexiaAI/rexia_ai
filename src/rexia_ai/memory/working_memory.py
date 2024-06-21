@@ -3,10 +3,11 @@
 from typing import List
 from ..base import BaseMemory
 
+
 class WorkingMemory(BaseMemory):
     """WorkingMemory class for ReXia.AI. Implements a working memory object that persists
     between run's on an instance of an Agent."""
-    
+
     max_length: int
     messages: List[str]
 
@@ -23,7 +24,7 @@ class WorkingMemory(BaseMemory):
     def get_messages(self):
         """Get all messages from the working memory."""
         return self.messages
-    
+
     def get_messages_as_string(self):
         """Get all messages from the working memory as a single string."""
         return " ".join(self.messages)

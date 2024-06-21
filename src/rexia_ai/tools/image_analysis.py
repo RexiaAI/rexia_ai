@@ -10,7 +10,7 @@ from ..structure import LLMOutput
 
 class RexiaAIImageAnalysis(BaseTool):
     """
-    Image Analysis Tool that works with ReXia.AI. 
+    Image Analysis Tool that works with ReXia.AI.
     Note: This tool requires a vision model or multimodal model to be set up and supplied.
 
     Attributes

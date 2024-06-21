@@ -6,6 +6,7 @@ from ..structure import RexiaAIResponse
 from ..memory import WorkingMemory
 from ..base import BaseMemory
 
+
 class Agent:
     """
     Agent class for ReXia AI.
@@ -16,11 +17,17 @@ class Agent:
         workflow: The workflow used by the agent.
         task: The task assigned to the agent.
     """
-    
+
     workflow: ReflectWorkflow
     task: str
 
-    def __init__(self, llm, task: str, memory: BaseMemory = WorkingMemory(), verbose: bool = False):
+    def __init__(
+        self,
+        llm,
+        task: str,
+        memory: BaseMemory = WorkingMemory(),
+        verbose: bool = False,
+    ):
         """
         Initialize an Agent instance.
 
@@ -29,7 +36,9 @@ class Agent:
             task: The task assigned to the agent.
             verbose: A flag used for enabling verbose mode. Defaults to False.
         """
-        self.workflow = ReflectWorkflow(llm=llm, task=task, memory=memory, verbose=verbose)
+        self.workflow = ReflectWorkflow(
+            llm=llm, task=task, memory=memory, verbose=verbose
+        )
         self.task = task
         self.memory = memory
 
@@ -73,7 +82,7 @@ class Agent:
             if task:
                 self.task = task
                 self.workflow.channel.task = task
-            
+
             messages = self.run_workflow()
             task_result = self.get_task_result(messages)
             accepted_answer = self.format_accepted_answer(task_result)
@@ -96,11 +105,11 @@ class Agent:
 
         try:
             # Remove 'finalise: ' from the string
-            answer = answer.replace('finalise: ', '')
-            
-            # 
+            answer = answer.replace("finalise: ", "")
+
+            #
             rexia_ai_response = RexiaAIResponse.from_json(answer)
-            
+
             return rexia_ai_response
         except Exception as e:
             print(f"Error while formatting the answer: {e}")
