@@ -30,8 +30,8 @@ class TestRexiaAIMemory(unittest.TestCase):
     def test_google_search(self):
 
         # Generate the response from the agent
-        self.agent.reflect()
-        response = self.agent.reflect("What is the last question you were asked?")
+        self.agent.invoke()
+        response = self.agent.invoke("What is the last question you were asked?")
 
         # Assert that the response is a RexiaAIResponse
         self.assertIsInstance(

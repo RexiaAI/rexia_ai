@@ -34,5 +34,5 @@ agent = Agent(
     verbose=True,
 )
 
-result = agent.reflect()
+result = agent.invoke()
 print(result)

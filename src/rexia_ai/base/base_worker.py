@@ -1,15 +1,12 @@
 """BaseWorker class for ReXia.AI."""
 
 import re
+import spacy
+from spacy.cli import download
 from typing import Any, List
 from abc import ABC
 from ..structure import LLMOutput
 from ..structure import RexiaAIResponse
-
-PREDEFINED_PROMPT = """You are an AI assistant helping a user with a task. 
-                The user asks you a question or gives you a task. 
-                You need to provide a response or perform the task.
-            """
 
 
 class BaseWorker(ABC):
@@ -19,21 +16,52 @@ class BaseWorker(ABC):
     Attributes:
         model: The model used by the worker.
         verbose: A flag used for enabling verbose mode.
+        nlp: The spaCy NLP model for text compression.
+        max_attempts: The maximum number of attempts to get a valid response from the model.
     """
 
     model: Any
     verbose: bool
+    nlp: Any
 
-    def __init__(self, model: Any, verbose: bool = False):
+    def __init__(self, model: Any, verbose: bool = False, max_attempts: int = 3):
         """
         Initialize a BaseWorker instance.
 
         Args:
             model: The model used by the worker.
             verbose: A flag used for enabling verbose mode. Defaults to False.
+            max_attempts: The maximum number of attempts to get a valid response from the model. Defaults to 3.
         """
         self.model = model
         self.verbose = verbose
+        self.max_attempts = max_attempts
+        self.setup_spacy()
+
+    def setup_spacy(self):
+        """Set up the spaCy model for text compression."""
+        try:
+            self.nlp = spacy.load("en_core_web_sm")
+        except OSError:
+            print("Downloading spaCy model. This may take a moment...")
+            download("en_core_web_sm")
+            self.nlp = spacy.load("en_core_web_sm")
+
+    def compress_text(self, text: str) -> str:
+        """
+        Compress the input text using spaCy.
+
+        Args:
+            text: The text to compress.
+
+        Returns:
+            The compressed text.
+        """
+        doc = self.nlp(text)
+        compressed_text = " ".join(
+            [token.lemma_ for token in doc if not token.is_stop and not token.is_punct]
+        )
+        return compressed_text
 
     def action(self, prompt: str, worker_name: str) -> str:
         """
@@ -53,11 +81,14 @@ class BaseWorker(ABC):
 
         return f"{worker_name}: {agent_response}"
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(
+        self, prompt: str, task: str, messages: List[str], memory: Any
+    ) -> str:
         """
-        Create a prompt for the model.
+        Create a prompt for the model with compression.
 
         Args:
+            prompt: The base prompt.
             task: The task for which the prompt is created.
             messages: The messages from the collaboration chat.
             memory: The memory object containing the history of the agent's tasks.
@@ -65,20 +96,26 @@ class BaseWorker(ABC):
         Returns:
             The created prompt as a string.
         """
-        additional_context = self._format_additional_context(task, messages, memory)
+
+        additional_context = self._format_additional_context(messages, memory)
+
+        # compress non-key areas of the prompt to save tokens.
+        compressed_additional_context = self.compress_text(additional_context)
+
+        # don't compress the task as it is a key area.
+        compressed_additional_context += f"Task: {task}"
+
         structured_output_prompt = self.get_structured_output_prompt()
 
-        prompt = (
-            f"{PREDEFINED_PROMPT}\n\n"
-            f"{additional_context}\n\n"
+        final_prompt = (
+            f"{prompt}\n\n"
+            f"{compressed_additional_context}\n\n"
             f"{structured_output_prompt}"
         )
 
-        return prompt
+        return final_prompt
 
-    def _format_additional_context(
-        self, task: str, messages: List[str], memory: Any
-    ) -> str:
+    def _format_additional_context(self, messages: List[str], memory: Any) -> str:
         """
         Format the task, messages and memory for the prompt.
 
@@ -91,7 +128,7 @@ class BaseWorker(ABC):
             The formatted task and messages as a string.
         """
         formatted = (
-            f"Task: {task}\n\nCollaboration Chat:\n\n"
+            "\n\nCollaboration Chat:\n\n"
             + "\n\n".join(messages)
             + "\n\nPrevious Task Results"
             + memory.get_messages_as_string()
@@ -120,10 +157,9 @@ class BaseWorker(ABC):
         Returns:
             The response from the model.
         """
-        max_attempts = 3
         attempt = 0
 
-        while attempt < max_attempts:
+        while attempt < self.max_attempts:
             try:
                 response = self.model.invoke(prompt)
                 cleaned_response = self._clean_response(response)

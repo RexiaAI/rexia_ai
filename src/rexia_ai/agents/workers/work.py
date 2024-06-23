@@ -1,17 +1,14 @@
 """Worker class for ReXia.AI."""
 
-from typing import Any
+from typing import Any, List
 from ...base import BaseWorker
 
 PREDEFINED_PROMPT = """
 As a worker agent for ReXia.AI, your role is to complete tasks based on the collaboration chat and task context.
 
 Task requirements and output format are provided in the chat. Pay attention to constraints and the required
-detail in your response.
-
-Communicate effectively with the team, share information, and coordinate efforts. Seek clarification when needed.
-
-Take an iterative approach to tasks, refining your approach based on feedback from the chat.
+detail in your response. Pay particularly close attention to the plan and any tool messages in the chat,
+you must follow the given plan and use information from tool messages.
 
 Tasks can vary in complexity, from simple ("What is the capital city of France?") to complex
 ("Analyze the factors that contributed to the French Revolution").
@@ -38,19 +35,13 @@ class Worker(BaseWorker):
 
     This worker is responsible for completing the task based on the
     collaboration chat and the task context.
-
-    Attributes:
-        model: The model used by the worker.
-        verbose: A flag used for enabling verbose mode.
     """
-
-    model: Any
-    verbose: bool
 
     def __init__(
         self,
         model: Any,
         verbose: bool = False,
+        max_attempts: int = 3,
     ):
         """
         Initialize a Worker instance.
@@ -59,4 +50,10 @@ class Worker(BaseWorker):
             model: The model used by the worker.
             verbose: A flag used for enabling verbose mode. Defaults to False.
         """
-        super().__init__(model, verbose=verbose)
+        super().__init__(model, verbose=verbose, max_attempts=max_attempts)
+
+    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+        """Create a prompt for the model."""
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+
+        return prompt

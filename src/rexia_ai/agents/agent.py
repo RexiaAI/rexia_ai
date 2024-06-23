@@ -1,10 +1,11 @@
 """Agent class for ReXia.AI."""
 
-from typing import List, Optional
+import re
+from typing import Type, Any, Optional, List
 from ..workflows import ReflectWorkflow
 from ..structure import RexiaAIResponse
 from ..memory import WorkingMemory
-from ..base import BaseMemory
+from ..base import BaseMemory, BaseWorkflow
 
 
 class Agent:
@@ -18,15 +19,17 @@ class Agent:
         task: The task assigned to the agent.
     """
 
-    workflow: ReflectWorkflow
+    workflow: BaseWorkflow
     task: str
 
     def __init__(
         self,
-        llm,
+        llm: Any,
         task: str,
+        workflow: Optional[Type[BaseWorkflow]] = None,
         memory: BaseMemory = WorkingMemory(),
         verbose: bool = False,
+        max_attempts: int = 3,
     ):
         """
         Initialize an Agent instance.
@@ -34,13 +37,17 @@ class Agent:
         Args:
             llm: The language model used by the agent.
             task: The task assigned to the agent.
+            workflow_class: The class of the workflow to be used by the agent.
             verbose: A flag used for enabling verbose mode. Defaults to False.
+            max_attempts: The maximum number of attempts to get a valid response from the model. Defaults to 3.
         """
-        self.workflow = ReflectWorkflow(
-            llm=llm, task=task, memory=memory, verbose=verbose
-        )
+        if not workflow:
+            workflow = ReflectWorkflow
+        self.workflow = workflow(llm=llm, task=task, memory=memory, verbose=verbose, max_attempts=max_attempts)
         self.task = task
-        self.memory = memory
+        self.llm = llm
+        self.verbose = verbose
+        self.max_attempts = max_attempts
 
     def run_workflow(self) -> List[str]:
         """
@@ -68,9 +75,9 @@ class Agent:
 
         return messages[-1]
 
-    def reflect(self, task: str = None) -> Optional[str]:
+    def invoke(self, task: str = None) -> Optional[str]:
         """
-        Reflect method for the agent.
+        Invoke method for the agent.
 
         This method runs the workflow, gets the task result and the plan, updates the buffer manager with the plan,
         and returns the accepted answer if it exists.
@@ -90,25 +97,38 @@ class Agent:
         except Exception as e:
             print(f"Unexpected error: {e}")
 
-    def format_accepted_answer(self, answer: str) -> Optional[str]:
+    def format_accepted_answer(self, answer: str) -> Optional[RexiaAIResponse]:
         """
-        Format the accepted answer.
+        Format the accepted answer by removing any single word before the JSON object.
 
         Args:
             answer: The accepted answer to format.
 
         Returns:
-            The formatted accepted answer if it exists, None otherwise.
+            The formatted RexiaAIResponse if it exists and is valid, None otherwise.
         """
         if not answer:
             return None
 
         try:
-            # Remove 'finalise: ' from the string
-            answer = answer.replace("finalise: ", "")
+            # Find the start of the JSON object
+            json_start = answer.find('{')
+            
+            if json_start == -1:
+                raise ValueError("No JSON object found in the answer")
+            
+            # Use regex to find the last word before the JSON object
+            match = re.search(r'\S+\s*$', answer[:json_start])
+            
+            if match:
+                word_start = match.start()
+                # Remove the word and any whitespace after it
+                json_str = answer[json_start:]
+            else:
+                json_str = answer[json_start:]
 
-            #
-            rexia_ai_response = RexiaAIResponse.from_json(answer)
+            # Parse the JSON string into a RexiaAIResponse object
+            rexia_ai_response = RexiaAIResponse.from_json(json_str)
 
             return rexia_ai_response
         except Exception as e:

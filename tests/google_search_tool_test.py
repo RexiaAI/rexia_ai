@@ -48,7 +48,7 @@ class TestRexiaAIGoogleSearch(unittest.TestCase):
     def test_google_search(self):
 
         # Generate the response from the agent
-        response = self.agent.reflect()
+        response = self.agent.invoke()
 
         # Assert that the response is a RexiaAIResponse
         self.assertIsInstance(

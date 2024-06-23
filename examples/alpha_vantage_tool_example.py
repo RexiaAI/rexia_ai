@@ -60,7 +60,7 @@ agent = Agent(
 api_result = quote_endpoint.get_quote_endpoint(symbol="NVDA")
 
 # Generate the response from the agent
-response = agent.reflect()
+response = agent.invoke()
 
 # Print the response
 print("Response:", response)

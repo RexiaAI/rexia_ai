@@ -81,7 +81,7 @@ class TestAlphaVantageTools(unittest.TestCase):
         )
 
     def test_response_format(self):
-        response = self.agent.reflect()
+        response = self.agent.invoke()
 
         self.assertIsInstance(
             response, RexiaAIResponse, "Response is not RexiaAIResponse."

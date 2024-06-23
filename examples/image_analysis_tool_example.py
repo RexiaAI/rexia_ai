@@ -38,7 +38,7 @@ agent = Agent(
 )
 
 # Generate the response from the agent
-response = agent.reflect()
+response = agent.invoke()
 
 # Print the response
 print("Response:", response)

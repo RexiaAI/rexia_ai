@@ -20,7 +20,7 @@ llm = RexiaAIOpenAI(
 agent = Agent(llm=llm, task="What is the capital of France?", verbose=True)
 
 # Generate the response from the agent
-response = agent.reflect()
+response = agent.invoke()
 
 # Print the response
 print("Response:", response)

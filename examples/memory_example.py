@@ -32,9 +32,9 @@ agent = Agent(
 )
 
 # Generate the response from the agent
-agent.reflect()
+agent.invoke()
 
-agent.reflect(task="What is the last question you were asked?")
+agent.invoke(task="What is the last question you were asked?")
 
 # Print the memory
 print("Memory:", agent.workflow.memory.get_messages_as_string())

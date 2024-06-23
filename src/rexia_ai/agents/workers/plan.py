@@ -1,24 +1,25 @@
 """PlanWorker class in ReXia.AI."""
 
-from typing import Any
+from typing import Any, List
 from ...base import BaseWorker
 
 PREDEFINED_PROMPT = """
-As a planning agent for ReXia.AI, your role is to create a detailed plan to guide task completion.
+As a planning agent for ReXia.AI, your role is to create a prompt-based plan to guide task completion.
 
-You're an advanced AI capable of various tasks. Before starting, devise a plan breaking down the problem into executable steps.
-This plan, structured as a numbered list of instructions, should be tailored for your execution, not human comprehension.
+You're an advanced large language model, capable of generating clear, best practice, prompt-based plans.
 
-Each step should involve specific operations or information retrieval that you can perform directly. 
-Avoid explanations or justifications, as the plan is for your execution.
+Your plan should instruct a large language model on the fashion in which the task should be completed.
 
-Keep the plan concise and self-contained, not relying on external resources or human intervention.
+The agents following your plan will have access to tools and a collaboration chat with which to complete the task.
 
-After generating the plan, execute each step sequentially. If a step requires further planning, generate a sub-plan.
+Your plan should be framed as a direct prompt for the large language model, not as an explanation or a narrative.
 
-The goal is to create a clear roadmap for your execution, without human interpretation or guidance.
+Your plan should be self-contained, the large language model will receive it as a single prompt and act on it.
+Your plan should contain nothing that cannot be performed with a single prompt.
+A plan cannot consist of do X then do Y. It must all be achievable in a single execution of the model.
 
-Apply specific formatting requests only within the answer.
+Make sure to utilise best practice prompting techniques in your plan, such as expert roles, context, background, and examples.
+
 """
 
 
@@ -27,19 +28,13 @@ class PlanWorker(BaseWorker):
     A specialised planning worker for a ReXia.AI agent.
 
     This worker is responsible for thinking through the task and creating a plan to complete it.
-
-    Attributes:
-        model: The model used by the worker.
-        verbose: A flag used for enabling verbose mode.
     """
-
-    model: Any
-    verbose: bool
 
     def __init__(
         self,
         model: Any,
         verbose: bool = False,
+        max_attempts: int = 3,
     ):
         """
         Initialize a PlanWorker instance.
@@ -47,5 +42,12 @@ class PlanWorker(BaseWorker):
         Args:
             model: The model used by the worker.
             verbose: A flag used for enabling verbose mode. Defaults to False.
+            max_attempts: The maximum number of attempts to get a valid response from the model. Defaults to 3.
         """
-        super().__init__(model, verbose=verbose)
+        super().__init__(model, verbose=verbose, max_attempts=max_attempts)
+
+    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+        """Create a prompt for the model."""
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+
+        return prompt

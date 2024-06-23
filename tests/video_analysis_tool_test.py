@@ -43,7 +43,7 @@ class TestVideoAnalysisTool(unittest.TestCase):
         )
 
     def test_response_format(self):
-        response = self.agent.reflect()
+        response = self.agent.invoke()
 
         # Assert that the response is a RexiaAIResponse
         self.assertIsInstance(

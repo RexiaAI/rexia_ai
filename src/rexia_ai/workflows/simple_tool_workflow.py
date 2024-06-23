@@ -1,15 +1,14 @@
-"""Reflect workflow for ReXia.AI."""
+"""SimpleToolWorkflow class for ReXia.AI"""
 
 from typing import Any
 from ..base import BaseWorkflow, BaseMemory
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
-from ..agents.workers import PlanWorker, FinaliseWorker, Worker, ToolWorker
+from ..agents.workers import Worker, ToolWorker
 
-
-class ReflectWorkflow(BaseWorkflow):
+class SimpleToolWorkflow(BaseWorkflow):
     """
-    ReflectWorkflow Class for ReXia AI, refactored for better design principles.
+    SimpleToolWorkflow Class for ReXia AI, refactored for better design principles.
 
     Attributes:
         llm: The language model used by the workflow.
@@ -17,10 +16,8 @@ class ReflectWorkflow(BaseWorkflow):
         verbose: A flag used for enabling verbose mode.
         memory: The memory component of the workflow.
         channel: The collaboration channel for the workflow.
-        plan: The plan component of the workflow.
         tool: The tool component of the workflow.
         work: The work component of the workflow.
-        finalise: The finalise component of the workflow.
     """
 
     llm: Any
@@ -28,10 +25,8 @@ class ReflectWorkflow(BaseWorkflow):
     verbose: bool
     memory: BaseMemory
     channel: CollaborationChannel
-    plan: Component
     tool: Component
     work: Component
-    finalise: Component
 
     def __init__(
         self,
@@ -44,12 +39,6 @@ class ReflectWorkflow(BaseWorkflow):
         super().__init__(llm, task, verbose)
         self.channel = CollaborationChannel(task)
         self.memory = memory
-        self.plan = Component(
-            "plan",
-            self.channel,
-            PlanWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
-            memory=self.memory,
-        )
         self.tool = Component(
             "tool",
             self.channel,
@@ -62,12 +51,6 @@ class ReflectWorkflow(BaseWorkflow):
             Worker(model=llm, verbose=verbose, max_attempts=max_attempts),
             memory=self.memory,
         )
-        self.finalise = Component(
-            "finalise",
-            self.channel,
-            FinaliseWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
-            memory=self.memory,
-        )
 
     def _run_task(self):
         """Run the agent process."""
@@ -75,13 +58,10 @@ class ReflectWorkflow(BaseWorkflow):
             print(f"ReXia.AI is working on the task: {self.channel.task}")
 
             self.channel.status = TaskStatus.WORKING
-            self.plan.run()
 
             if self.llm.tools:
                 self.tool.run()
             self.work.run()
-
-            self.finalise.run()
 
             self.channel.status = TaskStatus.COMPLETED
 

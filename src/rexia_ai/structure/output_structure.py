@@ -23,7 +23,7 @@ class LLMOutput:
             '    "answer": "a string enclosed in double quotes",\n'
             '    "confidence_score": "float between 0 and 100 percent, eg. 95.0, 10.1, 100.0",\n'
             '    "chain_of_reasoning": ["list of strings encased in double quotes"]\n'
-            '    "tool_calls": ["list of tool calls if any, do not add tool calls if you are not a tool calling agent."]\n'
+            '    "tool_calls": ["list of tool calls. Leave blank unless you are a tool calling agent."]\n'
             "}"
         )
 
