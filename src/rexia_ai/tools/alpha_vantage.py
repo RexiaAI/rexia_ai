@@ -1,6 +1,6 @@
 """ ReXia.AI Alpha Vantage Tool - AlphaVantageAPIWrapper extended to work with ReXia.AI. 
-Credit to the original authors who did most of the work. Alpha Vantage API responses can be very
-large datasets, do not use with a small model or context window."""
+Credit to the original authors who did most of the work. Should not be used without an LLM that
+can handle very large datasets being returned."""
 
 from typing import Dict, List
 from langchain_community.utilities.alpha_vantage import AlphaVantageAPIWrapper
