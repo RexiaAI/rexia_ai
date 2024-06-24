@@ -1,6 +1,5 @@
 import unittest
 import os
-from rexia_ai.tools import RexiaAIGoogleSearch
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
 from rexia_ai.structure import RexiaAIResponse

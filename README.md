@@ -22,29 +22,25 @@ ReXia.AI is an advanced AI framework designed to integrate various language mode
 
 ## Installation
 
-To install ReXia.AI, follow these steps:
+To install ReXia.AI, you can use pip:
 
-1. Ensure you have Python 3.8 or later installed.
-2. Clone the repository:
+```bash
+pip install rexia-ai
+```
 
-   bash
-   ```
-   git clone https://github.com/yourusername/rexia-ai.git
-   ```
+Additionally, you need to install either PyTorch or TensorFlow, depending on your preference:
 
-3. Navigate to the project directory:
+For PyTorch:
 
-   bash
-   ```
-   cd rexia-ai
-   ```
+```bash
+pip install torch
+```
 
-4. Install the required dependencies:
+For TensorFlow:
 
-   bash
-   ```
-   pip install -r requirements.txt
-   ```
+```bash
+pip install tensorflow
+```
 
 ## Quick Start
 

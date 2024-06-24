@@ -71,18 +71,17 @@ class BaseWorker(ABC):
 
         additional_context = self._format_additional_context(messages, memory, task)
 
-
         structured_output_prompt = self.get_structured_output_prompt()
 
         final_prompt = (
-            f"{prompt}\n\n"
-            f"{additional_context}\n\n"
-            f"{structured_output_prompt}"
+            f"{prompt}\n\n" f"{additional_context}\n\n" f"{structured_output_prompt}"
         )
 
         return final_prompt
 
-    def _format_additional_context(self, messages: List[str], memory: Any, task: str) -> str:
+    def _format_additional_context(
+        self, messages: List[str], memory: Any, task: str
+    ) -> str:
         """
         Format the task, messages and memory for the prompt.
 
@@ -136,7 +135,11 @@ class BaseWorker(ABC):
                 return rexia_ai_response
             except Exception as e:
                 # Append the error message to the prompt for the next attempt
-                prompt += f"Your previous generation was incorrectly formatted, please resolve this issue: {str(e)}"
+                prompt += (
+                    f"Your previous generation was incorrectly formatted, please resolve this issue:\n\n\ Issue: {str(e)}"
+                    + "\n\n"
+                    + f"Your previous generation was: {response}"
+                )
                 print(
                     "Failed to get a valid response from the model. "
                     f"Error: {str(e)}\n\nModel "

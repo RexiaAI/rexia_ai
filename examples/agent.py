@@ -9,11 +9,9 @@ YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 
 # Create an instance of the RexiaAI LLM
 llm = RexiaAIOpenAI(
-    base_url="https://api.01.ai/v1",
-    model="yi-large",
+    base_url="http://localhost:1234/v1",
     temperature=0,
-    api_key=YI_LARGE_API_KEY,
-    max_tokens=4000,
+    model="lm-studio"
 )
 
 # Create an instance of the RexiaAI Agent with the specified task and LLM
