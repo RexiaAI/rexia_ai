@@ -1,6 +1,8 @@
 """BaseWorker class for ReXia.AI."""
 
 import re
+import json
+import textwrap
 from typing import Any, List
 from abc import ABC
 from ..structure import LLMOutput
@@ -134,12 +136,77 @@ class BaseWorker(ABC):
                 rexia_ai_response = RexiaAIResponse.from_json(cleaned_response)
                 return rexia_ai_response
             except Exception as e:
-                # Append the error message to the prompt for the next attempt
-                prompt += (
-                    f"Your previous generation was incorrectly formatted, please resolve this issue:\n\n\ Issue: {str(e)}"
-                    + "\n\n"
-                    + f"Your previous generation was: {response}"
-                )
+                # Attempt to have the llm resolve any JSON errors
+                prompt = f"""Your previous generation contained incorrectly formatted JSON. Please fix this and any other errors,
+                    then return the correctly formatted JSON.
+
+                    Issue: {str(e)}
+
+                    Your previous JSON response was: 
+                    {response}
+                    
+                    You should reuse the same question, plan, answer, confidence_score, chain_of_reasoning, and tool_calls 
+                    from the previous response, but ensure that the JSON is correctly formatted.
+
+                    Instructions for correction:
+                    1. Carefully review the JSON structure and content.
+                    2. Identify and fix any syntax errors (e.g., missing quotes, commas, brackets).
+                    3. Ensure all keys are properly quoted.
+                    4. Verify that string values are enclosed in double quotes.
+                    5. Check that numbers, booleans, and null values are not quoted.
+                    6. Remove any trailing commas in objects or arrays.
+                    7. Eliminate any text or comments outside the JSON structure.
+
+                    The JSON should conform to the following schema:
+                    - `question`: a string representing the question asked.
+                    - `plan`: an array of strings, each representing a step in the plan.
+                    - `answer`: a string representing the final answer to the question.
+                    - `confidence_score`: an integer representing the confidence score.
+                    - `chain_of_reasoning`: an array of strings, each representing a step in the reasoning chain.
+                    - `tool_calls`: an array of objects, each representing a tool call with the following structure:
+                    - `name`: a string representing the name of the tool.
+                    - `parameters`: an object containing key-value pairs of parameters for the tool.
+
+                    Your response should ONLY contain valid JSON, structured as follows:
+                    {{
+                        "question": "The original question asked",
+                        "plan": [
+                            "Step 1 of the plan",
+                            "Step 2 of the plan",
+                            ...
+                        ],
+                        "answer": "The final answer to the question",
+                        "confidence_score": 0,
+                        "chain_of_reasoning": [
+                            "Reasoning step 1",
+                            "Reasoning step 2",
+                            ...
+                        ],
+                        "tool_calls": [
+                            {{
+                                "name": "ToolName1",
+                                "parameters": {{
+                                    "parameter1": "value1",
+                                }}
+                            }},
+                            {{
+                                "name": "ToolName2",
+                                "parameters": {{
+                                    "parameter1": "value1",
+                                    "parameter2": "value2"
+                                }}
+                            }},
+                            ...
+                        ]
+                    }}
+
+                    Do not include anything outside this structure or the task will fail.
+                    Do not include any comments or additional information or the task will fail.
+                    Do not include any text outside the JSON structure or the task will fail.
+                    Do not include any unquoted keys or values or the task will fail.
+                    Do not include any syntax errors or the task will fail.
+                    Return only your previous JSON response, corrected to conform to the schema or the task will fail.
+                    """
                 print(
                     "Failed to get a valid response from the model. "
                     f"Error: {str(e)}\n\nModel "
@@ -185,10 +252,30 @@ class BaseWorker(ABC):
         Returns:
             The structured output prompt.
         """
-        return f"""Structure your response using the following format, include no information outside this structure:
-                {LLMOutput.get_output_structure()}
-                """
+        
+        output_structure = json.dumps(LLMOutput.get_output_structure(), indent=2)
+        
+        return textwrap.dedent(f"""\
+            Structure your response using the following JSON format. It is critical that you
+            include no information outside this structure and adhere strictly to the format:
 
+            {output_structure}
+
+            Important guidelines:
+            1. Ensure all keys are exactly as shown above.
+            2. The 'question' field should contain the original question asked.
+            3. The 'plan' field is an array of strings, each representing a step in your plan.
+            4. The 'answer' field should contain your final response to the question.
+            5. The 'confidence_score' must be an integer between 0 and 100.
+            6. The 'chain_of_reasoning' is an array of strings, each representing a step in your reasoning process.
+            7. The 'tool_calls' field is an array of objects. Each object must have a 'name' (string) and 'parameters' (object) field.
+            8. Do not include any explanations, notes, or text outside of this JSON structure.
+            9. Ensure that the JSON is valid and can be parsed without errors.
+            10. Double-check that all required fields are present and correctly formatted.
+
+            Your entire response should be valid JSON that can be parsed by a JSON parser.
+            """)
+        
     def _get_available_tools(self) -> str:
         """
         Get the available tools.
