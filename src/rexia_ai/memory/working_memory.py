@@ -26,8 +26,8 @@ class WorkingMemory(BaseMemory):
         return self.messages
 
     def get_messages_as_string(self):
-        """Get all messages from the working memory as a single string."""
-        return " ".join(self.messages)
+        """Get all messages from the working memory as a single string, with the most recent message first."""
+        return " ".join(reversed(self.messages))
 
     def clear_messages(self):
         """Clear all messages from the working memory."""
