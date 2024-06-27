@@ -12,6 +12,7 @@ from .alpha_vantage import (
     RexiaAIAlphaVantageTimeSeriesWeekly,
     RexiaAIAlphaVantageTopGainersLosers,
 )
+from .query_knowledge_base import RexiaAIQueryKnowledgeBase
 
 __all__ = [
     "RexiaAIGoogleSearch",
@@ -24,4 +25,5 @@ __all__ = [
     "RexiaAIAlphaVantageTimeSeriesWeekly",
     "RexiaAIAlphaVantageTopGainersLosers",
     "RexiaAIYoutubeVideoAnalysis",
+    "RexiaAIQueryKnowledgeBase"
 ]
