@@ -12,12 +12,12 @@ ReXia.AI is an advanced AI framework designed to integrate various language mode
 - [License](#license)
 - [Contact](#contact)
 
-## Update v0.1.3
+## Update v0.1.6
 
-- Improved handling of JSON responses
-- Removed LLMWare and Huggingface LLM types, they're still useable, just provide an OpenAI compatibile endpoint for them.
-- Added 'PerplexityLite' example.
-- resolved a minor bug with working memory in that messages added more recently to the list were being passed further down in the prompt. This was causing the LLM to think the oldest message was the most recent.
+- Added team_worker
+- Added collaboration_workflow
+- Added collaboration workflow example
+- Added collaboration workflow documentation
 
 ## Features
 

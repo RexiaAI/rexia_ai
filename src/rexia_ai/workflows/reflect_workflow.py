@@ -9,7 +9,7 @@ from ..agents.workers import PlanWorker, FinaliseWorker, Worker, ToolWorker
 
 class ReflectWorkflow(BaseWorkflow):
     """
-    ReflectWorkflow Class for ReXia AI, refactored for better design principles.
+    ReflectWorkflow Class for ReXia AI.
 
     Attributes:
         llm: The language model used by the workflow.

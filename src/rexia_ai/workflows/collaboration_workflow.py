@@ -1,14 +1,15 @@
-"""SimpleToolWorkflow class for ReXia.AI"""
+"""CollaborationWorkflow class for ReXia.AI"""
 
 from typing import Any
 from ..base import BaseWorkflow, BaseMemory
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
-from ..agents.workers import Worker, ToolWorker
+from ..agents.workers import TeamWorker, ToolWorker
 
-class SimpleToolWorkflow(BaseWorkflow):
+
+class CollaborationWorkflow(BaseWorkflow):
     """
-    SimpleToolWorkflow Class for ReXia AI.
+    CollaborationWorkflow Class for ReXia AI.
 
     Attributes:
         llm: The language model used by the workflow.
@@ -16,8 +17,8 @@ class SimpleToolWorkflow(BaseWorkflow):
         verbose: A flag used for enabling verbose mode.
         memory: The memory component of the workflow.
         channel: The collaboration channel for the workflow.
-        tool: The tool component of the workflow.
-        work: The work component of the workflow.
+        team_work: The team worker for the workflow.
+        tool: The tool worker for the workflow
     """
 
     llm: Any
@@ -25,8 +26,8 @@ class SimpleToolWorkflow(BaseWorkflow):
     verbose: bool
     memory: BaseMemory
     channel: CollaborationChannel
+    team_work: Component
     tool: Component
-    work: Component
 
     def __init__(
         self,
@@ -39,16 +40,16 @@ class SimpleToolWorkflow(BaseWorkflow):
         super().__init__(llm, task, verbose)
         self.channel = CollaborationChannel(task)
         self.memory = memory
+        self.team_work = Component(
+            "team work",
+            self.channel,
+            TeamWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
+            memory=self.memory,
+        )
         self.tool = Component(
             "tool",
             self.channel,
             ToolWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
-            memory=self.memory,
-        )
-        self.work = Component(
-            "work",
-            self.channel,
-            Worker(model=llm, verbose=verbose, max_attempts=max_attempts),
             memory=self.memory,
         )
 
@@ -58,10 +59,9 @@ class SimpleToolWorkflow(BaseWorkflow):
             print(f"ReXia.AI is working on the task: {self.channel.task}")
 
             self.channel.status = TaskStatus.WORKING
-
             if self.llm.tools:
                 self.tool.run()
-            self.work.run()
+            self.team_work.run()
 
             self.channel.status = TaskStatus.COMPLETED
 
