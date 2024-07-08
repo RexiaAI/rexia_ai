@@ -2,5 +2,6 @@
 
 from .task_status import TaskStatus
 from .collaboration_channel import CollaborationChannel
+from .containerised_code_tester import ContainerisedCodeTester
 
-__all__ = ["TaskStatus", "CollaborationChannel"]
+__all__ = ["TaskStatus", "CollaborationChannel", "ContainerisedCodeTester"]

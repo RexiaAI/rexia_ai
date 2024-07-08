@@ -4,55 +4,63 @@ from rexia_ai.tools import RexiaAIQueryKnowledgeBase
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
 from rexia_ai.structure import RexiaAIResponse
-
+from verification.llm_verification import LLMVerification
 
 class TestRexiaAIQueryKnowledgeBase(unittest.TestCase):
     def setUp(self):
-        # Retrieve the YI_LARGE_API_KEY from environment variables
         YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
-        YI_LARGE_BASE_URL = "https://api.01.ai/v1"
+        BASE_URL = "https://api.01.ai/v1"
 
         if not YI_LARGE_API_KEY:
             self.skipTest("YI_LARGE_API_KEY not found in environment variables.")
 
-        # Create an instance of the RexiaAIGoogleSearch tool
         self.query_knowledge_base = RexiaAIQueryKnowledgeBase(
             api_key=YI_LARGE_API_KEY,
-            base_url=YI_LARGE_BASE_URL,
+            base_url=BASE_URL,
             model="yi-large",
             temperature=0,
         )
-
-        # Create a dictionary mapping the tool name to its instance
+        
         tools = {"query_knowledge_base": self.query_knowledge_base}
 
-        # Create an instance of the RexiaAI LLM
         self.llm = RexiaAIOpenAI(
-            base_url="https://api.01.ai/v1",
+            base_url=BASE_URL,
             model="yi-large",
             temperature=0,
             api_key=YI_LARGE_API_KEY,
             tools=tools,
         )
+        
+        self.llm_verification = LLMVerification(
+            base_url=BASE_URL, 
+            api_key=YI_LARGE_API_KEY,
+            model="yi-large",
+            temperature=0.0
+        )
 
-        # Create an instance of the RexiaAI Agent with the specified task and LLM
         self.agent = Agent(
             llm=self.llm,
             task="What is the capital of France?",
             verbose=True,
         )
 
-    def test_google_search(self):
-
-        # Generate the response from the agent
+    def test_query_knowledgebase(self):
         response = self.agent.invoke()
-
-        # Assert that the response is a RexiaAIResponse
+        messages = self.agent.workflow.channel.messages
+        verified_response = self.llm_verification.verify(
+            LLMVerification.get_verification_prompt()
+            + "\n\n Task:" + self.agent.task
+            + "\n\n Response:" + str(response)
+            + "\n\n Collaboration Chat:\n" + "\n".join(messages)
+        )
+        
         self.assertIsInstance(
             response,
             RexiaAIResponse,
             f"Expected RexiaAIResponse but got {type(response).__name__}",
         )
+        
+        self.assertTrue(verified_response, "Response verification failed")
 
 if __name__ == "__main__":
     unittest.main()

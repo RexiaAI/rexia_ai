@@ -11,29 +11,46 @@ class LLMOutput:
     @staticmethod
     def get_output_structure() -> str:
         """
-        Get the output structure with examples.
+        Get the output structure with generic placeholders.
 
         Returns:
-            A string representing the output structure with examples.
+            A string representing the generic output structure.
         """
         return (
             "{\n"
-            '    "question": "string enclosed in double quotes",\n'
-            '    "plan": "list of strings enclosed in double quotes",\n'
-            '    "answer": "a string enclosed in double quotes",\n'
-            '    "confidence_score": "float between 0 and 100 percent, eg. 95.0, 10.1, 100.0",\n'
-            '    "chain_of_reasoning": ["list of strings encased in double quotes"]\n'
-            '    "tool_calls": ["list of tool calls. Leave blank unless you are a tool calling agent."]\n'
+            '    "question": "The question string goes here",\n'
+            '    "plan": [\n'
+            '        "Step 1 of the plan",\n'
+            '        "Step 2 of the plan",\n'
+            '        "Add more steps as needed"\n'
+            "    ],\n"
+            '    "answer": [\n'
+            '        "First line",\n'
+            '        "Second line",\n'
+            '        "Third line",\n'
+            '        "Add more lines as needed, preserving indentation"\n'
+            "    ],\n"
+            '    "confidence_score": 0.0,\n'
+            '    "chain_of_reasoning": [\n'
+            '        "First step in the reasoning process",\n'
+            '        "Second step in the reasoning process",\n'
+            '        "Add more steps as needed"\n'
+            "    ],\n"
+            '    "tool_calls": [\n'
+            '        "First tool call if any",\n'
+            '        "Second tool call if any",\n'
+            '        "Leave this array empty if no tools were used"\n'
+            "    ]\n"
             "}"
         )
 
     @staticmethod
-    def get_json_scehma():
+    def get_json_schema():
         """
         Get the output schema.
 
         Returns:
-            A string representing the output schema.
+            A dict representing the output schema.
         """
 
         schema = {
@@ -41,8 +58,11 @@ class LLMOutput:
             "properties": {
                 "question": {"type": "string"},
                 "plan": {"type": "array", "items": {"type": "string"}},
-                "answer": {"type": "string"},
-                "confidence_score": {"type": "integer"},
+                "answer": {
+                    "type": "array",
+                    "items": {"oneOf": [{"type": "string"}, {"type": "object"}]},
+                },
+                "confidence_score": {"type": "number"},
                 "chain_of_reasoning": {"type": "array", "items": {"type": "string"}},
                 "tool_calls": {"type": "array", "items": {"type": "string"}},
             },

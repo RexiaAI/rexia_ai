@@ -38,3 +38,17 @@ class CollaborationChannel:
             self.messages.append(item)
         else:
             print("Error: Cannot add empty item to the channel.")
+            
+    def clear_messages(self) -> None:
+        """
+        Clear all messages from the channel.
+
+        Returns:
+            None
+        """
+        try:
+            self.messages.clear()
+        except Exception as e:
+            print(f"Error occurred while clearing messages: {str(e)}")
+        else:
+            print("All messages have been cleared from the channel.")

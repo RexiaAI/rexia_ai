@@ -230,20 +230,27 @@ class BaseWorker(ABC):
             The cleaned response.
         """
         cleaned_response = self.remove_system_tokens(response)
-        cleaned_response = self._strip_python_tags(cleaned_response)
+        cleaned_response = self._strip_tags(cleaned_response)
         return cleaned_response
 
-    def _strip_python_tags(self, code: str) -> str:
+    def _strip_tags(self, response: str) -> str:
         """
-        Strip python tags from the start and end of a string of code.
+        Strip tags from the start and end of a string.
 
         Args:
-            code: The code from which to strip python tags.
+            response: The response from which to strip tags.
 
         Returns:
-            The code with python tags stripped.
+            The response with tags stripped.
         """
-        return re.sub(r"^```python\n|```$", "", code, flags=re.MULTILINE)
+        # Remove opening tags
+        response = re.sub(r"^```(?:python|json)\n", "", response, flags=re.MULTILINE)
+        
+        # Remove closing tags, preserving the newline
+        response = re.sub(r"```$", "", response, flags=re.MULTILINE)
+        
+        # Trim any leading/trailing whitespace
+        return response.strip()
 
     def get_structured_output_prompt(self) -> str:
         """
@@ -252,10 +259,11 @@ class BaseWorker(ABC):
         Returns:
             The structured output prompt.
         """
-        
+
         output_structure = json.dumps(LLMOutput.get_output_structure(), indent=2)
-        
-        return textwrap.dedent(f"""\
+
+        return textwrap.dedent(
+            f"""\
             Structure your response using the following JSON format. It is critical that you
             include no information outside this structure and adhere strictly to the format:
 
@@ -265,17 +273,21 @@ class BaseWorker(ABC):
             1. Ensure all keys are exactly as shown above.
             2. The 'question' field should contain the original question asked.
             3. The 'plan' field is an array of strings, each representing a step in your plan.
-            4. The 'answer' field should contain your final response to the question.
-            5. The 'confidence_score' must be an integer between 0 and 100.
+            4. The 'answer' field should be an array of strings, where each string represents a single line.
+            - Preserve indentation by including the appropriate number of spaces at the beginning of each line.
+            - Include empty lines as empty strings in the array.
+            5. The 'confidence_score' must be a float between 0.0 and 100.0.
             6. The 'chain_of_reasoning' is an array of strings, each representing a step in your reasoning process.
             7. The 'tool_calls' field is an array of objects. Each object must have a 'name' (string) and 'parameters' (object) field.
             8. Do not include any explanations, notes, or text outside of this JSON structure.
             9. Ensure that the JSON is valid and can be parsed without errors.
             10. Double-check that all required fields are present and correctly formatted.
+            11. The code in the 'answer' field should follow all formatting and style guidelines provided in the original prompt.
 
             Your entire response should be valid JSON that can be parsed by a JSON parser.
-            """)
-        
+            """
+        )
+
     def _get_available_tools(self) -> str:
         """
         Get the available tools.

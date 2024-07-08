@@ -1,4 +1,4 @@
-"""FinaliseWorker class in ReXia.AI."""
+"""FinaliseWorker class for ReXia.AI's reflection and answer refinement process."""
 
 from typing import Any, List
 from ...base import BaseWorker
@@ -26,10 +26,21 @@ Apply specific formatting requests only within the answer.
 
 class FinaliseWorker(BaseWorker):
     """
-    A specialised reflection worker for a ReXia.AI agent.
+    A specialized reflection worker for ReXia.AI's agent system.
 
-    This worker is responsible for reflecting on the collaboration chat and
-    providing an improved answer to the task based on this reflection.
+    This worker is responsible for analyzing the collaboration chat,
+    reflecting on the information provided, and generating an improved,
+    comprehensive answer to the given task. It focuses on integrating
+    information from various sources, following predefined plans, and
+    providing detailed, coherent responses.
+
+    Attributes:
+        model (Any): The language model used for generating responses.
+        verbose (bool): Flag for enabling verbose output mode.
+        max_attempts (int): Maximum number of attempts to generate a valid response.
+
+    Inherits from:
+        BaseWorker: Provides core functionality for AI workers in the ReXia.AI system.
     """
 
     def __init__(
@@ -42,14 +53,32 @@ class FinaliseWorker(BaseWorker):
         Initialize a FinaliseWorker instance.
 
         Args:
-            model: The model used by the worker.
-            verbose: A flag used for enabling verbose mode. Defaults to False.
-            max_attempts: The maximum number of attempts to get a valid response from the model. Defaults to 3.
+            model (Any): The language model to be used for generating responses.
+            verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
+            max_attempts (int, optional): Maximum number of attempts to generate a valid response. Defaults to 3.
         """
         super().__init__(model, verbose=verbose, max_attempts=max_attempts)
 
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
-        """Create a prompt for the model."""
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+        """
+        Create a prompt for the model to generate a refined answer.
 
+        This method combines the predefined prompt with task-specific information,
+        collaboration messages, and any relevant memory to create a comprehensive
+        prompt for the model.
+
+        Args:
+            task (str): The original task or question to be answered.
+            messages (List[str]): A list of messages from the collaboration chat.
+            memory (Any): Additional context or information stored in the agent's memory.
+
+        Returns:
+            str: A formatted prompt string for the model to generate a refined answer.
+
+        Note:
+            The returned prompt includes instructions for the model to follow the
+            collaboration plan, integrate tool messages, and provide a detailed,
+            well-reasoned response.
+        """
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
         return prompt

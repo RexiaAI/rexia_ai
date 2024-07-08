@@ -89,7 +89,7 @@ class Agent:
             if task:
                 self.task = task
                 self.workflow.channel.task = task
-
+            self.workflow.clear_channel() # Clear any messages from a previous task.
             messages = self.run_workflow()
             task_result = self.get_task_result(messages)
             accepted_answer = self.format_accepted_answer(task_result)
@@ -121,7 +121,6 @@ class Agent:
             match = re.search(r'\S+\s*$', answer[:json_start])
             
             if match:
-                word_start = match.start()
                 # Remove the word and any whitespace after it
                 json_str = answer[json_start:]
             else:

@@ -1,4 +1,4 @@
-"""ToolWorker class in ReXia.AI."""
+"""ToolWorker class for ReXia.AI's tool interaction and management system."""
 
 from typing import Any, List, Dict
 from ...base import BaseWorker
@@ -61,42 +61,45 @@ PREDEFINED_PROMPT = """
 
 class ToolWorker(BaseWorker):
     """
-    A specialized tool worker for ReXia.AI agents, responsible for handling tool-related actions.
+    A specialized tool worker for ReXia.AI's agent system, focused on tool interaction and management.
 
-    This worker is designed to interact with various tools to gather information or perform actions
-    that assist in completing tasks assigned to the ReXia.AI agent. It manages tool calls, processes
-    their outputs, and integrates these results into the agent's workflow.
+    This worker is responsible for selecting appropriate tools, making tool calls,
+    processing their outputs, and integrating results into the overall task solution.
+    It plays a crucial role in enhancing the problem-solving capabilities of ReXia.AI
+    by leveraging external tools and APIs effectively.
 
     Attributes:
-        model (Any): The model used by the worker for making tool calls and processing responses.
-        verbose (bool): If True, enables detailed logging of actions and responses for debugging.
-        max_attempts (int): The maximum number of attempts to make for a valid response from a tool.
+        model (Any): The language model used for processing prompts and making decisions about tool usage.
+        verbose (bool): Flag for enabling verbose output mode.
+        max_attempts (int): Maximum number of attempts to generate a valid tool call or process a tool response.
+
+    Inherits from:
+        BaseWorker: Provides core functionality for AI workers in the ReXia.AI system.
     """
 
     def __init__(self, model: Any, verbose: bool = False, max_attempts: int = 3):
         """
-        Initializes a ToolWorker instance with a model, verbosity setting, and maximum attempt limit.
+        Initialize a ToolWorker instance.
 
         Args:
-            model (Any): The model instance to be used by the ToolWorker for processing and tool interaction.
-            verbose (bool): Flag to enable verbose output. Useful for debugging. Defaults to False.
-            max_attempts (int): Maximum number of attempts to get a valid response from the model. Defaults to 3.
+            model (Any): The language model to be used for processing and decision-making.
+            verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
+            max_attempts (int, optional): Maximum number of attempts for tool calls or response processing. Defaults to 3.
         """
         super().__init__(model, verbose=verbose, max_attempts=max_attempts)
 
     def action(self, prompt: str, worker_name: str) -> str:
         """
-        Executes the main action for the current task based on the provided prompt.
+        Execute the main action for the current task based on the provided prompt.
 
-        This method invokes the model with the prompt, handles the tool calls in the model's response,
-        and formats the final response.
+        This method processes the prompt, makes necessary tool calls, and formats the final response.
 
         Args:
-            prompt (str): The prompt to be processed by the model.
-            worker_name (str): The name of the worker performing the action.
+            prompt (str): The input prompt containing task details and context.
+            worker_name (str): Identifier for the worker executing this action.
 
         Returns:
-            str: The formatted response after processing the prompt and tool calls.
+            str: Formatted response including tool call results and any additional insights.
         """
         agent_response = self._invoke_model(prompt)
         results = self._handle_tool_calls(agent_response)
@@ -104,37 +107,35 @@ class ToolWorker(BaseWorker):
 
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
         """
-        Constructs a detailed prompt for the model based on the task, previous messages, and memory.
+        Construct a detailed prompt for the model incorporating task details, context, and available tools.
 
-        This method prepares a comprehensive prompt that includes the predefined prompt, available tools,
-        and any additional context necessary for the model to generate a response.
+        This method combines the predefined prompt with task-specific information, conversation history,
+        and a list of available tools to create a comprehensive prompt for the model.
 
         Args:
-            task (str): The current task description.
-            messages (List[str]): Previous messages in the conversation for context.
-            memory (Any): Additional memory or context that might be relevant to the task.
+            task (str): The current task or problem statement.
+            messages (List[str]): Previous messages or context relevant to the task.
+            memory (Any): Additional context or information stored in the agent's memory.
 
         Returns:
-            str: The constructed prompt for the model.
+            str: A formatted prompt string for the model to guide tool selection and usage.
         """
         prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
-
-        prompt = prompt + f"\n\nAvailable Tools:\n{self._get_available_tools()}\n\n"
-
+        prompt += f"\n\nAvailable Tools:\n{self._get_available_tools()}\n\n"
         return prompt
 
     def _handle_tool_calls(self, rexia_ai_response: RexiaAIResponse) -> Dict[str, Any]:
         """
-        Processes and executes tool calls found in the RexiaAIResponse object.
+        Process and execute tool calls specified in the model's response.
 
-        This method iterates through tool calls, checks for tool availability, and executes the tool's
-        function with the provided arguments. It handles errors and exceptions during tool execution.
+        This method iterates through tool calls, validates tool availability, executes
+        tool functions, and handles any errors or exceptions during the process.
 
         Args:
-            rexia_ai_response (RexiaAIResponse): The response object containing tool calls to process.
+            rexia_ai_response (RexiaAIResponse): The response object containing tool calls to be processed.
 
         Returns:
-            Dict[str, Any]: A dictionary with tool names as keys and their execution results or error messages as values.
+            Dict[str, Any]: A dictionary mapping tool names to their execution results or error messages.
         """
         results = {}
         for tool_call in rexia_ai_response.tool_calls:
@@ -168,17 +169,17 @@ class ToolWorker(BaseWorker):
         self, worker_name: str, agent_response: str, results: Dict
     ) -> str:
         """
-        Formats the final response including the worker name, the raw agent response, and the results of tool calls.
+        Format the final response including worker identification, raw agent response, and tool call results.
 
-        If verbose mode is enabled, this method also prints the detailed response.
+        If verbose mode is enabled, this method also prints a detailed response for debugging purposes.
 
         Args:
-            worker_name (str): The name of the worker.
-            agent_response (str): The raw response from the agent.
-            results (Dict): The results of the tool calls.
+            worker_name (str): Identifier for the worker formatting the response.
+            agent_response (str): The raw response generated by the agent.
+            results (Dict): Results of the tool calls made during the action.
 
         Returns:
-            str: The formatted final response.
+            str: A formatted string containing the worker's response and tool call results.
         """
         if self.verbose:
             print(f"{worker_name}: {agent_response}\n\nTool messages: {results}")
@@ -187,14 +188,12 @@ class ToolWorker(BaseWorker):
     @staticmethod
     def _format_messages(messages: List[str]) -> str:
         """
-        Formats a list of messages for display or further processing.
-
-        This method joins a list of messages into a single string, separated by double newlines.
+        Format a list of messages into a single string for display or further processing.
 
         Args:
-            messages (List[str]): The messages to format.
+            messages (List[str]): A list of message strings to be formatted.
 
         Returns:
-            str: The formatted string of messages.
+            str: A single string with messages joined by double newlines.
         """
         return "\n\n".join(messages)

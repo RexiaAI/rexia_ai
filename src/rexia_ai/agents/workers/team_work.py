@@ -1,4 +1,4 @@
-"""TeamWorker class for ReXia.AI."""
+"""TeamWorker class for ReXia.AI's collaborative problem-solving simulation."""
 
 from typing import Any, List
 from ...base import BaseWorker
@@ -74,10 +74,20 @@ of a diverse team working together on a complex problem from start to finish.
 
 class TeamWorker(BaseWorker):
     """
-    A worker for a ReXia AI agent.
+    A specialized worker for ReXia.AI's agent system that simulates collaborative problem-solving.
 
-    This worker is responsible for completing the task based on the
-    collaboration chat and the task context.
+    This worker is responsible for simulating a diverse team of five personalities
+    working together to analyze, plan, and execute solutions to complex problems.
+    It generates a comprehensive simulation of team dynamics, problem-solving processes,
+    and final solution implementation.
+
+    Attributes:
+        model (Any): The language model used for generating the team simulation.
+        verbose (bool): Flag for enabling verbose output mode.
+        max_attempts (int): Maximum number of attempts to generate a valid simulation.
+
+    Inherits from:
+        BaseWorker: Provides core functionality for AI workers in the ReXia.AI system.
     """
 
     def __init__(
@@ -87,16 +97,37 @@ class TeamWorker(BaseWorker):
         max_attempts: int = 3,
     ):
         """
-        Initialize a Worker instance.
+        Initialize a TeamWorker instance.
 
         Args:
-            model: The model used by the worker.
-            verbose: A flag used for enabling verbose mode. Defaults to False.
+            model (Any): The language model to be used for generating the team simulation.
+            verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
+            max_attempts (int, optional): Maximum number of attempts to generate a valid simulation. Defaults to 3.
         """
         super().__init__(model, verbose=verbose, max_attempts=max_attempts)
 
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
-        """Create a prompt for the model."""
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+        """
+        Create a prompt for the model to generate a team problem-solving simulation.
 
+        This method combines the predefined team simulation prompt with task-specific information,
+        relevant messages, and any pertinent memory to create a comprehensive prompt
+        for the model to generate a detailed team problem-solving scenario.
+
+        Args:
+            task (str): The problem or challenge to be addressed by the simulated team.
+            messages (List[str]): A list of relevant messages or context for the task.
+            memory (Any): Additional context or information stored in the agent's memory.
+
+        Returns:
+            str: A formatted prompt string for the model to generate a team problem-solving simulation.
+
+        Note:
+            The generated simulation includes a detailed analysis of the problem, individual
+            team member proposals, team discussions, consensus building, plan execution,
+            challenge resolution, and a final comprehensive solution. The output is structured
+            in a specific JSON format that includes the question, plan, answer, confidence score,
+            chain of reasoning, and any tool calls made during the process.
+        """
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
         return prompt
