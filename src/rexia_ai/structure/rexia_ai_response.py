@@ -59,17 +59,11 @@ class RexiaAIResponse:
             parsed_data = json_data
         else:
             raise ValueError("Input must be a JSON string or a dictionary.")
-
-        # Preserve the formatting of the answer field
-        answer = parsed_data.get("answer", [])
-        if isinstance(answer, list):
-            formatted_answer = "\n".join(answer)
-        else:
-            formatted_answer = answer
+        
         return cls(
             question=parsed_data.get("question", ""),
             plan=parsed_data.get("plan", []),
-            answer=formatted_answer,
+            answer=parsed_data.get("answer", []),
             confidence_score=cls._safe_float(parsed_data.get("confidence_score", 0)),
             chain_of_reasoning=parsed_data.get("chain_of_reasoning", []),
             tool_calls=parsed_data.get("tool_calls", []),
@@ -208,11 +202,6 @@ class RexiaAIResponse:
             str: The string representation of the instance.
         """
         dict_repr = self.to_dict()
-        # Format the answer field specially to preserve newlines
-        if isinstance(self.answer, list):
-            dict_repr['answer'] = '\n'.join(self.answer)
-        elif isinstance(self.answer, str):
-            dict_repr['answer'] = self.answer.replace('\\n', '\n')
         
         # Use json.dumps for consistent formatting of other fields
         return json.dumps(dict_repr, indent=4, ensure_ascii=False)
