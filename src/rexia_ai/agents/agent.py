@@ -6,48 +6,89 @@ from ..workflows import ReflectWorkflow
 from ..structure import RexiaAIResponse
 from ..memory import WorkingMemory
 from ..base import BaseMemory, BaseWorkflow
+from .routers import TaskComplexityRouter
+from ..llms import RexiaAIOpenAI
 
 
 class Agent:
     """
     Agent class for ReXia AI.
 
-    This agent is responsible for running the workflow, and reflecting on the task.
+    This agent is responsible for running the workflow and reflecting on the task.
 
     Attributes:
-        workflow: The workflow used by the agent.
-        task: The task assigned to the agent.
+        llm (RexiaAIOpenAI): The language model used by the agent.
+        workflow (BaseWorkflow): The workflow used by the agent.
+        task (str): The task assigned to the agent.
+        verbose (bool): Flag for enabling verbose mode.
+        max_attempts (int): Maximum number of attempts to get a valid response.
+        router (Optional[TaskComplexityRouter]): The task complexity router, if used.
+        task_complexity (Optional[int]): The complexity of the task, if router is used.
     """
-
-    workflow: BaseWorkflow
-    task: str
 
     def __init__(
         self,
-        llm: Any,
+        llm: RexiaAIOpenAI,
         task: str,
         workflow: Optional[Type[BaseWorkflow]] = None,
         memory: BaseMemory = WorkingMemory(),
         verbose: bool = False,
         max_attempts: int = 3,
+        use_router: bool = False,
+        router_llm: Optional[RexiaAIOpenAI] = None,
+        complex_llm: Optional[RexiaAIOpenAI] = None,
+        task_complexity_threshold: int = 50,
     ):
         """
         Initialize an Agent instance.
 
         Args:
-            llm: The language model used by the agent.
-            task: The task assigned to the agent.
-            workflow_class: The class of the workflow to be used by the agent.
-            verbose: A flag used for enabling verbose mode. Defaults to False.
-            max_attempts: The maximum number of attempts to get a valid response from the model. Defaults to 3.
+            llm (RexiaAIOpenAI): The language model used by the agent.
+            task (str): The task assigned to the agent.
+            workflow (Optional[Type[BaseWorkflow]]): The class of the workflow to be used.
+            memory (BaseMemory): The memory instance to be used. Defaults to WorkingMemory().
+            verbose (bool): Flag for enabling verbose mode. Defaults to False.
+            max_attempts (int): Maximum attempts to get a valid response. Defaults to 3.
+            use_router (bool): Whether to use the task complexity router. Defaults to False.
+            router_llm (Optional[RexiaAIOpenAI]): The LLM for the router. Required if use_router is True.
+            complex_llm (Optional[RexiaAIOpenAI]): The LLM for complex tasks. Required if use_router is True.
+            task_complexity_threshold (int): Threshold for task complexity. Defaults to 50.
+
+        Raises:
+            ValueError: If use_router is True but router_llm or complex_llm is not provided.
         """
-        if not workflow:
-            workflow = ReflectWorkflow
-        self.workflow = workflow(llm=llm, task=task, memory=memory, verbose=verbose, max_attempts=max_attempts)
         self.task = task
-        self.llm = llm
         self.verbose = verbose
         self.max_attempts = max_attempts
+
+        if use_router:
+            if not router_llm or not complex_llm:
+                raise ValueError(
+                    "router_llm and complex_llm must be provided when use_router is True"
+                )
+            self.router = TaskComplexityRouter(
+                base_llm=llm,
+                complex_llm=complex_llm,
+                router_llm=router_llm,
+                task_complexity_threshold=task_complexity_threshold,
+            )
+            self.task_complexity = self.router.route(task)
+            self.llm = (
+                complex_llm if self.task_complexity > task_complexity_threshold else llm
+            )
+        else:
+            self.router = None
+            self.task_complexity = None
+            self.llm = llm
+
+        workflow_class = workflow or ReflectWorkflow
+        self.workflow = workflow_class(
+            llm=self.llm,
+            task=task,
+            memory=memory,
+            verbose=verbose,
+            max_attempts=max_attempts,
+        )
 
     def run_workflow(self) -> List[str]:
         """
@@ -87,9 +128,16 @@ class Agent:
         """
         try:
             if task:
-                self.task = task
-                self.workflow.channel.task = task
-            self.workflow.clear_channel() # Clear any messages from a previous task.
+                self.task = self.workflow.channel.task = task
+                if self.router:
+                    self.task_complexity = self.router.route(task)
+                    self.llm = (
+                        self.router.complex_llm
+                        if self.task_complexity > self.router.task_complexity_threshold
+                        else self.router.base_llm
+                    )
+                    self.workflow.llm = self.llm
+            self.workflow.clear_channel()  # Clear any messages from a previous task.
             messages = self.run_workflow()
             task_result = self.get_task_result(messages)
             accepted_answer = self.format_accepted_answer(task_result)
@@ -112,14 +160,14 @@ class Agent:
 
         try:
             # Find the start of the JSON object
-            json_start = answer.find('{')
-            
+            json_start = answer.find("{")
+
             if json_start == -1:
                 raise ValueError("No JSON object found in the answer")
-            
+
             # Use regex to find the last word before the JSON object
-            match = re.search(r'\S+\s*$', answer[:json_start])
-            
+            match = re.search(r"\S+\s*$", answer[:json_start])
+
             if match:
                 # Remove the word and any whitespace after it
                 json_str = answer[json_start:]
