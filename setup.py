@@ -6,7 +6,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='rexia_ai',
-    version='0.2.3',
+    version='0.2.4',
     author='Robyn Le Sueur',
     author_email='robyn.lesueur@googlemail.com',
     description='ReXia.AI: An advanced AI framework for agentic processes',

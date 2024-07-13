@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("rexia_ai")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8a4ca504b66337d9f7ed81ca32b5762568effe96")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1abf9bea62a5b05a8990de615198fc729e8cf50c")]
 [assembly: System.Reflection.AssemblyProductAttribute("rexia_ai")]
 [assembly: System.Reflection.AssemblyTitleAttribute("rexia_ai")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
