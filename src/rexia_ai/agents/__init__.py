@@ -5,5 +5,5 @@ from .agent import Agent
 
 __all__ = [
     "Component",
-    "Agent"
+    "Agent",
 ]
