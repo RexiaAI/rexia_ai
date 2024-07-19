@@ -50,5 +50,3 @@ class CollaborationChannel:
             self.messages.clear()
         except Exception as e:
             print(f"Error occurred while clearing messages: {str(e)}")
-        else:
-            print("All messages have been cleared from the channel.")

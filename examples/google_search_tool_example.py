@@ -10,7 +10,6 @@ from rexia_ai.tools import RexiaAIGoogleSearch
 # Retrieve the Google API key and search engine ID from environment variables
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 
 # Create an instance of the RexiaAIGoogleSearch tool
 google_search = RexiaAIGoogleSearch(api_key=GOOGLE_API_KEY, engine_id=SEARCH_ENGINE_ID)

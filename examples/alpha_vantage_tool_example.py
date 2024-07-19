@@ -16,7 +16,6 @@ from rexia_ai.tools import (
 
 # Retrieve the AlphaVantage API key from the environment variable
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 
 # Create instances of the AlphaVantage tools
 symbol_search = RexiaAIAlphaVantageSearchSymbols(api_key=ALPHA_VANTAGE_API_KEY)
@@ -42,12 +41,10 @@ tools = {
 
 # Create an instance of the RexiaAI LLM
 llm = RexiaAIOpenAI(
-    base_url="https://api.01.ai/v1",
-    model="yi-large",
+    base_url="http://localhost:1234/v1",
+    model="lm-studio",
     temperature=0,
-    api_key=YI_LARGE_API_KEY,
     tools=tools,
-    max_tokens=4000,
 )
 
 # Create an instance of the RexiaAI Agent with the specified task and LLM

@@ -6,13 +6,11 @@ from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
 from rexia_ai.workflows import TDDWorkflow
 
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
-
 # Create an instance of the RexiaAI LLM
 llm = RexiaAIOpenAI(
     base_url="http://localhost:1234/v1",
-    model="yi-large",
-    temperature=0
+    model="lm-studio",
+    temperature=0,
 )
 
 class TestLLMCode:

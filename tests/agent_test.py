@@ -8,23 +8,17 @@ from verification.llm_verification import LLMVerification
 class TestAgent(unittest.TestCase):
     def setUp(self):
         
-        BASE_URL = "https://api.01.ai/v1"
-        YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
-        
-        if not os.getenv("YI_LARGE_API_KEY"):
-            self.skipTest("YI_LARGE_API_KEY not found in environment variables.")
+        BASE_URL = "http://localhost:1234/v1"
 
         self.llm = RexiaAIOpenAI(
             base_url=BASE_URL,
-            model="yi-large",
+            model="lm-studio",
             temperature=0.0,
-            api_key=YI_LARGE_API_KEY,
         )
         self.llm_verification = LLMVerification(
-            base_url=BASE_URL, 
-            api_key=YI_LARGE_API_KEY,
-            model="yi-large",
-            temperature=0.0
+            base_url=BASE_URL,
+            model="lm-studio",
+            temperature=0.0,
         )
 
         self.agent = Agent(

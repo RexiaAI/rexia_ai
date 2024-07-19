@@ -12,16 +12,12 @@ class TestSimpleToolWorkflow(unittest.TestCase):
     def setUp(self):
         GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
         SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
-        YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
-        BASE_URL = "https://api.01.ai/v1"
+        BASE_URL = "http://localhost:1234/v1"
 
         if not GOOGLE_API_KEY or not SEARCH_ENGINE_ID:
             self.skipTest(
                 "Google API key or search engine ID not found in environment variables."
             )
-
-        if not YI_LARGE_API_KEY:
-            self.skipTest("YI_LARGE_API_KEY not found in environment variables.")
 
         self.google_search = RexiaAIGoogleSearch(
             api_key=GOOGLE_API_KEY, engine_id=SEARCH_ENGINE_ID
@@ -30,18 +26,16 @@ class TestSimpleToolWorkflow(unittest.TestCase):
         tools = {"google_search": self.google_search}
 
         self.llm = RexiaAIOpenAI(
-            base_url="https://api.01.ai/v1",
-            model="yi-large",
+            base_url=BASE_URL,
+            model="lm-studio",
             temperature=0,
-            api_key=YI_LARGE_API_KEY,
             tools=tools,
         )
         
         self.llm_verification = LLMVerification(
-            base_url=BASE_URL, 
-            api_key=YI_LARGE_API_KEY,
-            model="yi-large",
-            temperature=0.0
+            base_url=BASE_URL,
+            model="lm-studio",
+            temperature=0,
         )
 
         self.agent = Agent(

@@ -6,7 +6,6 @@ from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.workflows import SimpleToolWorkflow
 from rexia_ai.tools import RexiaAIGoogleSearch
 
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
 
@@ -17,10 +16,9 @@ tools = {"google_search": google_search}
 
 # Create an instance of the ReXiaAI LLM
 llm = RexiaAIOpenAI(
-    base_url="https://api.01.ai/v1",
-    model="yi-large",
+    base_url="http://localhost:1234/v1",
+    model="lm-studio",
     temperature=0,
-    api_key=YI_LARGE_API_KEY,
     tools=tools,
 )
 

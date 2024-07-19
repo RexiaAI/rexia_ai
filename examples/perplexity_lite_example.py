@@ -21,8 +21,8 @@ class PerplexityLite():
         # Create an instance of the RexiaAILLMWare LLM and give it the tools
         self.llm = RexiaAIOpenAI(
             base_url="http://localhost:1234/v1",
-            model="QuantFactory/Meta-Llama-3-8B-Instruct-GGUF",
-            temperature=0.0,
+            model="lm-studio",
+            temperature=0,
             tools=self.tools,
         )
         

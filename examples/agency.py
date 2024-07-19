@@ -11,7 +11,6 @@ from rexia_ai.tools import RexiaAIGoogleSearch, RexiaAIAlphaVantageExchangeRate
 ALPHA_VANTAGE_API_KEY = os.getenv("ALPHA_VANTAGE_API_KEY")
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 SEARCH_ENGINE_ID = os.getenv("SEARCH_ENGINE_ID")
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 
 # Create an instance of the RexiaAIGoogleSearch tool
 google_search = RexiaAIGoogleSearch(api_key=GOOGLE_API_KEY, engine_id=SEARCH_ENGINE_ID)
@@ -23,22 +22,47 @@ tools = {
     exchange_rate.to_rexiaai_function_call()["name"]: exchange_rate,
 }
 
-# Create an instance of the RexiaAI LLM
-llm = RexiaAIOpenAI(
-    base_url="https://api.01.ai/v1",
-    model="yi-large",
+complex_llm = RexiaAIOpenAI(
+    base_url="http://localhost:1234/v1",
+    model="lm-studio",
     temperature=0,
-    api_key=YI_LARGE_API_KEY,
+    tools=tools,
+)
+
+llm = RexiaAIOpenAI(
+    base_url="http://localhost:1234/v1",
+    model="lm-studio",
+    temperature=0,
     tools=tools,
 )
 
 # Create agents to populate the agency
-agent = Agent(llm=llm, task="Reflect Agent", verbose=True)
+agent = Agent(
+    llm=llm,
+    task="Reflect Agent",
+    verbose=True,
+    use_router=True,
+    router_llm=llm,
+    complex_llm=complex_llm,
+    task_complexity_threshold=60
+)
 simple_tool_agent = Agent(
-    llm=llm, task="Simple Tool Agent", workflow=SimpleToolWorkflow, verbose=True
+    llm=llm,
+    task="Simple Tool Agent",
+    workflow=SimpleToolWorkflow,
+    use_router=True,
+    router_llm=llm,
+    complex_llm=complex_llm,
+    task_complexity_threshold=60
 )
 code_tool_agent = Agent(
-    llm=llm, task="Code Tool Agent", workflow=CodeToolWorkflow, verbose=True
+    llm=llm,
+    task="Code Tool Agent",
+    workflow=CodeToolWorkflow,
+    use_router=True,
+    router_llm=llm,
+    complex_llm=complex_llm,
+    task_complexity_threshold=60
 )
 
 # Assign the agents names and descriptions so the agency manager can decide how best to use them.

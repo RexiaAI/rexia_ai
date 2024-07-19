@@ -1,13 +1,12 @@
 """BaseWorker class for ReXia.AI."""
 
-import re
 import json
 import textwrap
 from typing import Any, List
 from abc import ABC
 from ..structure import LLMOutput
 from ..structure import RexiaAIResponse
-
+from ..common import Utility
 
 class BaseWorker(ABC):
     """
@@ -104,18 +103,6 @@ class BaseWorker(ABC):
             + memory.get_messages_as_string()
         )
         return formatted
-
-    def remove_system_tokens(self, s: str) -> str:
-        """
-        Remove system tokens from the string.
-
-        Args:
-            s: The string from which to remove system tokens.
-
-        Returns:
-            The string with system tokens removed.
-        """
-        return re.sub(r"<\|.*\|>", "", s)
 
     def _invoke_model(self, prompt: str) -> RexiaAIResponse:
         """
@@ -229,28 +216,8 @@ class BaseWorker(ABC):
         Returns:
             The cleaned response.
         """
-        cleaned_response = self.remove_system_tokens(response)
-        cleaned_response = self._strip_tags(cleaned_response)
+        cleaned_response = Utility.extract_json_string(response)
         return cleaned_response
-
-    def _strip_tags(self, response: str) -> str:
-        """
-        Strip tags from the start and end of a string.
-
-        Args:
-            response: The response from which to strip tags.
-
-        Returns:
-            The response with tags stripped.
-        """
-        # Remove opening tags
-        response = re.sub(r"^```(?:python|json)\n", "", response, flags=re.MULTILINE)
-        
-        # Remove closing tags, preserving the newline
-        response = re.sub(r"```$", "", response, flags=re.MULTILINE)
-        
-        # Trim any leading/trailing whitespace
-        return response.strip()
 
     def get_structured_output_prompt(self) -> str:
         """

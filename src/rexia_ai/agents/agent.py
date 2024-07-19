@@ -1,7 +1,7 @@
 """Agent class for ReXia.AI."""
 
 import re
-from typing import Type, Any, Optional, List
+from typing import Type, Optional, List
 from ..workflows import ReflectWorkflow
 from ..structure import RexiaAIResponse
 from ..memory import WorkingMemory
@@ -72,14 +72,11 @@ class Agent:
                 router_llm=router_llm,
                 task_complexity_threshold=task_complexity_threshold,
             )
-            self.task_complexity = self.router.route(task)
-            self.llm = (
-                complex_llm if self.task_complexity > task_complexity_threshold else llm
-            )
         else:
             self.router = None
             self.task_complexity = None
-            self.llm = llm
+        
+        self.llm = llm
 
         workflow_class = workflow or ReflectWorkflow
         self.workflow = workflow_class(

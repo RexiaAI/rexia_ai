@@ -8,7 +8,6 @@ from rexia_ai.tools import RexiaAIYoutubeVideoAnalysis
 
 # Retrieve the OpenAI API key from the environment variable
 OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
 
 # Create an instance of the RexiaAIYoutubeVideoAnalysis tool
 analyse_video = RexiaAIYoutubeVideoAnalysis(
@@ -20,11 +19,9 @@ tools = {"analyse_video": analyse_video}
 
 # Create an instance of the RexiaAI LLM with the specified tools
 llm = RexiaAIOpenAI(
-    base_url="https://api.01.ai/v1",
-    model="yi-large",
+    base_url="http://localhost:1234/v1",
+    model="lm-studio",
     temperature=0,
-    api_key=YI_LARGE_API_KEY,
-    max_tokens=4000,
 )
 
 # Create an instance of the RexiaAI Agent with the specified task and LLM

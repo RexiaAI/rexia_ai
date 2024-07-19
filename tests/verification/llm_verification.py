@@ -5,7 +5,7 @@ from rexia_ai.llms import RexiaAIOpenAI
 class LLMVerification():
     """LLMVerification class for ReXia.AI. Automates verification of ReXia.AI output for testing purposes."""
     
-    def __init__(self, base_url: str, api_key: str, model: str, temperature: float) -> None:
+    def __init__(self, base_url: str, model: str, api_key: str = "", temperature: float = 0.2) -> None:
         """Initializes the LLMVerification class with the given api key and base url.
         
             Args:

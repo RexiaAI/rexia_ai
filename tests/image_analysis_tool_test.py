@@ -10,8 +10,7 @@ from verification.llm_verification import LLMVerification
 class TestImageAnalysisTool(unittest.TestCase):
     def setUp(self):
         OPEN_AI_API_KEY = os.getenv("OPEN_AI_API_KEY")
-        YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
-        BASE_URL = "https://api.01.ai/v1"
+        BASE_URL = "http://localhost:1234/v1"
 
         self.image_analysis = RexiaAIImageAnalysis(
             vision_model_base_url="https://api.openai.com/v1",
@@ -23,16 +22,14 @@ class TestImageAnalysisTool(unittest.TestCase):
 
         self.llm = RexiaAIOpenAI(
             base_url=BASE_URL,
-            model="yi-large",
+            model="lm-studio",
             temperature=0,
-            api_key=YI_LARGE_API_KEY,
             tools=tools,
         )
 
         self.llm_verification = LLMVerification(
             base_url=BASE_URL, 
-            api_key=YI_LARGE_API_KEY,
-            model="yi-large",
+            model="lm-studio",
             temperature=0.0
         )
 

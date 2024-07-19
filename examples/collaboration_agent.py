@@ -1,18 +1,14 @@
 """ Simple tool using agent example. """
 
-import os
 from rexia_ai.agents import Agent
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.workflows import CollaborationWorkflow
 
-YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")
-
 # Create an instance of the ReXiaAI LLM
 llm = RexiaAIOpenAI(
-    base_url="https://api.01.ai/v1",
-    model="yi-large",
+    base_url="http://localhost:1234/v1",
+    model="lm-studio",
     temperature=0,
-    api_key=YI_LARGE_API_KEY,
 )
 
 # Create an instance of the ReXiaAI Agent with the specified task, LLM and workflow
