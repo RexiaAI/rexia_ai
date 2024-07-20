@@ -1,6 +1,7 @@
 """Utility class for ReXia.AI."""
 
 import re
+import json_repair
 
 class Utility:
     """
@@ -68,3 +69,24 @@ class Utility:
         pattern = r'\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}'
         match = re.search(pattern, text, re.DOTALL)
         return match.group(0) if match else text
+    
+    @staticmethod
+    def fix_json_errors(json_string: str) -> str:
+        """
+        Attempt to fix common JSON errors using json-repair.
+
+        This method uses the json-repair library to handle common JSON formatting errors
+        that might occur in responses from large language models.
+
+        Args:
+            json_string (str): The potentially malformed JSON string.
+
+        Returns:
+            str: The JSON string with common errors fixed.
+        """
+        try:
+            repaired_json = json_repair.repair_json(json_string)
+            return repaired_json
+        except Exception as e:
+            print(f"Error while fixing JSON string with json-repair: {e}")
+            return json_string

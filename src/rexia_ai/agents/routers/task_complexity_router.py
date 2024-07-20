@@ -8,6 +8,7 @@ and then chooses between a base model and a complex model for task execution.
 import json
 from typing import Dict, Any
 from ...llms import RexiaAIOpenAI
+from ...common import Utility
 
 PREDEFINED_PROMPT = """
 You are a task complexity analyzer. Your job is to assess the given task and assign it a complexity
@@ -150,7 +151,8 @@ class TaskComplexityRouter:
             return complexity_score
                     
         except Exception as e:
-            print(f"Error in routing task: {e}.")
+            print(f"Error in routing task: {e}. Setting complexity to complexity threshold for safety.")
+            return self.task_complexity_threshold 
 
     def _calculate_complexity_score(self, task: str) -> int:
         """
@@ -212,3 +214,19 @@ class TaskComplexityRouter:
             json.JSONDecodeError: If the response is not valid JSON.
         """
         return json.loads(response)
+    
+    def _clean_router_response(self, response: str) -> str:
+        """
+        Clean the JSON response from the router model.
+        
+        Args:
+            response (str): The JSON string response from the router model.
+            
+        Returns:
+            str: the cleaned JSON response.
+        """
+        
+        cleaned_response = Utility.extract_json_string(response)
+        cleaned_response = Utility.fix_json_errors(cleaned_response)
+        
+        return cleaned_response

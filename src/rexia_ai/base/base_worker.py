@@ -1,6 +1,6 @@
 """BaseWorker class for ReXia.AI."""
 
-import json
+import json5
 import textwrap
 from typing import Any, List
 from abc import ABC
@@ -217,6 +217,7 @@ class BaseWorker(ABC):
             The cleaned response.
         """
         cleaned_response = Utility.extract_json_string(response)
+        cleaned_response = Utility.fix_json_errors(cleaned_response)
         return cleaned_response
 
     def get_structured_output_prompt(self) -> str:
@@ -227,7 +228,7 @@ class BaseWorker(ABC):
             The structured output prompt.
         """
 
-        output_structure = json.dumps(LLMOutput.get_output_structure(), indent=2)
+        output_structure = json5.dumps(LLMOutput.get_output_structure(), indent=2)
 
         return textwrap.dedent(
             f"""\
