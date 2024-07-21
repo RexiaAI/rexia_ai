@@ -38,7 +38,6 @@ class CollaborationWorkflow(BaseWorkflow):
         task: str,
         memory: BaseMemory,
         verbose: bool = False,
-        max_attempts: int = 3,
     ) -> None:
         """
         Initialize a CollaborationWorkflow instance.
@@ -50,7 +49,6 @@ class CollaborationWorkflow(BaseWorkflow):
             task (str): A description of the task to be performed by the workflow.
             memory (BaseMemory): The memory object to be used for storing and retrieving information.
             verbose (bool, optional): Enable verbose mode for detailed logging. Defaults to False.
-            max_attempts (int, optional): Maximum number of attempts for each component. Defaults to 3.
         """
         super().__init__(llm, task, verbose)
         self.channel = CollaborationChannel(task)
@@ -58,13 +56,13 @@ class CollaborationWorkflow(BaseWorkflow):
         self.team_work = Component(
             "team work",
             self.channel,
-            TeamWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
+            TeamWorker(model=llm, verbose=verbose),
             memory=self.memory,
         )
         self.tool = Component(
             "tool",
             self.channel,
-            ToolWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
+            ToolWorker(model=llm, verbose=verbose),
             memory=self.memory,
         )
 

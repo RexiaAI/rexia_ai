@@ -21,7 +21,6 @@ class Agent:
         workflow (BaseWorkflow): The workflow used by the agent.
         task (str): The task assigned to the agent.
         verbose (bool): Flag for enabling verbose mode.
-        max_attempts (int): Maximum number of attempts to get a valid response.
         router (Optional[TaskComplexityRouter]): The task complexity router, if used.
         task_complexity (Optional[int]): The complexity of the task, if router is used.
     """
@@ -33,7 +32,6 @@ class Agent:
         workflow: Optional[Type[BaseWorkflow]] = None,
         memory: BaseMemory = WorkingMemory(),
         verbose: bool = False,
-        max_attempts: int = 3,
         use_router: bool = False,
         router_llm: Optional[RexiaAIOpenAI] = None,
         complex_llm: Optional[RexiaAIOpenAI] = None,
@@ -48,7 +46,6 @@ class Agent:
             workflow (Optional[Type[BaseWorkflow]]): The class of the workflow to be used.
             memory (BaseMemory): The memory instance to be used. Defaults to WorkingMemory().
             verbose (bool): Flag for enabling verbose mode. Defaults to False.
-            max_attempts (int): Maximum attempts to get a valid response. Defaults to 3.
             use_router (bool): Whether to use the task complexity router. Defaults to False.
             router_llm (Optional[RexiaAIOpenAI]): The LLM for the router. Required if use_router is True.
             complex_llm (Optional[RexiaAIOpenAI]): The LLM for complex tasks. Required if use_router is True.
@@ -59,7 +56,6 @@ class Agent:
         """
         self.task = task
         self.verbose = verbose
-        self.max_attempts = max_attempts
 
         if use_router:
             if not router_llm or not complex_llm:
@@ -84,7 +80,6 @@ class Agent:
             task=task,
             memory=memory,
             verbose=verbose,
-            max_attempts=max_attempts,
         )
 
     def run_workflow(self) -> List[str]:

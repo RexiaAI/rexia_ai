@@ -2,9 +2,16 @@
 
 import inspect
 from typing import Any, List, Dict
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from ...base import BaseWorker
 from ...common import ContainerisedCodeTester
 from ...structure import RexiaAIResponse
+
+class CodeGenerationError(Exception):
+    pass
+
+class CodeExecutionError(Exception):
+    pass
 
 PREDEFINED_PROMPT = """
 As a test-driven development agent for ReXia.AI, implement Python function(s) to pass the given unit test.
@@ -95,7 +102,6 @@ class TDDWorker(BaseWorker):
         self,
         model: Any,
         verbose: bool = False,
-        max_attempts: int = 5,
     ):
         """
         Initialize a TDDWorker instance.
@@ -103,9 +109,8 @@ class TDDWorker(BaseWorker):
         Args:
             model: The model used by the worker.
             verbose: A flag used for enabling verbose mode. Defaults to False.
-            max_attempts: Maximum number of attempts to generate passing code. Defaults to 5.
         """
-        super().__init__(model, verbose=verbose, max_attempts=max_attempts)
+        super().__init__(model, verbose=verbose)
         self.test_class = None
         self.test_globals = {}
 
@@ -147,6 +152,12 @@ class TDDWorker(BaseWorker):
         prompt = super().create_prompt(PREDEFINED_PROMPT, task_prompt, messages, memory)
         return prompt
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(1),
+        retry=retry_if_exception_type(CodeGenerationError),
+        reraise=True
+    )
     def action(self, prompt: str, worker_name: str) -> str:
         """
         Execute the action of generating and testing code based on the given prompt.
@@ -165,64 +176,46 @@ class TDDWorker(BaseWorker):
                 maximum attempts, it returns a failure message.
 
         Raises:
-            ValueError: If the AI model response is not of the expected type.
-
-        Note:
-            - This method uses a ContainerizedCodeExecutor to run the generated code securely.
-            - It will make up to self.max_attempts to generate passing code.
-            - If verbose mode is enabled, it will print detailed information about each attempt.
+            RetryError: If all retry attempts fail.
         """
-        for attempt in range(self.max_attempts):
-            try:
-                agent_response = self._invoke_model(prompt)
-                if not isinstance(agent_response, RexiaAIResponse):
-                    raise ValueError(
-                        f"Expected RexiaAIResponse, got {type(agent_response)}"
-                    )
-                print(f"Agent response for attempt {attempt + 1}: {agent_response}")
-                print(f"Code generated for attempt {attempt + 1}: {agent_response.answer}")
+        try:
+            agent_response = self._invoke_model(prompt)
+            if not isinstance(agent_response, RexiaAIResponse):
+                raise ValueError(f"Expected RexiaAIResponse, got {type(agent_response)}")
 
-                code = agent_response.answer
+            if self.verbose:
+                print(f"Agent response: {agent_response}")
+                print(f"Code generated: {agent_response.answer}")
 
+            code = agent_response.answer
+
+            if self.verbose:
+                print("Code to test:")
+                print(code)
+
+            executor = ContainerisedCodeTester()
+            result = executor.execute_code(code, self.test_class)
+
+            if result.get("all_passed"):
+                return f"{worker_name}: {agent_response}"
+            else:
+                error_message = self._format_error_message(result)
                 if self.verbose:
-                    print(f"Attempt {attempt + 1}")
-                    print("Code to test: ")
-                    print(code)
-                    
-                # Execute the code in a container
-                executor = ContainerisedCodeTester()
-                result = executor.execute_code(code, self.test_class)
+                    print(f"Attempt failed, retrying...")
+                    print(error_message)
+                prompt = self._update_prompt_with_error(prompt, agent_response, error_message)
+                raise CodeGenerationError(error_message)
 
-                if result.get("all_passed"):
-                    return f"{worker_name}: {agent_response}"
-                else:
-                    print(f"Attempt {attempt + 1} failed, retrying...")
-                    error_message = "Test failures or errors:\n"
-                    for failure in result.get("failed", []):
-                        error_message += (
-                            f"- Failed: {failure['name']}: {failure['error']}\n"
-                        )
-                    for error in result.get("errors", []):
-                        error_message += (
-                            f"- Error: {error['type']}: {error['message']}\n"
-                        )
-                    if "error" in result:
-                        error_message += f"Error: {result['error']}\n"
+        except Exception as e:
+            print(f"Error during attempt: {str(e)}")
+            raise CodeGenerationError(str(e))
 
-                    if self.verbose:
-                        print(error_message)
-                    prompt = f"""\nThe Python code within the answer field of this JSON object returned an error.
-                        JSON Object: {agent_response}\n\n 
-                        Error: {error_message}\n\n
-                        
-                        Please return the full previous JSON object with the answer updated to fix this error.
-                        """
-            except Exception as e:
-                print(f"Error during attempt {attempt + 1}: {str(e)}")
-
-        return (
-            f"{worker_name}: Maximum attempts reached. Could not generate passing code."
-        )
+    def _update_prompt_with_error(self, prompt: str, agent_response: RexiaAIResponse, error_message: str) -> str:
+        return f"""\nThe Python code within the answer field of this JSON object returned an error.
+        JSON Object: {agent_response}\n\n 
+        Error: {error_message}\n\n
+        Please return the full previous JSON object with the answer updated to fix this error.
+        """
 
     def _format_error_message(self, result: Dict[str, Any]) -> str:
         """

@@ -3,7 +3,7 @@
 import json5
 from typing import List, Dict, Any
 from dataclasses import dataclass
-
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from ..agents import Agent
 from ..common import CollaborationChannel, Utility
 from ..memory import WorkingMemory
@@ -49,7 +49,7 @@ class ManagerAgent:
     """
 
     def __init__(
-        self, agents: List[AgentInfo], manager_llm: RexiaAIOpenAI, max_retries: int = 3
+        self, agents: List[AgentInfo], manager_llm: RexiaAIOpenAI
     ):
         """
         Initialize the ManagerAgent.
@@ -57,7 +57,6 @@ class ManagerAgent:
         Args:
             agents (List[AgentInfo]): List of available agents.
             manager_llm (RexiaAIOpenAI): Language model for the manager.
-            max_retries (int): Maximum number of retries for operations. Defaults to 3.
         """
         self.llm = manager_llm
         self.collaboration_channel = CollaborationChannel("Agent Collaboration")
@@ -65,7 +64,6 @@ class ManagerAgent:
         self.agents = agents
         self.task = ""
         self.subtasks = []
-        self.max_retries = max_retries
 
     def assign_task(self, task: str) -> None:
         """
@@ -100,6 +98,12 @@ class ManagerAgent:
         except Exception as e:
                 raise AgencyError(f"Error in managing agents: {str(e)}")
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(1),
+        retry=retry_if_exception_type((AgencyError)),
+        reraise=True,
+    )
     def present_results(self) -> str:
         """
         Present the results of the collaborative task execution.
@@ -108,18 +112,14 @@ class ManagerAgent:
         Returns:
             str: A summarized report of the collaborative task execution.
         """
-        for attempt in range(self.max_retries):
-            try:
-                messages = self.collaboration_channel.messages
-                prompt = self._create_results_prompt(messages)
-                report = self.llm.invoke(prompt)
-                cleaned_report = Utility.remove_system_tokens(report)
-                return cleaned_report
-            except Exception as e:
-                if attempt < self.max_retries - 1:
-                    print(f"Attempt {attempt + 1} failed: {str(e)}. Retrying...")
-                else:
-                    raise AgencyError(f"Error in presenting results: {str(e)}")
+        try:
+            messages = self.collaboration_channel.messages
+            prompt = self._create_results_prompt(messages)
+            report = self.llm.invoke(prompt)
+            cleaned_report = Utility.remove_system_tokens(report)
+            return cleaned_report
+        except Exception as e:
+                raise AgencyError(f"Error in presenting results: {str(e)}")
 
     def _create_results_prompt(self, messages: List[str]) -> str:
         """
@@ -195,72 +195,25 @@ class ManagerAgent:
             agents_list, previous_results, memory_content
         )
 
-        attempt = 0
-        while attempt < self.max_retries:
+        try:
+            response = self.llm.invoke(prompt)
+            cleaned_response = self._clean_response(response)
+            parsed_response = json5.loads(cleaned_response)
+            return self._process_parsed_response(parsed_response)
+        except Exception as e:
+            print(
+                f"Failed to get a valid response from the model. "
+                f"Error: {str(e)}\n\nModel "
+                f"Response: {response}\n\nRetrying..."
+            )
             try:
-                response = self.llm.invoke(prompt)
-                cleaned_response = self._clean_response(response)
-                parsed_response = json5.loads(cleaned_response)
-                return self._process_parsed_response(parsed_response)
-            except Exception as e:
-                # Attempt to have the llm resolve any JSON errors
-                error_prompt = f"""Your previous generation contained incorrectly formatted JSON.
-                    Please fix this and any other errors, then return the correctly formatted JSON
-                    and nothing else. Your response should consisit of a single, correctly formatted,
-                    JSON object.
-
-                    Issue: {str(e)}
-
-                    Your previous JSON response was: 
-                    {response}
-                    
-                    You should reuse the same status and assignment (if applicable) from the previous response, 
-                    but ensure that the JSON is correctly formatted.
-
-                    Instructions for correction:
-                    1. Carefully review the JSON structure and content.
-                    2. Identify and fix any syntax errors (e.g., missing quotes, commas, brackets).
-                    3. Ensure all keys are properly quoted.
-                    4. Verify that string values are enclosed in double quotes.
-                    5. Check that numbers, booleans, and null values are not quoted.
-                    6. Remove any trailing commas in objects or arrays.
-                    7. Eliminate any text or comments outside the JSON structure.
-
-                    The JSON should conform to one of the following structures:
-
-                    For in-progress tasks:
-                    {{
-                        "status": "in_progress",
-                        "assignment": {{
-                            "agent": "Agent's name",
-                            "task": "Description of the subtask assigned to this agent"
-                        }}
-                    }}
-
-                    For completed tasks:
-                    {{
-                        "status": "complete",
-                        "summary": "Brief summary of the completed task and its results"
-                    }}
-
-                    Do not include anything outside this structure or the task will fail.
-                    Do not include any comments or additional information or the task will fail.
-                    Do not include any text outside the JSON structure or the task will fail.
-                    Do not include any unquoted keys or values or the task will fail.
-                    Do not include any syntax errors or the task will fail.
-                    Return only your previous JSON response, corrected to conform to the schema or the task will fail.
-                    """
-                print(
-                    f"Failed to get a valid response from the model. "
-                    f"Error: {str(e)}\n\nModel "
-                    f"Response: {response}\n\nRetrying..."
+                fixed_response = Utility.fix_json_errors_llm(
+                    self, json_string=response, error=e, llm=self.llm
                 )
-                prompt = error_prompt
-            attempt += 1
-
-        raise AgencyError(
-            "Max retries reached. Unable to get a valid response from the model."
-        )
+            except:
+                print("Failed to get a valid response from the model.")
+                raise RuntimeError("Unable to get a valid response from the model.")
+            return self._process_parsed_response(fixed_response)
 
     def _process_parsed_response(
         self, parsed_response: Dict[str, Any]
@@ -371,33 +324,28 @@ class ManagerAgent:
         Raises:
             AgencyError: If there's an error in executing the assignment.
         """
-        for attempt in range(self.max_retries):
-            try:
-                result = assignment.agent.invoke(assignment.task)
-                result_summary = self._summarise_results(result)
-                cleaned_summary = Utility.remove_system_tokens(result_summary)
-                cleaned_summary = (
-                    "Subtask: "
-                    + assignment.task
-                    + "\n\nAgent Assigned: "
-                    + assignment.name
-                    + "\n\nAgent Result: "
-                    + str(cleaned_summary)
-                )
-                print(cleaned_summary)
-                self.collaboration_channel.put(cleaned_summary)
-                return
-            except Exception as e:
-                if attempt < self.max_retries - 1:
-                    print(f"Attempt {attempt + 1} failed: {str(e)}. Retrying...")
-                else:
-                    error_message = f"Failed task: {assignment.task}\nError: Failed to execute assignment for agent {assignment.name}: {str(e)}"
-                    self.collaboration_channel.put(
-                        error_message
-                        + "\n\nAgent messages:"
-                        + "\n".join(assignment.agent.workflow.channel.messages)
-                    )
-                    raise AgencyError(error_message)
+        try:
+            result = assignment.agent.invoke(assignment.task)
+            result_summary = self._summarise_results(result)
+            cleaned_summary = Utility.remove_system_tokens(result_summary)
+            cleaned_summary = (
+                "Subtask: "
+                + assignment.task
+                + "\n\nAgent Assigned: "
+                + assignment.name
+                + "\n\nAgent Result: "
+                + str(cleaned_summary)
+            )
+            print(cleaned_summary)
+            self.collaboration_channel.put(cleaned_summary)
+        except Exception as e:
+            error_message = f"Failed task: {assignment.task}\nError: Failed to execute assignment for agent {assignment.name}: {str(e)}"
+            self.collaboration_channel.put(
+                error_message
+                + "\n\nAgent messages:"
+                + "\n".join(assignment.agent.workflow.channel.messages)
+            )
+            raise AssignmentError(error_message)
                 
     def _summarise_results(self, results: str):
         """
@@ -466,7 +414,6 @@ class Agency:
         task: str,
         agents: List[AgentInfo],
         manager_llm: RexiaAIOpenAI,
-        max_retries: int = 3,
     ):
         """
         Initialize the Agency.
@@ -475,11 +422,9 @@ class Agency:
             task (str): The main task to be completed.
             agents (List[AgentInfo]): List of available agents.
             manager_llm (RexiaAIOpenAI): Language model for the manager.
-            max_retries (int): Maximum number of retries for operations. Defaults to 3.
         """
         self.task = task
-        self.manager = ManagerAgent(agents, manager_llm, max_retries)
-        self.max_retries = max_retries
+        self.manager = ManagerAgent(agents, manager_llm)
 
     def invoke(self, task: str = None) -> str:
         """

@@ -90,3 +90,43 @@ class Utility:
         except Exception as e:
             print(f"Error while fixing JSON string with json-repair: {e}")
             return json_string
+        
+    @staticmethod
+    def fix_json_errors_prompt(json_string: str, error: str) -> str:
+        """
+         Generate a prompt to instruct an llm to fix errors in a json object.
+         
+         Args:
+            json_string (str): the malformed json string.
+            error (str): the error in the json.
+            llm (RexiaAIOpenAI): The large language model to use.
+        """
+        fix_errors_prompt = f"""
+        Please fix this incorrectly formatted JSON object.
+
+        Error: {str(error)}
+
+        Incorrectly Formatted JSON: 
+        {json_string}
+        
+        You should reuse the same format, but ensure that the JSON is correctly formatted.
+
+        Instructions for correction:
+        1. Carefully review the JSON structure and content.
+        2. Identify and fix any syntax errors (e.g., missing quotes, commas, brackets).
+        3. Ensure all keys are properly quoted.
+        4. Verify that string values are enclosed in double quotes.
+        5. Check that numbers, booleans, and null values are not quoted.
+        6. Remove any trailing commas in objects or arrays.
+        7. Eliminate any text or comments outside the JSON structure.
+
+        Your response should ONLY contain valid JSON.
+        
+        Do not include anything outside this structure or the task will fail.
+        Do not include any comments or additional information or the task will fail.
+        Do not include any text outside the JSON structure or the task will fail.
+        Do not include any unquoted keys or values or the task will fail.
+        Do not include any syntax errors or the task will fail.
+        """
+                
+        return fix_errors_prompt

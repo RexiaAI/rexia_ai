@@ -8,6 +8,7 @@ from ..structure import LLMOutput
 from ..structure import RexiaAIResponse
 from ..common import Utility
 
+
 class BaseWorker(ABC):
     """
     BaseWorker for ReXia.AI. Allows for the creation of workers from a standard interface.
@@ -16,25 +17,22 @@ class BaseWorker(ABC):
         model: The model used by the worker.
         verbose: A flag used for enabling verbose mode.
         nlp: The spaCy NLP model for text compression.
-        max_attempts: The maximum number of attempts to get a valid response from the model.
     """
 
     model: Any
     verbose: bool
     nlp: Any
 
-    def __init__(self, model: Any, verbose: bool = False, max_attempts: int = 3):
+    def __init__(self, model: Any, verbose: bool = False):
         """
         Initialize a BaseWorker instance.
 
         Args:
             model: The model used by the worker.
             verbose: A flag used for enabling verbose mode. Defaults to False.
-            max_attempts: The maximum number of attempts to get a valid response from the model. Defaults to 3.
         """
         self.model = model
         self.verbose = verbose
-        self.max_attempts = max_attempts
 
     def action(self, prompt: str, worker_name: str) -> str:
         """
@@ -114,97 +112,27 @@ class BaseWorker(ABC):
         Returns:
             The response from the model.
         """
-        attempt = 0
-
-        while attempt < self.max_attempts:
+        try:
+            response = self.model.invoke(prompt)
+            cleaned_response = self._clean_response(response)
+            rexia_ai_response = RexiaAIResponse.from_json(cleaned_response)
+            return rexia_ai_response
+        except Exception as e:
+            print(
+                "Failed to get a valid response from the model. "
+                f"Error: {str(e)}\n\nModel "
+                f"Response: {response}\n\Attempting to fix..."
+            )
             try:
-                response = self.model.invoke(prompt)
-                cleaned_response = self._clean_response(response)
-                rexia_ai_response = RexiaAIResponse.from_json(cleaned_response)
-                return rexia_ai_response
-            except Exception as e:
-                # Attempt to have the llm resolve any JSON errors
-                prompt = f"""Your previous generation contained incorrectly formatted JSON. Please fix this and any other errors,
-                    then return the correctly formatted JSON.
-
-                    Issue: {str(e)}
-
-                    Your previous JSON response was: 
-                    {response}
-                    
-                    You should reuse the same question, plan, answer, confidence_score, chain_of_reasoning, and tool_calls 
-                    from the previous response, but ensure that the JSON is correctly formatted.
-
-                    Instructions for correction:
-                    1. Carefully review the JSON structure and content.
-                    2. Identify and fix any syntax errors (e.g., missing quotes, commas, brackets).
-                    3. Ensure all keys are properly quoted.
-                    4. Verify that string values are enclosed in double quotes.
-                    5. Check that numbers, booleans, and null values are not quoted.
-                    6. Remove any trailing commas in objects or arrays.
-                    7. Eliminate any text or comments outside the JSON structure.
-
-                    The JSON should conform to the following schema:
-                    - `question`: a string representing the question asked.
-                    - `plan`: an array of strings, each representing a step in the plan.
-                    - `answer`: a string representing the final answer to the question.
-                    - `confidence_score`: an integer representing the confidence score.
-                    - `chain_of_reasoning`: an array of strings, each representing a step in the reasoning chain.
-                    - `tool_calls`: an array of objects, each representing a tool call with the following structure:
-                    - `name`: a string representing the name of the tool.
-                    - `parameters`: an object containing key-value pairs of parameters for the tool.
-
-                    Your response should ONLY contain valid JSON, structured as follows:
-                    {{
-                        "question": "The original question asked",
-                        "plan": [
-                            "Step 1 of the plan",
-                            "Step 2 of the plan",
-                            ...
-                        ],
-                        "answer": "The final answer to the question",
-                        "confidence_score": 0,
-                        "chain_of_reasoning": [
-                            "Reasoning step 1",
-                            "Reasoning step 2",
-                            ...
-                        ],
-                        "tool_calls": [
-                            {{
-                                "name": "ToolName1",
-                                "parameters": {{
-                                    "parameter1": "value1",
-                                }}
-                            }},
-                            {{
-                                "name": "ToolName2",
-                                "parameters": {{
-                                    "parameter1": "value1",
-                                    "parameter2": "value2"
-                                }}
-                            }},
-                            ...
-                        ]
-                    }}
-
-                    Do not include anything outside this structure or the task will fail.
-                    Do not include any comments or additional information or the task will fail.
-                    Do not include any text outside the JSON structure or the task will fail.
-                    Do not include any unquoted keys or values or the task will fail.
-                    Do not include any syntax errors or the task will fail.
-                    Return only your previous JSON response, corrected to conform to the schema or the task will fail.
-                    """
-                print(
-                    "Failed to get a valid response from the model. "
-                    f"Error: {str(e)}\n\nModel "
-                    f"Response: {response}\n\nRetrying..."
+                fix_errors_prompt = Utility.fix_json_errors_prompt(
+                    self, json_string=response, error=e
                 )
-            attempt += 1
-
-        # If we reach here, we've failed after max_attempts
-        raise Exception(
-            "Failed to get a valid response from the model after maximum attempts"
-        )
+                fixed_response = self.model.invoke(fix_errors_prompt)
+            except:
+                print("Failed to get a valid response from the model.")
+                raise RuntimeError("Unable to get a valid response from the model.")
+            rexia_ai_response = RexiaAIResponse.from_json(fixed_response)
+            return rexia_ai_response
 
     def _clean_response(self, response: str) -> str:
         """

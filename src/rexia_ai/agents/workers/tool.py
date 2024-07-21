@@ -71,22 +71,20 @@ class ToolWorker(BaseWorker):
     Attributes:
         model (Any): The language model used for processing prompts and making decisions about tool usage.
         verbose (bool): Flag for enabling verbose output mode.
-        max_attempts (int): Maximum number of attempts to generate a valid tool call or process a tool response.
 
     Inherits from:
         BaseWorker: Provides core functionality for AI workers in the ReXia.AI system.
     """
 
-    def __init__(self, model: Any, verbose: bool = False, max_attempts: int = 3):
+    def __init__(self, model: Any, verbose: bool = False):
         """
         Initialize a ToolWorker instance.
 
         Args:
             model (Any): The language model to be used for processing and decision-making.
             verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
-            max_attempts (int, optional): Maximum number of attempts for tool calls or response processing. Defaults to 3.
         """
-        super().__init__(model, verbose=verbose, max_attempts=max_attempts)
+        super().__init__(model, verbose=verbose)
 
     def action(self, prompt: str, worker_name: str) -> str:
         """

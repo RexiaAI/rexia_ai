@@ -1,9 +1,16 @@
 """LLMTool class for ReXia.AI"""
-
+from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from typing import Any, List, Dict
 from ...base import BaseWorker
 from ...structure import RexiaAIResponse
 from ...common import ContainerisedToolRunner
+class ToolGenerationError(Exception):
+    pass
+
+
+class ToolExecutionError(Exception):
+    pass
+
 
 PREDEFINED_PROMPT = """
 As an AI assistant for ReXia.AI, your task is to implement Python function(s) that will solve the given problem. Follow these guidelines:
@@ -39,7 +46,7 @@ Output format:
 - Preserve indentation with EXACTLY 4 spaces per level
 - Include empty lines as empty strings
 - The code will be joined and executed directly
-- Ensure there is a main() function that returns the final result
+- It is required that your response has a main() function that returns the result or it will fail.
 
 Example output format:
 
@@ -75,6 +82,7 @@ Example output format:
 Now, implement the solution for the following problem:
 """
 
+
 class LLMTool(BaseWorker):
     """
     A worker for ReXia AI that generates Python tools based on given tasks.
@@ -91,7 +99,6 @@ class LLMTool(BaseWorker):
         self,
         model: Any,
         verbose: bool = False,
-        max_attempts: int = 5,
     ):
         """
         Initialize an LLMTool instance.
@@ -99,10 +106,8 @@ class LLMTool(BaseWorker):
         Args:
             model (Any): The language model to be used for generating code.
             verbose (bool, optional): If True, enables verbose output. Defaults to False.
-            max_attempts (int, optional): Maximum number of attempts to generate
-                working code. Defaults to 5.
         """
-        super().__init__(model, verbose=verbose, max_attempts=max_attempts)
+        super().__init__(model, verbose=verbose)
         self.tool_runner = ContainerisedToolRunner()
 
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
@@ -128,9 +133,17 @@ class LLMTool(BaseWorker):
         Remember to use only built-in Python libraries and avoid any external dependencies or API calls.
         """
         # Combine the predefined prompt with the task-specific prompt
-        prompt = super().create_prompt(PREDEFINED_PROMPT + task_prompt, task, messages, memory)
+        prompt = super().create_prompt(
+            PREDEFINED_PROMPT + task_prompt, task, messages, memory
+        )
         return prompt
 
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_fixed(1),
+        retry=retry_if_exception_type((ToolGenerationError, ToolExecutionError)),
+        reraise=True,
+    )
     def action(self, prompt: str, worker_name: str) -> str:
         """
         Execute the action of generating and running a Python tool based on the given prompt.
@@ -145,43 +158,56 @@ class LLMTool(BaseWorker):
 
         Returns:
             str: A formatted string containing the worker's response and tool execution results.
+
+        Raises:
+            RetryError: If all retry attempts fail.
         """
-        for attempt in range(self.max_attempts):
-            try:
-                agent_response = self._invoke_model(prompt)
-                if not isinstance(agent_response, RexiaAIResponse):
-                    raise ValueError(f"Expected RexiaAIResponse, got {type(agent_response)}")
+        try:
+            agent_response = self._invoke_model(prompt)
+            if not isinstance(agent_response, RexiaAIResponse):
+                raise ToolGenerationError(
+                    f"Expected RexiaAIResponse, got {type(agent_response)}"
+                )
 
-                 # Join the list of code lines into a single string
-                code = "\n".join(agent_response.answer) if isinstance(agent_response.answer, list) else agent_response.answer
-                
+            code = self._extract_code(agent_response)
+
+            if self.verbose:
+                print("Code to execute:")
+                print(code)
+
+            result = self.tool_runner.execute_code(code)
+
+            if result.get("success"):
+                output = result.get("output", "No output")
+                print(f"Tool execution successful. Output: {output}")
+                return self._format_response(worker_name, agent_response, result)
+            else:
+                error_message = f"Error: {result['error']}"
                 if self.verbose:
-                    print(f"Attempt {attempt + 1}")
-                    print("Code to execute:")
-                    print(code)
+                    print(error_message)
+                # Update the prompt with error information
+                prompt = self._update_prompt_with_error(prompt, agent_response, error_message)
+                raise ToolExecutionError(error_message)
 
-                # Execute the generated code
-                result = self.tool_runner.execute_code(code)
+        except Exception as e:
+            print(f"Error during attempt: {str(e)}")
+            # Update the prompt with error information
+            prompt = self._update_prompt_with_error(prompt, agent_response, str(e))
+            raise ToolGenerationError(str(e))
+        
+    def _update_prompt_with_error(self, prompt: str, agent_response: RexiaAIResponse, error_message: str) -> str:
+        return f"""\nThe Python code within the answer field of this JSON object returned an error.
+        Original prompt: {prompt}
+        JSON Object: {agent_response}\n\n 
+        Error: {error_message}\n\n
+        Please return the full previous JSON object with the answer updated to fix this error.
+        """
 
-                if result.get("success"):
-                    # If execution was successful, log the result
-                    output = result.get("output", "No output")
-                    print(f"Tool execution successful. Output: {output}")
-                    return self._format_response(worker_name, agent_response, result)
-                else:
-                    # If execution failed, prepare error message for next attempt
-                    error_message = f"Error: {result['error']}"
-                    if self.verbose:
-                        print(error_message)
-                    prompt += f"\n\nThe previous code resulted in an error. Please fix and try again:\n{error_message}"
-            except Exception as e:
-                print(f"Error during attempt {attempt + 1}: {str(e)}")
-
-        # If all attempts fail, return a failure response
-        return self._format_response(
-            worker_name,
-            "Maximum attempts reached. Could not create a working tool.",
-            {"success": False, "error": "Max attempts exceeded"}
+    def _extract_code(self, agent_response: RexiaAIResponse) -> str:
+        return (
+            "\n".join(agent_response.answer)
+            if isinstance(agent_response.answer, list)
+            else agent_response.answer
         )
 
     def _format_response(
@@ -204,7 +230,7 @@ class LLMTool(BaseWorker):
         formatted_response = {
             "worker_name": worker_name,
             "agent_response": str(agent_response),
-            "tool_results": results
+            "tool_results": results,
         }
-        
+
         return str(formatted_response)

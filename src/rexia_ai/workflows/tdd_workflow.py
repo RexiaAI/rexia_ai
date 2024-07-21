@@ -31,7 +31,6 @@ class TDDWorkflow(BaseWorkflow):
         task: str,
         memory: BaseMemory,
         verbose: bool = False,
-        max_attempts: int = 5,
     ):
         """
         Initialize a TDDWorkflow instance.
@@ -43,17 +42,15 @@ class TDDWorkflow(BaseWorkflow):
             task (str): A description of the task to be performed using TDD.
             memory (BaseMemory): The memory object to be used for storing and retrieving information.
             verbose (bool, optional): Enable verbose mode for detailed logging. Defaults to False.
-            max_attempts (int, optional): Maximum number of attempts for code generation. Defaults to 5.
         """
         super().__init__(llm, task, verbose)
         self.memory = memory
         self.channel = CollaborationChannel(task)
         self.test_class = None
-        self.max_attempts = max_attempts
         self.tdd = Component(
             "tdd",
             self.channel,
-            TDDWorker(model=llm, verbose=verbose, max_attempts=max_attempts),
+            TDDWorker(model=llm, verbose=verbose),
             memory=self.memory,
         )
 

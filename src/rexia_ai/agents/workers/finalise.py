@@ -37,7 +37,6 @@ class FinaliseWorker(BaseWorker):
     Attributes:
         model (Any): The language model used for generating responses.
         verbose (bool): Flag for enabling verbose output mode.
-        max_attempts (int): Maximum number of attempts to generate a valid response.
 
     Inherits from:
         BaseWorker: Provides core functionality for AI workers in the ReXia.AI system.
@@ -47,7 +46,6 @@ class FinaliseWorker(BaseWorker):
         self,
         model: Any,
         verbose: bool = False,
-        max_attempts: int = 3,
     ):
         """
         Initialize a FinaliseWorker instance.
@@ -55,9 +53,8 @@ class FinaliseWorker(BaseWorker):
         Args:
             model (Any): The language model to be used for generating responses.
             verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
-            max_attempts (int, optional): Maximum number of attempts to generate a valid response. Defaults to 3.
         """
-        super().__init__(model, verbose=verbose, max_attempts=max_attempts)
+        super().__init__(model, verbose=verbose)
 
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
         """

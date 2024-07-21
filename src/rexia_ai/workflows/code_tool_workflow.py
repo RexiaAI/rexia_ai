@@ -19,7 +19,6 @@ class CodeToolWorkflow(BaseWorkflow):
         verbose (bool): Flag for enabling detailed logging and output for debugging purposes.
         memory (BaseMemory): The memory component used to store and retrieve relevant information across runs.
         channel (CollaborationChannel): Communication channel for task-related interactions and data sharing.
-        max_attempts (int): Maximum number of attempts for code generation before giving up.
         code_tool (Component): The component responsible for generating and executing the code tool.
     """
 
@@ -29,7 +28,6 @@ class CodeToolWorkflow(BaseWorkflow):
         task: str,
         memory: BaseMemory,
         verbose: bool = False,
-        max_attempts: int = 5,
     ):
         """
         Initialize a CodeToolWorkflow instance.
@@ -41,22 +39,20 @@ class CodeToolWorkflow(BaseWorkflow):
             task (str): A description of the task to be performed using the code tool.
             memory (BaseMemory): The memory object to be used for storing and retrieving information.
             verbose (bool, optional): Enable verbose mode for detailed logging. Defaults to False.
-            max_attempts (int, optional): Maximum number of attempts for code generation. Defaults to 5.
         """
         super().__init__(llm, task, verbose)
         self.memory = memory
         self.channel = CollaborationChannel(task)
-        self.max_attempts = max_attempts
         self.code_tool = Component(
             "Code",
             self.channel,
-            LLMTool(model=llm, verbose=verbose, max_attempts=max_attempts),
+            LLMTool(model=llm, verbose=verbose),
             memory=self.memory,
         )
         self.worker = Component(
             "Work",
             self.channel,
-            Worker(model=llm, verbose=verbose, max_attempts=max_attempts),
+            Worker(model=llm, verbose=verbose),
             memory=self.memory
         )
 
