@@ -6,9 +6,13 @@ import ast
 import os
 import inspect
 import json
-import traceback
 import textwrap
+import logging
 from typing import Any, List, Dict, Tuple, Union
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class ContainerisedCodeTester:
     """
@@ -30,14 +34,14 @@ class ContainerisedCodeTester:
         """
         try:
             self.client = docker.from_env()
-            print(f"Docker client initialized successfully.")
+            logger.info("Docker client initialized successfully.")
         except docker.errors.DockerException as e:
             error_msg = f"Failed to initialize Docker client: {str(e)}"
-            print(error_msg)
+            logger.error(error_msg)
             raise RuntimeError(error_msg)
         self.image = image
         self.timeout = timeout
-        print(f"ContainerisedCodeExecutor initialized with image: {image}, timeout: {timeout}s")
+        logger.info(f"ContainerisedCodeExecutor initialized with image: {image}, timeout: {timeout}s")
 
     def execute_code(self, code: Union[str, List[str]], test_class: type) -> Dict[str, Any]:
         """
@@ -55,35 +59,35 @@ class ContainerisedCodeTester:
                 code = "\n".join(code)
 
             with tempfile.TemporaryDirectory() as tmpdir:
-                print(f"Created temporary directory: {tmpdir}")
+                logger.info(f"Created temporary directory: {tmpdir}")
                 self._write_files(tmpdir, code, test_class)
                 status_code, stdout, stderr = self._run_container(tmpdir)
                 
                 if not stdout and not stderr:
-                    print("No output from container")
+                    logger.warning("No output from container")
                 else:
-                    print("Container produced output")
-                    print(f"Stdout length: {len(stdout)} characters")
-                    print(f"Stderr length: {len(stderr)} characters")
+                    logger.info("Container produced output")
+                    logger.debug(f"Stdout length: {len(stdout)} characters")
+                    logger.debug(f"Stderr length: {len(stderr)} characters")
                 
-                print(f"Container execution completed with status code: {status_code}")
+                logger.info(f"Container execution completed with status code: {status_code}")
                 
                 results = self._parse_output(status_code, stdout, stderr)
 
                 if results.get("all_passed"):
-                    print("All tests passed successfully!")
+                    logger.info("All tests passed successfully!")
                 else:
-                    print("Some tests failed or errors occurred.")
-                    print(f"Passed tests: {len(results['passed'])}")
-                    print(f"Failed tests: {len(results['failed'])}")
-                    print(f"Errors: {len(results['errors'])}")
+                    logger.warning("Some tests failed or errors occurred.")
+                    logger.debug(f"Passed tests: {len(results['passed'])}")
+                    logger.debug(f"Failed tests: {len(results['failed'])}")
+                    logger.debug(f"Errors: {len(results['errors'])}")
 
                 return results
 
         except Exception as e:
             error_message = f"An error occurred during code execution: {str(e)}"
-            print(error_message)
-            traceback.print_exc()
+            logger.error(error_message)
+            logger.exception("Exception details:")
             return {
                 "error": error_message,
                 "all_passed": False,
@@ -114,16 +118,16 @@ class ContainerisedCodeTester:
 
         with open(code_path, "w") as f:
             f.write(code)
-        print(f"Written code to: {code_path}")
+        logger.info(f"Written code to: {code_path}")
         
         with open(test_path, "w") as f:
             f.write(inspect.getsource(test_class))
-        print(f"Written test class to: {test_path}")
+        logger.info(f"Written test class to: {test_path}")
         
         main_content = self._generate_main_test_logic(test_class.__name__, function_name)
         with open(main_path, "w") as f:
             f.write(main_content)
-        print(f"Written main execution logic to: {main_path}")
+        logger.info(f"Written main execution logic to: {main_path}")
 
     def _run_container(self, tmpdir: str) -> Tuple[int, str, str]:
         """
@@ -139,7 +143,7 @@ class ContainerisedCodeTester:
             RuntimeError: If there's an error running the container.
         """
         try:
-            print(f"Starting container with image: {self.image}")
+            logger.info(f"Starting container with image: {self.image}")
             container = self.client.containers.run(
                 self.image,
                 command=["python", "/app/main.py"],
@@ -151,20 +155,20 @@ class ContainerisedCodeTester:
                 network_mode="none",
             )
 
-            print(f"Container started. Waiting for completion...")
+            logger.info("Container started. Waiting for completion...")
             result = container.wait(timeout=self.timeout)
             stdout = container.logs(stdout=True, stderr=False).decode("utf-8")
             stderr = container.logs(stdout=False, stderr=True).decode("utf-8")
             return result["StatusCode"], stdout, stderr
         except Exception as e:
-            print(f"Error in _run_container: {str(e)}")
+            logger.error(f"Error in _run_container: {str(e)}")
             return 1, "", str(e)
         finally:
             try:
                 container.remove(force=True)
-                print("Container removed.")
-            except:
-                print("Failed to remove container.")
+                logger.info("Container removed.")
+            except Exception as e:
+                logger.error(f"Failed to remove container: {str(e)}")
 
     @staticmethod
     def _generate_main_test_logic(class_name: str, func_name: str) -> str:
@@ -244,6 +248,7 @@ class ContainerisedCodeTester:
                 sys.exit(1 if test_results["failed"] or test_results["errors"] else 0)
         ''')
 
+
     @staticmethod
     def _parse_output(status_code: int, stdout: str, stderr: str) -> Dict[str, Any]:
         """
@@ -275,7 +280,7 @@ class ContainerisedCodeTester:
             
             if json_start != -1 and json_end != -1:
                 json_str = stdout[json_start + len("--- BEGIN JSON RESULTS ---"):json_end].strip()
-                print(f"Extracted JSON:\n{json_str}")
+                logger.info(f"Extracted JSON:\n{json_str}")
                 
                 test_results = json.loads(json_str)
                 results["passed"] = test_results.get("passed", [])
@@ -289,16 +294,16 @@ class ContainerisedCodeTester:
 
         except json.JSONDecodeError as e:
             error_msg = f"Failed to parse output as JSON: {str(e)}"
-            print(error_msg)
+            logger.error(error_msg)
             results["errors"].append(error_msg)
         except ValueError as e:
             error_msg = f"Error extracting JSON from output: {str(e)}"
-            print(error_msg)
+            logger.error(error_msg)
             results["errors"].append(error_msg)
         except Exception as e:
             error_msg = f"Unexpected error while parsing output: {str(e)}"
-            print(error_msg)
-            traceback.print_exc()
+            logger.error(error_msg)
+            logger.exception("Exception details:")
             results["errors"].append(error_msg)
 
         return results

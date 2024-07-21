@@ -1,7 +1,12 @@
 """Collaboration Channel class for ReXia.AI."""
 
+import logging
 from typing import Any, List
 from ..common import TaskStatus
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class CollaborationChannel:
     """
@@ -37,8 +42,8 @@ class CollaborationChannel:
         if item:
             self.messages.append(item)
         else:
-            print("Error: Cannot add empty item to the channel.")
-            
+            logger.error("Error: Cannot add empty item to the channel.")
+
     def clear_messages(self) -> None:
         """
         Clear all messages from the channel.
@@ -49,4 +54,4 @@ class CollaborationChannel:
         try:
             self.messages.clear()
         except Exception as e:
-            print(f"Error occurred while clearing messages: {str(e)}")
+            logger.error(f"Error occurred while clearing messages: {str(e)}")

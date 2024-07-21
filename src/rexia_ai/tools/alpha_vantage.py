@@ -2,9 +2,14 @@
 Credit to the original authors who did most of the work. Should not be used without an LLM that
 can handle very large datasets being returned."""
 
+import logging
 from typing import Dict, List
 from langchain_community.utilities.alpha_vantage import AlphaVantageAPIWrapper
 from ..base import BaseTool
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 
 class RexiaAIAlphaVantageSearchSymbols(BaseTool):
@@ -60,7 +65,7 @@ class RexiaAIAlphaVantageSearchSymbols(BaseTool):
         try:
             result = self.alpha_vantage_api.search_symbols(keywords)
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 
@@ -144,7 +149,7 @@ class RexiaAIAlphaVantageMarketNewsSentiment(BaseTool):
         try:
             result = self.alpha_vantage_api._get_market_news_sentiment(symbol)
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 
@@ -221,7 +226,7 @@ class RexiaAIAlphaVantageTimeSeriesDaily(BaseTool):
         try:
             result = self.alpha_vantage_api._get_time_series_daily(symbol)
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 
@@ -298,7 +303,7 @@ class RexiaAIAlphaVantageQuoteEndpoint(BaseTool):
         try:
             result = self.alpha_vantage_api._get_quote_endpoint(symbol)
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 
@@ -375,7 +380,7 @@ class RexiaAIAlphaVantageTimeSeriesWeekly(BaseTool):
         try:
             result = self.alpha_vantage_api._get_time_series_weekly(symbol)
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 
@@ -449,7 +454,7 @@ class RexiaAIAlphaVantageTopGainersLosers(BaseTool):
         try:
             result = self.alpha_vantage_api._get_top_gainers_losers()
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 
@@ -519,7 +524,7 @@ class RexiaAIAlphaVantageExchangeRate(BaseTool):
                 from_currency, to_currency
             )
         except Exception as e:
-            print(f"An error occurred while searching symbols: {e}")
+            logger.error(f"An error occurred while searching symbols: {e}")
             return None
         return result
 

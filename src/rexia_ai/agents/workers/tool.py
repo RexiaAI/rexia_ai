@@ -1,8 +1,14 @@
 """ToolWorker class for ReXia.AI's tool interaction and management system."""
 
+import logging
 from typing import Any, List, Dict
 from ...base import BaseWorker
 from ...structure import RexiaAIResponse
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
+
 
 PREDEFINED_PROMPT = """
         As a tool calling agent for ReXia.AI, your role is key in supporting task completion. 
@@ -58,7 +64,6 @@ PREDEFINED_PROMPT = """
         }
         """
 
-
 class ToolWorker(BaseWorker):
     """
     A specialized tool worker for ReXia.AI's agent system, focused on tool interaction and management.
@@ -85,6 +90,7 @@ class ToolWorker(BaseWorker):
             verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
         """
         super().__init__(model, verbose=verbose)
+        logger.info("ToolWorker initialized")
 
     def action(self, prompt: str, worker_name: str) -> str:
         """
@@ -99,6 +105,7 @@ class ToolWorker(BaseWorker):
         Returns:
             str: Formatted response including tool call results and any additional insights.
         """
+        logger.info(f"Executing action for worker: {worker_name}")
         agent_response = self._invoke_model(prompt)
         results = self._handle_tool_calls(agent_response)
         return self._format_response(worker_name, agent_response, results)
@@ -118,6 +125,7 @@ class ToolWorker(BaseWorker):
         Returns:
             str: A formatted prompt string for the model to guide tool selection and usage.
         """
+        logger.info("Creating prompt for task")
         prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
         prompt += f"\n\nAvailable Tools:\n{self._get_available_tools()}\n\n"
         return prompt
@@ -136,11 +144,14 @@ class ToolWorker(BaseWorker):
             Dict[str, Any]: A dictionary mapping tool names to their execution results or error messages.
         """
         results = {}
+        logger.info(f"Processing {len(rexia_ai_response.tool_calls)} tool calls")
         for tool_call in rexia_ai_response.tool_calls:
             tool_name = tool_call.get("name")
             tool_args = tool_call.get("parameters", {})
+            logger.debug(f"Processing tool call: {tool_name}")
 
             if tool_name not in self.model.tools:
+                logger.warning(f"Tool not found: {tool_name}")
                 results[tool_name] = f"Error: Tool {tool_name} not found."
                 continue
 
@@ -149,6 +160,7 @@ class ToolWorker(BaseWorker):
             function_to_call = getattr(tool, function_name, None)
 
             if not function_to_call:
+                logger.error(f"Function {function_name} not found in tool {tool_name}")
                 results[tool_name] = (
                     f"Error: Function {function_name} not found in tool {tool_name}"
                 )
@@ -156,7 +168,9 @@ class ToolWorker(BaseWorker):
 
             try:
                 results[tool_name] = function_to_call(**tool_args)
+                logger.info(f"Successfully executed {function_name} in {tool_name}")
             except Exception as e:
+                logger.exception(f"Error executing {function_name} in {tool_name}: {str(e)}")
                 results[tool_name] = (
                     f"Error executing {function_name} in {tool_name}: {str(e)}"
                 )
@@ -179,9 +193,10 @@ class ToolWorker(BaseWorker):
         Returns:
             str: A formatted string containing the worker's response and tool call results.
         """
+        formatted_response = f"{worker_name}: {results}"
         if self.verbose:
-            print(f"{worker_name}: {agent_response}\n\nTool messages: {results}")
-        return f"{worker_name}: {results}"
+            logger.debug(f"Verbose output: {worker_name}: {agent_response}\n\nTool messages: {results}")
+        return formatted_response
 
     @staticmethod
     def _format_messages(messages: List[str]) -> str:
@@ -194,4 +209,5 @@ class ToolWorker(BaseWorker):
         Returns:
             str: A single string with messages joined by double newlines.
         """
-        return "\n\n".join(messages)
+        formatted = "\n\n".join(messages)
+        return formatted

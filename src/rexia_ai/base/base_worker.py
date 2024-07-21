@@ -2,13 +2,16 @@
 
 import json5
 import textwrap
+import logging
 from typing import Any, List
 from abc import ABC
 from ..structure import LLMOutput
 from ..structure import RexiaAIResponse
 from ..common import Utility
 
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 class BaseWorker(ABC):
     """
     BaseWorker for ReXia.AI. Allows for the creation of workers from a standard interface.
@@ -48,7 +51,7 @@ class BaseWorker(ABC):
         agent_response = self._invoke_model(prompt)
 
         if self.verbose:
-            print(f"{worker_name}: {agent_response}")
+            logger.debug(f"{worker_name}: {agent_response}")
 
         return f"{worker_name}: {agent_response}"
 
@@ -67,15 +70,12 @@ class BaseWorker(ABC):
         Returns:
             The created prompt as a string.
         """
-
         additional_context = self._format_additional_context(messages, memory, task)
-
         structured_output_prompt = self.get_structured_output_prompt()
 
         final_prompt = (
             f"{prompt}\n\n" f"{additional_context}\n\n" f"{structured_output_prompt}"
         )
-
         return final_prompt
 
     def _format_additional_context(
@@ -118,18 +118,17 @@ class BaseWorker(ABC):
             rexia_ai_response = RexiaAIResponse.from_json(cleaned_response)
             return rexia_ai_response
         except Exception as e:
-            print(
-                "Failed to get a valid response from the model. "
-                f"Error: {str(e)}\n\nModel "
-                f"Response: {response}\n\Attempting to fix..."
-            )
+            logger.error(f"Failed to get a valid response from the model. Error: {str(e)}")
+            logger.debug(f"Model Response: {response}")
+            logger.info("Attempting to fix the response...")
             try:
                 fix_errors_prompt = Utility.fix_json_errors_prompt(
                     self, json_string=response, error=e
                 )
                 fixed_response = self.model.invoke(fix_errors_prompt)
+                logger.info("Successfully fixed the response")
             except:
-                print("Failed to get a valid response from the model.")
+                logger.error("Failed to get a valid response from the model.")
                 raise RuntimeError("Unable to get a valid response from the model.")
             rexia_ai_response = RexiaAIResponse.from_json(fixed_response)
             return rexia_ai_response
@@ -155,7 +154,6 @@ class BaseWorker(ABC):
         Returns:
             The structured output prompt.
         """
-
         output_structure = json5.dumps(LLMOutput.get_output_structure(), indent=2)
 
         return textwrap.dedent(

@@ -2,6 +2,11 @@
 
 import re
 import json_repair
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class Utility:
     """
@@ -37,7 +42,8 @@ class Utility:
         response = re.sub(r"```$", "", response, flags=re.MULTILINE)
         
         # Trim any leading/trailing whitespace
-        return response.strip()
+        stripped_response = response.strip()
+        return stripped_response
     
     @staticmethod
     def remove_system_tokens(s: str) -> str:
@@ -50,7 +56,8 @@ class Utility:
         Returns:
             The string with system tokens removed.
         """
-        return re.sub(r"</?[\w_]+>|<\|.*?\|>", "", s)
+        cleaned_string = re.sub(r"</?[\w_]+>|<\|.*?\|>", "", s)
+        return cleaned_string
     
     @staticmethod
     def extract_json_string(text):
@@ -68,7 +75,12 @@ class Utility:
         """
         pattern = r'\{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*\}'
         match = re.search(pattern, text, re.DOTALL)
-        return match.group(0) if match else text
+        if match:
+            extracted_json = match.group(0)
+            return extracted_json
+        else:
+            logger.warning("No JSON object found in the text")
+            return text
     
     @staticmethod
     def fix_json_errors(json_string: str) -> str:
@@ -88,7 +100,7 @@ class Utility:
             repaired_json = json_repair.repair_json(json_string)
             return repaired_json
         except Exception as e:
-            print(f"Error while fixing JSON string with json-repair: {e}")
+            logger.error(f"Error while fixing JSON string with json-repair: {e}")
             return json_string
         
     @staticmethod
@@ -128,5 +140,4 @@ class Utility:
         Do not include any unquoted keys or values or the task will fail.
         Do not include any syntax errors or the task will fail.
         """
-                
         return fix_errors_prompt

@@ -1,10 +1,14 @@
 """ContainerisedToolRunner class for ReXia.AI"""
 
+import logging
 from typing import Any, Dict
 import docker
 import tempfile
 import os
-import traceback
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class ContainerisedToolRunner:
     """
@@ -27,14 +31,15 @@ class ContainerisedToolRunner:
         """
         try:
             self.client = docker.from_env()
-            print("Docker client initialized successfully.")
+            logger.info("Docker client initialized successfully.")
         except docker.errors.DockerException as e:
             error_msg = f"Failed to initialize Docker client: {str(e)}"
-            print(error_msg)
+            logger.error(error_msg)
             raise RuntimeError(error_msg)
         
         self.image = image
         self.timeout = timeout
+        logger.info(f"ContainerisedToolRunner initialized with image: {image}, timeout: {timeout}s")
 
     def execute_code(self, code: str) -> Dict[str, Any]:
         """
@@ -52,18 +57,20 @@ class ContainerisedToolRunner:
         """
         try:
             with tempfile.TemporaryDirectory() as tmpdir:
-                print(f"Created temporary directory: {tmpdir}")
+                logger.info(f"Created temporary directory: {tmpdir}")
                 self._write_files(tmpdir, code)
                 status_code, stdout, stderr = self._run_container(tmpdir)
 
                 if status_code == 0:
+                    logger.info("Code execution successful")
                     return {"success": True, "output": stdout}
                 else:
+                    logger.warning(f"Code execution failed with status code: {status_code}")
                     return {"success": False, "error": stderr}
         except Exception as e:
             error_message = f"An error occurred during code execution: {str(e)}"
-            print(error_message)
-            traceback.print_exc()
+            logger.error(error_message)
+            logger.exception("Exception details:")
             return {"success": False, "error": error_message}
 
     def _write_files(self, tmpdir: str, code: str) -> None:
@@ -83,7 +90,7 @@ class ContainerisedToolRunner:
 
             with open(code_path, "w") as f:
                 f.write(code)
-            print(f"Written code to: {code_path}")
+            logger.info(f"Written code to: {code_path}")
 
             main_content = """
 import tool
@@ -95,8 +102,9 @@ if __name__ == '__main__':
 """
             with open(main_path, "w") as f:
                 f.write(main_content)
-            print(f"Written main execution logic to: {main_path}")
+            logger.info(f"Written main execution logic to: {main_path}")
         except IOError as e:
+            logger.error(f"Error writing files: {str(e)}")
             raise IOError(f"Error writing files: {str(e)}")
 
     def _run_container(self, tmpdir: str) -> tuple:
@@ -115,7 +123,7 @@ if __name__ == '__main__':
             docker.errors.APIError: If there's an error in the Docker API.
         """
         try:
-            print(f"Starting container with image: {self.image}")
+            logger.info(f"Starting container with image: {self.image}")
             container = self.client.containers.run(
                 self.image,
                 command=["python", "/app/main.py"],
@@ -127,22 +135,27 @@ if __name__ == '__main__':
                 network_mode="none",
             )
 
-            print("Container started. Waiting for completion...")
+            logger.info("Container started. Waiting for completion...")
             result = container.wait(timeout=self.timeout)
             stdout = container.logs(stdout=True, stderr=False).decode("utf-8")
             stderr = container.logs(stdout=False, stderr=True).decode("utf-8")
+            logger.info(f"Container execution completed with status code: {result['StatusCode']}")
             return result["StatusCode"], stdout, stderr
         except docker.errors.ContainerError as e:
+            logger.error(f"Container exited with non-zero status code: {str(e)}")
             return 1, "", f"Container exited with non-zero status code: {str(e)}"
         except docker.errors.ImageNotFound as e:
+            logger.error(f"Docker image not found: {str(e)}")
             return 1, "", f"Docker image not found: {str(e)}"
         except docker.errors.APIError as e:
+            logger.error(f"Docker API error: {str(e)}")
             return 1, "", f"Docker API error: {str(e)}"
         except Exception as e:
+            logger.error(f"Unexpected error in _run_container: {str(e)}")
             return 1, "", f"Unexpected error in _run_container: {str(e)}"
         finally:
             try:
                 container.remove(force=True)
-                print("Container removed.")
-            except:
-                print("Failed to remove container.")
+                logger.info("Container removed.")
+            except Exception as e:
+                logger.error(f"Failed to remove container: {str(e)}")

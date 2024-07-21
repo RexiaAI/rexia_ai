@@ -1,10 +1,15 @@
 """CodeToolWorkflow module for ReXia.AI's Code Tool Generation and Execution system."""
 
+import logging
 from typing import Any
 from ..base import BaseWorkflow, BaseMemory
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
 from ..agents.workers import LLMTool, Worker
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class CodeToolWorkflow(BaseWorkflow):
     """
@@ -68,23 +73,30 @@ class CodeToolWorkflow(BaseWorkflow):
             str: A success message or an error message if an exception occurs.
         """
         try:
-            print(f"ReXia.AI is working on the Code Tool task: {self.task}")
+            logger.info(f"ReXia.AI is working on the Code Tool task: {self.task}")
 
             self.channel.status = TaskStatus.WORKING
+            logger.debug(f"Task status set to: {self.channel.status}")
             
             # Generate and execute the code tool
             self.code_tool.run()
             self.worker.run()
 
             self.channel.status = TaskStatus.COMPLETED
+            logger.debug(f"Task status set to: {self.channel.status}")
 
             # Add the final message to the memory
-            self.memory.add_message(self.channel.messages[-1])
+            final_message = self.channel.messages[-1]
+            self.memory.add_message(final_message)
+            logger.info("Result added to memory")
+            if self.verbose:
+                logger.debug(f"Result: {final_message}")
 
-            print(f"ReXia.AI has completed the Code Tool task: {self.channel.task}")
+            logger.info(f"ReXia.AI has completed the Code Tool task: {self.channel.task}")
 
         except Exception as e:
-            print(f"An error occurred while running the task: {e}")
+            logger.error(f"An error occurred while running the task: {e}", exc_info=True)
+            raise
 
     def run(self) -> str:
         """
@@ -96,4 +108,9 @@ class CodeToolWorkflow(BaseWorkflow):
         Returns:
             str: A success message or an error message if an exception occurs.
         """
-        return self._run_task()
+        try:
+            result = self._run_task()
+            return result
+        except Exception as e:
+            logger.error(f"Code Tool workflow execution failed: {e}", exc_info=True)
+            return f"An error occurred: {str(e)}"

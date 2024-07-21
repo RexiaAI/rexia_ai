@@ -1,10 +1,15 @@
 """ReflectWorkflow module for ReXia.AI's multi-stage reflective task execution system."""
 
+import logging
 from typing import Any
 from ..base import BaseWorkflow, BaseMemory
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
 from ..agents.workers import PlanWorker, FinaliseWorker, Worker, ToolWorker
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class ReflectWorkflow(BaseWorkflow):
     """
@@ -100,28 +105,33 @@ class ReflectWorkflow(BaseWorkflow):
             None
 
         Raises:
-            Exception: If an error occurs during task execution. The error is caught and printed.
+            Exception: If an error occurs during task execution. The error is caught and logged.
         """
         try:
-            print(f"ReXia.AI is working on the task: {self.channel.task}")
+            logger.info(f"ReXia.AI is working on the task: {self.channel.task}")
 
             self.channel.status = TaskStatus.WORKING
-            self.plan.run()
+            logger.debug(f"Task status set to: {self.channel.status}")
 
+            self.plan.run()
             if self.llm.tools:
                 self.tool.run()
             self.work.run()
-
             self.finalise.run()
 
             self.channel.status = TaskStatus.COMPLETED
+            logger.debug(f"Task status set to: {self.channel.status}")
 
             # Add the final message to the memory
-            self.memory.add_message(self.channel.messages[-1])
+            final_message = self.channel.messages[-1]
+            self.memory.add_message(final_message)
+            logger.info("Result added to memory")
+            if self.verbose:
+                logger.debug(f"Result: {final_message}")
 
-            print(f"ReXia.AI has completed the task: {self.channel.task}")
+            logger.info(f"ReXia.AI has completed the task: {self.channel.task}")
         except Exception as e:
-            print(f"An error occurred while running the task: {e}")
+            logger.error(f"An error occurred while running the task: {e}", exc_info=True)
 
     def run(self) -> None:
         """
@@ -133,4 +143,7 @@ class ReflectWorkflow(BaseWorkflow):
         Returns:
             None
         """
-        self._run_task()
+        try:
+            self._run_task()
+        except Exception as e:
+            logger.error(f"Reflective workflow execution failed: {e}", exc_info=True)

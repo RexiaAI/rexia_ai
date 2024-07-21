@@ -1,11 +1,16 @@
 """TDD Worker class for ReXia.AI."""
 
 import inspect
+import logging
 from typing import Any, List, Dict
-from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
+from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 from ...base import BaseWorker
 from ...common import ContainerisedCodeTester
 from ...structure import RexiaAIResponse
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class CodeGenerationError(Exception):
     pass
@@ -98,11 +103,7 @@ class TDDWorker(BaseWorker):
     the provided unit tests.
     """
 
-    def __init__(
-        self,
-        model: Any,
-        verbose: bool = False,
-    ):
+    def __init__(self, model: Any, verbose: bool = False):
         """
         Initialize a TDDWorker instance.
 
@@ -117,6 +118,7 @@ class TDDWorker(BaseWorker):
     def set_test_class(self, test_class: type):
         """Set the test class to be used for TDD."""
         self.test_class = test_class
+        logger.info(f"Test class set to: {test_class.__name__}")
 
     def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
         """
@@ -134,6 +136,7 @@ class TDDWorker(BaseWorker):
             ValueError: If the test class has not been set.
         """
         if self.test_class is None:
+            logger.error("Test class has not been set.")
             raise ValueError(
                 "Test class has not been set. Use set_test_class() before creating a prompt."
             )
@@ -154,8 +157,9 @@ class TDDWorker(BaseWorker):
 
     @retry(
         stop=stop_after_attempt(3),
-        wait=wait_fixed(1),
+        wait=wait_exponential(multiplier=1, min=1, max=60),
         retry=retry_if_exception_type(CodeGenerationError),
+        before_sleep=lambda retry_state: logger.info(f"Retrying action (attempt {retry_state.attempt_number})"),
         reraise=True
     )
     def action(self, prompt: str, worker_name: str) -> str:
@@ -184,38 +188,41 @@ class TDDWorker(BaseWorker):
                 raise ValueError(f"Expected RexiaAIResponse, got {type(agent_response)}")
 
             if self.verbose:
-                print(f"Agent response: {agent_response}")
-                print(f"Code generated: {agent_response.answer}")
+                logger.info(f"Agent response: {agent_response}")
+                logger.info(f"Code generated: {agent_response.answer}")
 
             code = agent_response.answer
 
             if self.verbose:
-                print("Code to test:")
-                print(code)
+                logger.info("Code to test:")
+                logger.info(code)
 
             executor = ContainerisedCodeTester()
             result = executor.execute_code(code, self.test_class)
 
             if result.get("all_passed"):
+                logger.info("All tests passed successfully.")
                 return f"{worker_name}: {agent_response}"
             else:
                 error_message = self._format_error_message(result)
                 if self.verbose:
-                    print(f"Attempt failed, retrying...")
-                    print(error_message)
+                    logger.info("Attempt failed, retrying...")
+                    logger.error(error_message)
                 prompt = self._update_prompt_with_error(prompt, agent_response, error_message)
                 raise CodeGenerationError(error_message)
 
         except Exception as e:
-            print(f"Error during attempt: {str(e)}")
+            logger.error(f"Error during attempt: {str(e)}")
             raise CodeGenerationError(str(e))
 
     def _update_prompt_with_error(self, prompt: str, agent_response: RexiaAIResponse, error_message: str) -> str:
-        return f"""\nThe Python code within the answer field of this JSON object returned an error.
+        updated_prompt = f"""\nThe Python code within the answer field of this JSON object returned an error.
         JSON Object: {agent_response}\n\n 
         Error: {error_message}\n\n
         Please return the full previous JSON object with the answer updated to fix this error.
         """
+        logger.debug(f"Updated prompt with error: {updated_prompt[:100]}...")  # Log first 100 chars
+        return updated_prompt
 
     def _format_error_message(self, result: Dict[str, Any]) -> str:
         """

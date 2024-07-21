@@ -1,6 +1,11 @@
 """LLM verification, uses a large language model to verify output from ReXia.AI"""
 
+import logging
 from rexia_ai.llms import RexiaAIOpenAI
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class LLMVerification():
     """LLMVerification class for ReXia.AI. Automates verification of ReXia.AI output for testing purposes."""
@@ -21,21 +26,23 @@ class LLMVerification():
         Args:
         prompt (str): The input prompt to be sent to the ReXia.AI API for verification.
         """
+        logger.info("Starting verification process")
         try:
             result = self.llm.invoke(prompt)
             if "PASSED" in result:
+                logger.info("Verification passed")
                 return True
             else:
+                logger.info("Verification failed")
                 return False
         except Exception as e:
-            print(f"Error occurred invoking the LLM for verification: {e}") 
+            logger.error(f"Error occurred invoking the LLM for verification: {e}", exc_info=True)
             return False
         
     @staticmethod
     def get_verification_prompt():
         """Returns a predefined prompt used to verify ReXia.AI LLM."""
-        
-        return """You are a verification agent for ReXia.AI. Your job is to read a given task,
+        prompt = """You are a verification agent for ReXia.AI. Your job is to read a given task,
         the collaboration chat associated with that task if present, the task history if present, and the
         response given to that task and determine if the response correctly answers the question
         or not. 
@@ -46,5 +53,4 @@ class LLMVerification():
         
         You should look for any logical errors, factual inaccuracies, or inconsistencies in the response
         that would make it incorrect. If you find such issues, please specify them in your response."""
-            
-        
+        return prompt

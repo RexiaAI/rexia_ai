@@ -1,5 +1,6 @@
 """Agent class for ReXia.AI."""
 
+import logging
 import re
 from typing import Type, Optional, List
 from ..workflows import ReflectWorkflow
@@ -9,7 +10,9 @@ from ..base import BaseMemory, BaseWorkflow
 from .routers import TaskComplexityRouter
 from ..llms import RexiaAIOpenAI
 
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 class Agent:
     """
     Agent class for ReXia AI.
@@ -103,7 +106,7 @@ class Agent:
             The task result if it exists, None otherwise.
         """
         if not messages:
-            print("Error: No messages to process.")
+            logging.error("Error: No messages to process.")
             return None
 
         return messages[-1]
@@ -135,7 +138,7 @@ class Agent:
             accepted_answer = self.format_accepted_answer(task_result)
             return accepted_answer
         except Exception as e:
-            print(f"Unexpected error: {e}")
+            logging.error(f"Unexpected error: {e}")
 
     def format_accepted_answer(self, answer: str) -> Optional[RexiaAIResponse]:
         """
@@ -171,5 +174,5 @@ class Agent:
 
             return rexia_ai_response
         except Exception as e:
-            print(f"Error while formatting the answer: {e}")
+            logging.error(f"Error while formatting the answer: {e}")
             return None

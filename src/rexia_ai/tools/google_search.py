@@ -5,7 +5,6 @@ the work."""
 from langchain_google_community import GoogleSearchAPIWrapper
 from ..base import BaseTool
 
-
 class RexiaAIGoogleSearch(BaseTool):
     """
     Google Search Tool that works with ReXia.AI.
