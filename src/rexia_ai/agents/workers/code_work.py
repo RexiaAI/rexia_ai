@@ -1,4 +1,4 @@
-"""Worker class for ReXia.AI's general task execution and problem-solving system."""
+"""CodeWorker class for ReXia.AI's general task execution and problem-solving system."""
 
 from typing import Any, List
 from ...base import BaseWorker
@@ -23,16 +23,12 @@ Ensure your response is clear, concise, and informative. Avoid unnecessary compl
 Don't add reasoning outside your chain of reasoning. Don't use unexplained abbreviations or shorthand. 
 Use messages from tools in your answer. Ensure your answer matches the task and is complete and detailed.
 
-If there are tool messages provided by tools, you should use them to provide accurate answers.
-
 Apply specific formatting requests only within the answer.
 """
 
 
-class Worker(BaseWorker):
+class CodeWorker(BaseWorker):
     """
-    A non-specialized worker for ReXia.AI's agent system, designed for general task execution.
-
     This worker is responsible for processing and completing a wide range of tasks
     based on the collaboration chat, task context, and any additional information
     provided. It's capable of handling tasks varying from simple queries to complex

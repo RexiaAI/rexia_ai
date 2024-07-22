@@ -157,8 +157,8 @@ class ContainerisedCodeTester:
 
             logger.info("Container started. Waiting for completion...")
             result = container.wait(timeout=self.timeout)
-            stdout = container.logs(stdout=True, stderr=False).decode("utf-8")
-            stderr = container.logs(stdout=False, stderr=True).decode("utf-8")
+            stdout = container.logs(stdout=True, stderr=False)
+            stderr = container.logs(stdout=False, stderr=True)
             return result["StatusCode"], stdout, stderr
         except Exception as e:
             logger.error(f"Error in _run_container: {str(e)}")

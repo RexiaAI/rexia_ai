@@ -125,7 +125,6 @@ class ToolWorker(BaseWorker):
         Returns:
             str: A formatted prompt string for the model to guide tool selection and usage.
         """
-        logger.info("Creating prompt for task")
         prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
         prompt += f"\n\nAvailable Tools:\n{self._get_available_tools()}\n\n"
         return prompt
@@ -168,7 +167,7 @@ class ToolWorker(BaseWorker):
 
             try:
                 results[tool_name] = function_to_call(**tool_args)
-                logger.info(f"Successfully executed {function_name} in {tool_name}")
+                logger.info(f"Successfully executed {function_name}")
             except Exception as e:
                 logger.exception(f"Error executing {function_name} in {tool_name}: {str(e)}")
                 results[tool_name] = (

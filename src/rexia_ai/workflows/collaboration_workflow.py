@@ -91,10 +91,10 @@ class CollaborationWorkflow(BaseWorkflow):
             self.channel.status = TaskStatus.WORKING
             logger.debug(f"Task status set to: {self.channel.status}")
             
-            # Generate and execute the code tool
+            # Generate and execute the code too
             if self.llm.tools:
                 self.tool.run()
-                
+            
             self.team_work.run()
 
             self.channel.status = TaskStatus.COMPLETED

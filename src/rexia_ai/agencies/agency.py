@@ -1,3 +1,5 @@
+"""Agency class for ReXia.AI"""
+
 import json5
 import logging
 from typing import List, Dict, Any

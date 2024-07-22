@@ -6,7 +6,8 @@ from .plan import PlanWorker
 from .finalise import FinaliseWorker
 from .team_work import TeamWorker
 from .tdd import TDDWorker
-from .llm_tool import LLMTool
+from .code_tool import CodeTool
+from .code_work import CodeWorker
 
 __all__ = [
     "ToolWorker",
@@ -15,5 +16,6 @@ __all__ = [
     "FinaliseWorker",
     "TeamWorker",
     "TDDWorker",
-    "LLMTool"
+    "CodeTool",
+    "CodeWorker"
 ]

@@ -92,7 +92,9 @@ class Agent:
         Returns:
             The messages from the workflow.
         """
+        logger.info("Starting workflow...")
         self.workflow.run()
+        logger.info("Workflow completed.")
         return self.workflow.channel.messages
 
     def get_task_result(self, messages: List[str]) -> Optional[str]:

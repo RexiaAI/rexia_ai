@@ -1,9 +1,12 @@
 """Component class for ReXia.AI."""
 
+import logging
 from typing import Any
 from ..base import BaseMemory, BaseWorker
 from ..common import CollaborationChannel
 
+logging.basicConfig(level=logging.INFO, format='%(message)s')
+logger = logging.getLogger(__name__)
 
 class Component:
     """
@@ -48,7 +51,9 @@ class Component:
         Returns:
             The response from performing the task.
         """
+        logging.info(f"Component {self.name} running.")
         response = self.perform_task()
+        logging.info(f"Component {self.name} finished running.")
         return response
 
     def perform_task(self) -> Any:

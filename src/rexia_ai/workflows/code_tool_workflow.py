@@ -5,7 +5,7 @@ from typing import Any
 from ..base import BaseWorkflow, BaseMemory
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
-from ..agents.workers import LLMTool, Worker
+from ..agents.workers import CodeTool, CodeWorker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -51,13 +51,13 @@ class CodeToolWorkflow(BaseWorkflow):
         self.code_tool = Component(
             "Code",
             self.channel,
-            LLMTool(model=llm, verbose=verbose),
+            CodeTool(model=llm, verbose=verbose),
             memory=self.memory,
         )
         self.worker = Component(
             "Work",
             self.channel,
-            Worker(model=llm, verbose=verbose),
+            CodeWorker(model=llm, verbose=verbose),
             memory=self.memory
         )
 
