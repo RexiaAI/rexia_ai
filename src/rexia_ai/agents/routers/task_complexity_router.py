@@ -11,6 +11,7 @@ logger = logging.getLogger(__name__)
 PREDEFINED_PROMPT = """
 You are a task complexity analyzer. Your job is to assess the given task and assign it a complexity
 score between 1 and 100. Consider the following factors:
+
 1. Input length: How long is the input text?
 2. Expected output length: How long should the response be?
 3. Task type: Is it simple classification, generation, summarization, etc.?
@@ -19,47 +20,65 @@ score between 1 and 100. Consider the following factors:
 6. Contextual understanding: How much context or background knowledge is needed?
 7. Creativity level: Does it require creative or original thinking?
 8. Factual knowledge: How much factual information is necessary?
+
 After analyzing the task, provide your response in the following JSON format:
-"complexity_score": ,
-"explanation": "",
-"factors": {
-"input_length": ,
-"output_length": ,
-"task_type": "",
-"domain_specificity": ,
-"reasoning_depth": ,
-"contextual_understanding": ,
-"creativity_level": ,
-"factual_knowledge": 
+
+{
+  "complexity_score": <integer between 1 and 100>,
+  "explanation": "<brief explanation of the scoring>",
+  "factors": {
+    "input_length": <integer between 1 and 100>,
+    "output_length": <integer between 1 and 100>,
+    "task_type": "<string describing the task type>",
+    "domain_specificity": <integer between 1 and 100>,
+    "reasoning_depth": <integer between 1 and 100>,
+    "contextual_understanding": <integer between 1 and 100>,
+    "creativity_level": <integer between 1 and 100>,
+    "factual_knowledge": <integer between 1 and 100>
+  }
+}
+
 Here are some examples:
+
 Example 1:
 Task: Classify this movie review as positive or negative: "I loved this film! The acting was superb
 and the plot kept me engaged throughout."
-"complexity_score": 15,
-"explanation": "Simple sentiment classification with short input, minimal reasoning required.",
-"factors": {
-"input_length": 20,
-"output_length": 10,
-"task_type": "classification",
-"domain_specificity": 10,
-"reasoning_depth": 20,
-"contextual_understanding": 15,
-"creativity_level": 5,
-"factual_knowledge": 10
+
+{
+  "complexity_score": 15,
+  "explanation": "Simple sentiment classification with short input, minimal reasoning required.",
+  "factors": {
+    "input_length": 20,
+    "output_length": 10,
+    "task_type": "classification",
+    "domain_specificity": 10,
+    "reasoning_depth": 20,
+    "contextual_understanding": 15,
+    "creativity_level": 5,
+    "factual_knowledge": 10
+  }
+}
+
 Example 2:
 Task: Summarize the key points of this 1000-word article on quantum computing.
-"complexity_score": 70,
-"explanation": "Long input on specialized topic, requires good summarization skills and technical understanding.",
-"factors": {
-"input_length": 80,
-"output_length": 50,
-"task_type": "summarization",
-"domain_specificity": 85,
-"reasoning_depth": 70,
-"contextual_understanding": 75,
-"creativity_level": 30,
-"factual_knowledge": 80
+
+{
+  "complexity_score": 70,
+  "explanation": "Long input on specialized topic, requires good summarization skills and technical understanding.",
+  "factors": {
+    "input_length": 80,
+    "output_length": 50,
+    "task_type": "summarization",
+    "domain_specificity": 85,
+    "reasoning_depth": 70,
+    "contextual_understanding": 75,
+    "creativity_level": 30,
+    "factual_knowledge": 80
+  }
+}
+
 Now, analyze the following task and provide the output in the required JSON format:
+
 """
 
 class TaskComplexityRouter:

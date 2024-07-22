@@ -54,13 +54,13 @@ Example output format:
 ],
 "answer": [
 "def is_even(n: int) -> bool:",
-" return n % 2 == 0",
+"    return n % 2 == 0",
 "",
 "def sum_even_numbers(start: int, end: int) -> int:",
-" return sum(num for num in range(start, end + 1) if is_even(num))",
+"    return sum(num for num in range(start, end + 1) if is_even(num))",
 "",
 "def main() -> int:",
-" return sum_even_numbers(1, 100)",
+"    return sum_even_numbers(1, 100)",
 ""
 ],
 "confidence_score": 95.0,
