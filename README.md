@@ -12,13 +12,6 @@ ReXia.AI is an advanced AI framework designed to integrate various language mode
 - [License](#license)
 - [Contact](#contact)
 
-## Update v0.1.6
-
-- Added team_worker
-- Added collaboration_workflow
-- Added collaboration workflow example
-- Added collaboration workflow documentation
-
 ## Features
 
 - Support for multiple language models
@@ -85,6 +78,7 @@ print(result)
 
 Detailed documentation for each component can be found in the `docs` folder:
 
+- [Agency](docs/agencies/agency.md)
 - [Agent](docs/agents/agent.md)
 - [Workflows](docs/workflows)
 - [Language Models](docs/llms)
@@ -99,6 +93,7 @@ ReXia.AI comes with several built-in tools:
 - [Google Search](docs/tools/google_search.md)
 - [Image Analysis](docs/tools/image_analysis.md)
 - [Alpha Vantage Financial Data](docs/tools/alpha_vantage.md)
+- [Query Knowledge Base](docs/tools/query_knowledge_base.md)
 
 ## License
 
