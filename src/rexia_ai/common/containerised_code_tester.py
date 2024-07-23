@@ -35,7 +35,7 @@ class ContainerisedCodeTester:
         try:
             self.client = docker.from_env()
             logger.info("Docker client initialized successfully.")
-        except docker.errors.DockerException as e:
+        except Exception as e:
             error_msg = f"Failed to initialize Docker client: {str(e)}"
             logger.error(error_msg)
             raise RuntimeError(error_msg)

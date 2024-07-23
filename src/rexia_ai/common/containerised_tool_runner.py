@@ -32,7 +32,7 @@ class ContainerisedToolRunner:
         try:
             self.client = docker.from_env()
             logger.info("Docker client initialized successfully.")
-        except docker.errors.DockerException as e:
+        except Exception as e:
             error_msg = f"Failed to initialize Docker client: {str(e)}"
             logger.error(error_msg)
             raise RuntimeError(error_msg)
@@ -141,15 +141,6 @@ if __name__ == '__main__':
             stderr = container.logs(stdout=False, stderr=True).decode("utf-8")
             logger.info(f"Container execution completed with status code: {result['StatusCode']}")
             return result["StatusCode"], stdout, stderr
-        except docker.errors.ContainerError as e:
-            logger.error(f"Container exited with non-zero status code: {str(e)}")
-            return 1, "", f"Container exited with non-zero status code: {str(e)}"
-        except docker.errors.ImageNotFound as e:
-            logger.error(f"Docker image not found: {str(e)}")
-            return 1, "", f"Docker image not found: {str(e)}"
-        except docker.errors.APIError as e:
-            logger.error(f"Docker API error: {str(e)}")
-            return 1, "", f"Docker API error: {str(e)}"
         except Exception as e:
             logger.error(f"Unexpected error in _run_container: {str(e)}")
             return 1, "", f"Unexpected error in _run_container: {str(e)}"
