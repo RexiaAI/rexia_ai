@@ -6,7 +6,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='rexia_ai',
-    version='0.2.4',
+    version='0.3.1',
     author='Robyn Le Sueur',
     author_email='robyn.lesueur@googlemail.com',
     description='ReXia.AI: An advanced AI framework for agentic processes',
@@ -17,19 +17,22 @@ setup(
     package_dir={'': 'src'},
     install_requires=[
         "docker_py==1.10.6",
-        "gradio==4.37.0",
-        "langchain_community==0.2.5",
-        "langchain_google_community==1.0.5",
-        "langchain_openai==0.1.9",
+        "gradio==4.39.0",
+        "json5==0.9.25",
+        "json_repair==0.25.3",
+        "langchain_community==0.2.9",
+        "langchain_google_community==1.0.7",
+        "langchain_openai==0.1.17",
         "llmware==0.3.0",
         "moviepy==1.0.3",
-        "openai==1.35.3",
+        "openai==1.37.0",
         "opencv_python==4.10.0.82",
         "opencv_python_headless==4.10.0.82",
-        "pydantic==2.7.4",
+        "pydantic==2.8.2",
         "pytube==15.0.0",
         "Requests==2.32.3",
         "setuptools==69.5.1",
+        "tenacity==8.5.0",
         "transformers==4.41.2"
     ],
     classifiers=[
