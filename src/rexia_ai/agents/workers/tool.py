@@ -90,7 +90,6 @@ class ToolWorker(BaseWorker):
             verbose (bool, optional): Enable verbose output for debugging. Defaults to False.
         """
         super().__init__(model, verbose=verbose)
-        logger.info("ToolWorker initialized")
 
     def action(self, prompt: str, worker_name: str) -> str:
         """
@@ -105,7 +104,6 @@ class ToolWorker(BaseWorker):
         Returns:
             str: Formatted response including tool call results and any additional insights.
         """
-        logger.info(f"Executing action for worker: {worker_name}")
         agent_response = self._invoke_model(prompt)
         results = self._handle_tool_calls(agent_response)
         return self._format_response(worker_name, agent_response, results)
