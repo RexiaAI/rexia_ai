@@ -6,8 +6,8 @@ from rexia_ai.agents import Agent
 
 # Create an instance of the RexiaAI LLM
 llm = RexiaAIOpenAI(
-    base_url="http://localhost:1234/v1",
-    model="lm-studio",
+    base_url="http://localhost:11434/v1",
+    model="llama3.1",
     temperature=0
 )
 

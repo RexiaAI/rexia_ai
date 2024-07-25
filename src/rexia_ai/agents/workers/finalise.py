@@ -21,6 +21,9 @@ Avoid abbreviations or shorthand unless explained in the answer. Don't give inst
 just provide the improved one. Ensure your answer matches the task and is complete and detailed.
 
 Apply specific formatting requests only within the answer.
+
+Your answer should always be a completion of the task, not a statement that the task is complete
+or a description of the actions required to complex the task.
 """
 
 

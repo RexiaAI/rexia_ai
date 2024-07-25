@@ -26,6 +26,8 @@ Use messages from tools in your answer. Ensure your answer matches the task and 
 If there are tool messages provided by tools, you should use them to provide accurate answers.
 
 Apply specific formatting requests only within the answer.
+Your answer should always be a completion of the task, not a statement that the task is complete
+or a description of the actions required to complex the task.
 """
 
 

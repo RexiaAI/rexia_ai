@@ -113,7 +113,7 @@ class Agent:
 
         return messages[-1]
 
-    def invoke(self, task: str = None) -> Optional[str]:
+    def invoke(self, task: str = None) -> Optional[RexiaAIResponse]:
         """
         Invoke method for the agent.
 

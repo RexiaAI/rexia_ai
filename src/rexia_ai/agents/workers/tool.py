@@ -36,6 +36,8 @@ PREDEFINED_PROMPT = """
         structured format requested below.
         
         Ignore any existing tool calls in the collaboration chat and make your own.
+        
+        Use only tools from available tools to make tool calls.
 
         {
         "tool_calls": [
@@ -124,7 +126,7 @@ class ToolWorker(BaseWorker):
             str: A formatted prompt string for the model to guide tool selection and usage.
         """
         prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
-        prompt += f"\n\nAvailable Tools:\n{self._get_available_tools()}\n\n"
+        prompt += f"\n\nAvailable Tools (Use only these):\n{self._get_available_tools()}\n\n"
         return prompt
 
     def _handle_tool_calls(self, rexia_ai_response: RexiaAIResponse) -> Dict[str, Any]:
