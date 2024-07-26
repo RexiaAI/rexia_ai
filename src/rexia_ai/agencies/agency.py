@@ -7,35 +7,43 @@ from dataclasses import dataclass
 from tenacity import retry, stop_after_attempt, wait_fixed, retry_if_exception_type
 from ..agents import Agent
 from ..common import CollaborationChannel, Utility
-from ..memory import WorkingMemory
 from ..llms import RexiaAIOpenAI
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
+
 # Custom exceptions
 class AgencyError(Exception):
     """Base exception for Agency-related errors."""
+
     pass
+
 
 class AssignmentError(AgencyError):
     """Exception raised for errors in assignment creation or execution."""
+
     pass
+
 
 @dataclass
 class AgentInfo:
     """Dataclass to store information about an agent."""
+
     agent: Agent
     name: str
     description: str
 
+
 @dataclass
 class AgentAssignment:
     """Dataclass to store an agent's task assignment."""
+
     agent: Agent
     name: str
     task: str
+
 
 class ManagerAgent:
     """ManagerAgent class for ReXia.AI. This agent manages the interactions between agents within an agency."""
@@ -50,7 +58,6 @@ class ManagerAgent:
         """
         self.llm = manager_llm
         self.collaboration_channel = CollaborationChannel("Agent Collaboration")
-        self.memory = WorkingMemory()
         self.agents = agents
         self.task = ""
         self.subtasks = []
@@ -63,7 +70,6 @@ class ManagerAgent:
             task (str): The main task to be completed.
         """
         self.task = task
-        self.memory.add_message(f"Main task: {task}")
 
     def manage_agents(self) -> None:
         """
@@ -76,9 +82,6 @@ class ManagerAgent:
 
             # Execute all subtasks sequentially
             for subtask in self.subtasks:
-                if subtask["status"] == "complete":
-                    self.memory.add_message(f"Final summary: {subtask['summary']}")
-                    break
                 try:
                     self._execute_assignment(subtask["assignment"])
                 except Exception as e:
@@ -90,10 +93,8 @@ class ManagerAgent:
     def _generate_subtasks(self) -> None:
         """Generate all subtasks required to complete the main task."""
         agents_list = self._format_agents_list()
-        memory_content = self.memory.get_messages_as_string()
-        previous_results = self._get_all_previous_results()
-        prompt = self._create_action_prompt(agents_list, previous_results, memory_content)
-        
+        prompt = self._create_action_prompt(agents_list)
+
         try:
             response = self.llm.invoke(prompt)
             cleaned_response = self._clean_response(response)
@@ -102,33 +103,10 @@ class ManagerAgent:
             logging.info("Generated subtasks:")
             for idx, subtask in enumerate(self.subtasks, 1):
                 logging.info(f"Subtask {idx}:")
-                logging.info(f"  Completion: {subtask['completion']}")
                 logging.info(f"  Agent: {subtask['assignment'].name}")
                 logging.info(f"  Task: {subtask['assignment'].task}")
-                logging.info("  Plan:")
-                for step in subtask["Plan"]:
-                    logging.info(f"    Step: {step['Step']}")
-                    logging.info(f"    Status: {step['status']}")
         except Exception as e:
-            logging.error(f"Failed to get a valid response from the model. Error: {str(e)}\n\nModel Response: {response}\n\nRetrying...")
-            try:
-                fix_errors_prompt = Utility.fix_json_errors_prompt(self, json_string=response, error=e)
-                fixed_response = self.llm.invoke(fix_errors_prompt)
-                cleaned_response = self._clean_response(fixed_response)
-                self.subtasks = self._process_parsed_response(cleaned_response)
-                logging.info("Generated subtasks:")
-                for idx, subtask in enumerate(self.subtasks, 1):
-                    logging.info(f"Subtask {idx}:")
-                    logging.info(f"  Completion: {subtask['completion']}")
-                    logging.info(f"  Agent: {subtask['assignment'].name}")
-                    logging.info(f"  Task: {subtask['assignment'].task}")
-                    logging.info("  Plan:")
-                    for step in subtask["Plan"]:
-                        logging.info(f"    Step: {step['Step']}")
-                        logging.info(f"    Status: {step['status']}")
-            except:
-                logging.error("Failed to get a valid response from the model.")
-                raise RuntimeError("Unable to get a valid response from the model.")
+            logging.error(f"Failed to get a valid response from the model. Error: {e}")
 
     @retry(
         stop=stop_after_attempt(3),
@@ -168,19 +146,34 @@ class ManagerAgent:
         """
         formatted_messages = self._format_messages(messages)
         return f"""
-        You are tasked with presenting the complete results of a collaborative task execution.
-        The main task was: "{self.task}"
+        ## Task Finalization
+
+        You are an expert analyst tasked with using the work of your team of agents to complete a task.
+
+        ### Original Task
+        "{self.task}"
+
+        ### Collaboration Data
         Below are the messages from the collaboration channel, representing the work done by various agents:
+
         {formatted_messages}
-        Based on the above information, present the full and detailed results of the task. Do not describe the outcome; instead, provide the actual content of the deliverables, plans, strategies, or any other outputs produced. Include all relevant details, data, figures, and explanations that constitute the complete result of the task.
-        Your response should be structured as follows:
-        1. [Main Output Title]
-        [Present the primary output or deliverable here in full detail]
-        2. [Secondary Output Title (if applicable)]
-        [Present any secondary outputs or deliverables]
-        3. [Additional Components (if any)]
-        [Include any other relevant components of the result]
-        Ensure that you are presenting the actual content and not describing it. Provide all the specific details, numbers, plans, or any other concrete information that makes up the full result of the task.
+
+        ### Your Responsibilities
+        1. Thoroughly analyze all messages from the collaboration channel.
+        2. Synthesise the information to create a comprehensive answer to the original task.
+        3. Ensure all aspects of the task are addressed in your response.
+        4. Present your findings in a clear, logical, and well-structured manner.
+        5. Include relevant data, analysis, and conclusions from the collaboration.
+        6. Highlight key insights or important discoveries.
+        7. Address any limitations or uncertainties in the results, if applicable.
+        8. Provide a completion of the task, this means you must provide the full
+        answer building on the previous work, not a description of what has been done.
+        9. Make use all the work of your agents in the collaboration chat. Your response
+        should be a synthesis of all of this information.
+
+        ### Output Format
+        Your response should be detailed, professional, and directly answer the original task.
+        Use appropriate headings, bullet points, or numbered lists to organize information clearly.
         """
 
     def _format_messages(self, messages: List[str]) -> str:
@@ -193,29 +186,37 @@ class ManagerAgent:
         Returns:
             str: Formatted string of messages.
         """
-        return "\n".join([f"Message {i}:\n{message}\n" for i, message in enumerate(messages, 1)])
+        formatted_messages = "\n".join(
+            [f"Message {i}:\n{message}\n" for i, message in enumerate(messages, 1)]
+        )
+        return formatted_messages
 
     def _format_agents_list(self) -> str:
         """Format the list of agents for the prompt."""
-        return "\n".join(f"{i+1}. Name: {agent.name}\n Description: {agent.description}" for i, agent in enumerate(self.agents))
+        return "\n".join(
+            f"{i+1}. Name: {agent.name}\n Description: {agent.description}"
+            for i, agent in enumerate(self.agents)
+        )
 
-    def _process_parsed_response(self, parsed_response: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _process_parsed_response(
+        self, parsed_response: Dict[str, Any]
+    ) -> List[Dict[str, Any]]:
         """
         Process the parsed LLM response and return the list of subtasks.
-        
+
         Args:
             parsed_response (Dict[str, Any]): The parsed JSON response from the LLM.
-        
+
         Returns:
             List[Dict[str, Any]]: A list of dictionaries containing the subtasks.
-        
+
         Raises:
             AssignmentError: If no agent is found with the specified name.
             ValueError: If the status in the LLM response is invalid.
         """
         if parsed_response["status"] == "complete":
             return [{"status": "complete", "summary": parsed_response["summary"]}]
-        
+
         subtasks = []
         for subtask in parsed_response["subtasks"]:
             agent_name = subtask["assignment"]["agent"]
@@ -223,88 +224,62 @@ class ManagerAgent:
             agent_info = next((a for a in self.agents if a.name == agent_name), None)
             if agent_info is None:
                 raise AssignmentError(f"No agent found with name: {agent_name}")
-            assignment = AgentAssignment(agent=agent_info.agent, name=agent_name, task=task_description)
-            subtasks.append({
-                "status": "in_progress",
-                "completion": subtask["completion"],
-                "assignment": assignment,
-                "Plan": subtask["Plan"]
-            })
+            assignment = AgentAssignment(
+                agent=agent_info.agent, name=agent_name, task=task_description
+            )
+            subtasks.append(
+                {
+                    "status": "in_progress",
+                    "assignment": assignment,
+                }
+            )
         return subtasks
 
-    def _create_action_prompt(self, agents_list: str, task_log: str, memory_content: str) -> str:
+    def _create_action_prompt(self, agents_list: str) -> str:
         """
         Create the prompt for generating all subtasks.
-        
+
         Args:
             agents_list (str): A formatted string listing all available agents and their descriptions.
-            previous_results (str): A string containing the results of previously completed subtasks.
-        
+            memory_content (str): A string containing the results of previously completed tasks.
         Returns:
             str: A formatted prompt string for the LLM to generate all subtasks.
         """
         return f"""
-        You are an AI task manager responsible for efficiently breaking down and managing a complex task. 
-        Your goal is to generate a list of all subtasks required to complete the main task.
+        You are an expert AI task manager responsible for efficiently breaking down and managing a complex task. 
+        Your goal is to generate a comprehensive list of all subtasks required to complete the main task.
 
-        Main Task: {self.task}
+        ### Main Task
+        {self.task}
 
-        Available AI Agents (Use only these): {agents_list}
+        ### Available AI Agents
+        Use only these agents for task assignments:
+        {agents_list}
 
-        Previous Completed Subtask Results: {task_log}
-
-        Previous Task Results: {memory_content}
-
-        IMPORTANT GUIDELINES:
+        ### Critical Guidelines
         1. Provide COMPLETE information in each subtask. Do NOT reference previous subtasks or information.
         2. Each subtask must be self-contained with ALL necessary context and details.
-        3. NEVER use phrases like "as mentioned before" or "using the previous information".
-        4. If a subtask requires information from a previous step, REPEAT that information in full.
-        5. Create comprehensive subtasks that encompass multiple related actions when possible.
-        6. Ensure subtasks relate to the plan and prioritize based on importance and dependencies.
-        7. Be explicit and instructive. The agent must understand it needs to perform the work, not describe it.
-        8. If a previous subtask result is unsatisfactory, try a different approach or agent.
+        3. Be explicit and instructive. The agent must understand it needs to perform the work, not describe it.
+        4. If you want code, specify the language required for the code.
+        5. Each subtask should read as a prompt, using best practice prompting techniques, to instruct an AI
+        agent to complete the subtask exactly as required.
+        6. Ensure logical progression and dependencies between subtasks.
+        7. Assign subtasks to the most appropriate agent based on their capabilities.
 
-        Example of a GOOD subtask:
-        "Implement the Snake class for the Snake game with the following specifications:
-        1. Attributes: position (list of coordinates), direction (UP, DOWN, LEFT, RIGHT), length (initial value: 3)
-        2. Methods:
-           a. move(): Update snake's position based on current direction
-           b. grow(): Increase snake's length when it eats food
-           c. check_collision(): Detect collisions with self or game boundaries
-        3. Game board size: 20x20 grid
-        Provide complete Python code with proper documentation."
-
-        Example of a BAD subtask:
-        "Implement the Snake class as discussed earlier, with the previously mentioned attributes and methods."
+        ### Output Format
 
         Generate a list of subtasks in the following JSON format:
         {{
             "status": "in_progress",
             "subtasks": [
                 {{
-                    "completion": "completion percentage (e.g. 75%)",
                     "assignment": {{
                         "agent": "Agent name",
                         "subtask": "Comprehensive task description with ALL necessary context and information."
                     }},
-                    "Plan": [
-                        {{
-                            "Step": "Detailed step description",
-                            "status": "pending, in_progress, or completed"
-                        }},
-                        // ... more steps as needed
-                    ]
                 }},
                 // ... more subtasks as needed
             ]
-        }}
-
-        If the task is complete, use this JSON format:
-        {{
-            "status": "complete",
-            "completion": "100%",
-            "summary": "Detailed summary of the completed task and its results"
         }}
 
         Your response must be in valid JSON format as specified above. Include nothing outside the JSON.
@@ -321,19 +296,23 @@ class ManagerAgent:
             AgencyError: If there's an error in executing the assignment.
         """
         try:
-            task_with_context = (
-                assignment.task + "\n\nAdditional Context: " + "\n\n".join(self.collaboration_channel.messages)
-            )
-            result = assignment.agent.invoke(task_with_context)
+            result = assignment.agent.invoke(assignment.task)
             summary = (
-                "Subtask: " + assignment.task + "\n\nAgent Assigned: " + assignment.name + "\n\nAgent Result: " + str(result)
+                "Subtask: "
+                + assignment.task
+                + "\n\nAgent Assigned: "
+                + assignment.name
+                + "\n\nAgent Result: "
+                + str(result)
             )
             logging.info(summary)
             self.collaboration_channel.put(summary)
         except Exception as e:
             error_message = f"Failed task: {assignment.task}\nError: Failed to execute assignment for agent {assignment.name}: {str(e)}"
             self.collaboration_channel.put(
-                error_message + "\n\nAgent messages:" + "\n".join(assignment.agent.workflow.channel.messages)
+                error_message
+                + "\n\nAgent messages:"
+                + "\n".join(assignment.agent.workflow.channel.messages)
             )
             raise AssignmentError(error_message)
 
@@ -361,6 +340,7 @@ class ManagerAgent:
         cleaned_response = Utility.extract_json_string(response)
         cleaned_response = Utility.fix_json_errors(cleaned_response)
         return cleaned_response
+
 
 class Agency:
     """Agency class for ReXia.AI. An agency represents a group of autonomous agents capable of working together on complex tasks."""

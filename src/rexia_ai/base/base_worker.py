@@ -55,9 +55,7 @@ class BaseWorker(ABC):
 
         return f"{worker_name}: {agent_response}"
 
-    def create_prompt(
-        self, prompt: str, task: str, messages: List[str], memory: Any
-    ) -> str:
+    def create_prompt(self, prompt: str, task: str, messages: List[str]) -> str:
         """
         Create a prompt for the model with compression.
 
@@ -70,7 +68,7 @@ class BaseWorker(ABC):
         Returns:
             The created prompt as a string.
         """
-        additional_context = self._format_additional_context(messages, memory, task)
+        additional_context = self._format_additional_context(messages, task)
         structured_output_prompt = self.get_structured_output_prompt()
 
         final_prompt = (
@@ -87,7 +85,6 @@ class BaseWorker(ABC):
         Args:
             task: The task for which the prompt is created.
             messages: The messages from the collaboration chat.
-            memory: The memory object containing the history of the agent's tasks.
 
         Returns:
             The formatted task and messages as a string.
@@ -97,8 +94,6 @@ class BaseWorker(ABC):
             + task
             + "\n\nCollaboration Chat:\n\n"
             + "\n\n".join(messages)
-            + "\n\nPrevious Task Details:\n\n"
-            + memory.get_messages_as_string()
         )
         return formatted
 

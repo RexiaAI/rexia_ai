@@ -4,8 +4,6 @@ from typing import Any, List
 from ...base import BaseWorker
 
 PREDEFINED_PROMPT = """
-# AI Team Problem-Solving Simulation
-
 You are an AI tasked with simulating a team of five distinct personalities working together to solve a problem. 
 The team will plan, discuss, and execute a solution in a single, cohesive process.
 
@@ -36,6 +34,7 @@ The team will plan, discuss, and execute a solution in a single, cohesive proces
 
 Use the following JSON structure for your output:
 
+```json
 {
     "question": "The original problem statement",
     "plan": ["Step 1 of the agreed and executed plan", "Step 2", ...],
@@ -57,18 +56,6 @@ Use the following JSON structure for your output:
     ],
     "tool_calls": []
 }
-
-## Guidelines
-
-- Maintain each character's unique voice, expertise, and perspective throughout the entire process.
-- Show how the team's diverse skills contribute to both planning and execution.
-- Demonstrate realistic team dynamics, including potential disagreements and their resolutions.
-- Ensure the final solution comprehensively addresses the original problem.
-- The "chain_of_reasoning" should clearly show the progression from initial ideas through planning, execution, and final solution.
-- Adjust the confidence score based on the team's overall satisfaction with the process and outcome.
-
-Remember to keep the interaction realistic, showcasing both the benefits and challenges 
-of a diverse team working together on a complex problem from start to finish.
 """
 
 
@@ -103,7 +90,7 @@ class TeamWorker(BaseWorker):
         """
         super().__init__(model, verbose=verbose)
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(self, task: str, messages: List[str]) -> str:
         """
         Create a prompt for the model to generate a team problem-solving simulation.
 
@@ -114,17 +101,9 @@ class TeamWorker(BaseWorker):
         Args:
             task (str): The problem or challenge to be addressed by the simulated team.
             messages (List[str]): A list of relevant messages or context for the task.
-            memory (Any): Additional context or information stored in the agent's memory.
 
         Returns:
             str: A formatted prompt string for the model to generate a team problem-solving simulation.
-
-        Note:
-            The generated simulation includes a detailed analysis of the problem, individual
-            team member proposals, team discussions, consensus building, plan execution,
-            challenge resolution, and a final comprehensive solution. The output is structured
-            in a specific JSON format that includes the question, plan, answer, confidence score,
-            chain of reasoning, and any tool calls made during the process.
         """
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages)
         return prompt

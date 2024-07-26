@@ -19,14 +19,13 @@ The `SimpleToolWorkflow` class is a specialized workflow implementation in the R
 - `llm`: The language model used by the workflow.
 - `task`: The task that the workflow is designed to perform.
 - `verbose`: A flag used for enabling verbose mode.
-- `memory`: The memory component of the workflow.
 - `channel`: The collaboration channel for the workflow.
 - `tool`: The tool component of the workflow.
 - `work`: The work component of the workflow.
 
 ## Methods
 
-### `__init__(self, llm: Any, task: str, memory: BaseMemory, verbose: bool = False, max_attempts: int = 3) -> None`
+### `__init__(self, llm: Any, task: str, verbose: bool = False, max_attempts: int = 3) -> None`
 
 Initializes a SimpleToolWorkflow instance.
 
@@ -34,7 +33,6 @@ Initializes a SimpleToolWorkflow instance.
 
 - `llm`: The language model used by the workflow.
 - `task`: The task assigned to the workflow.
-- `memory`: The memory instance used by the workflow.
 - `verbose`: A flag for enabling verbose mode. Defaults to `False`.
 - `max_attempts`: The maximum number of attempts to get a valid response from the model. Defaults to `3`.
 
@@ -52,7 +50,6 @@ Here's an example of how to use the `SimpleToolWorkflow` class with an Agent:
 
 ```python
 from rexia_ai.workflows import SimpleToolWorkflow
-from rexia_ai.memory import WorkingMemory
 from rexia_ai.agent import Agent
 
 # Initialize your language model
@@ -61,15 +58,11 @@ llm = ...  # Your language model instance
 # Define the task
 task = "Perform a web search and summarize the results."
 
-# Create a memory instance
-memory = WorkingMemory()
-
 # Create an Agent instance with SimpleToolWorkflow
 agent = Agent(
     llm=llm,
     task=task,
     workflow=SimpleToolWorkflow,
-    memory=memory,
     verbose=True
 )
 

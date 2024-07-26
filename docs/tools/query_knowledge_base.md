@@ -66,7 +66,6 @@ Here's an example of how to use the `RexiaAIQueryKnowledgeBase` class:
 from rexia_ai.tools import RexiaAIQueryKnowledgeBase
 from rexia_ai.agent import Agent
 from rexia_ai.workflows import SimpleToolWorkflow
-from rexia_ai.memory import WorkingMemory
 
 # Initialize the RexiaAIQueryKnowledgeBase instance
 knowledge_base_tool = RexiaAIQueryKnowledgeBase(
@@ -81,7 +80,6 @@ agent = Agent(
     llm=...,  # Your language model instance
     task="Query the knowledge base for information",
     workflow=SimpleToolWorkflow,
-    memory=WorkingMemory(),
     verbose=True,
     tools={"query_knowledge_base": knowledge_base_tool}
 )

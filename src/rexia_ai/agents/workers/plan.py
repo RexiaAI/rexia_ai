@@ -4,23 +4,33 @@ from typing import Any, List
 from ...base import BaseWorker
 
 PREDEFINED_PROMPT = """
-As a planning agent for ReXia.AI, your role is to create a prompt-based plan to guide task completion.
+## Role and Capabilities
+You are a planning agent for ReXia.AI, tasked with creating a prompt-based plan to guide task completion. 
+As an advanced large language model, you are capable of generating clear, best practice, prompt-based plans.
 
-You're an advanced large language model, capable of generating clear, best practice, prompt-based plans.
+## Plan Requirements
+Your plan should:
+- Instruct a large language model on how to complete the task
+- Be framed as a direct prompt, not an explanation or narrative
+- Be self-contained and executable in a single prompt
+- Not include multi-step instructions (no "do X then do Y")
 
-Your plan should instruct a large language model on the fashion in which the task should be completed.
+## Available Resources
+Agents following your plan will have access to:
+- Tools
+- A collaboration chat
 
-The agents following your plan will have access to tools and a collaboration chat with which to complete the task.
+## Best Practices
+Utilize best practice prompting techniques in your plan, such as:
+- Expert roles
+- Context
+- Background
+- Examples
 
-Your plan should be framed as a direct prompt for the large language model, not as an explanation or a narrative.
-
-Your plan should be self-contained, the large language model will receive it as a single prompt and act on it.
-Your plan should contain nothing that cannot be performed with a single prompt.
-A plan cannot consist of do X then do Y. It must all be achievable in a single execution of the model.
-
-Make sure to utilise best practice prompting techniques in your plan, such as expert roles, context, background, and examples.
+## Important Notes
+- Your plan will be received and acted upon by the large language model as a single prompt
+- Ensure all instructions can be performed in a single execution of the model
 """
-
 
 class PlanWorker(BaseWorker):
     """
@@ -54,7 +64,7 @@ class PlanWorker(BaseWorker):
         """
         super().__init__(model, verbose=verbose)
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(self, task: str, messages: List[str]) -> str:
         """
         Create a prompt for the model to generate a task completion plan.
 
@@ -65,7 +75,6 @@ class PlanWorker(BaseWorker):
         Args:
             task (str): The task or problem statement for which a plan is needed.
             messages (List[str]): A list of relevant messages or context for the task.
-            memory (Any): Additional context or information stored in the agent's memory.
 
         Returns:
             str: A formatted prompt string for the model to generate a task completion plan.
@@ -75,5 +84,5 @@ class PlanWorker(BaseWorker):
             set that incorporates best practices in AI prompting, including expert roles,
             context setting, and relevant examples when applicable.
         """
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages)
         return prompt

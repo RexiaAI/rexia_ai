@@ -30,7 +30,6 @@ To create and use an `Agent` instance, follow the steps below:
 
 ```python
 from rexia_ai.agent import Agent
-from rexia_ai.memory import WorkingMemory
 from rexia_ai.workflows import ReflectWorkflow
 from rexia_ai.llms import RexiaAIOpenAI
 
@@ -44,7 +43,6 @@ agent = Agent(
     llm=base_llm,
     task="Your task description",
     workflow=ReflectWorkflow,
-    memory=WorkingMemory(),
     verbose=True,
     use_router=True,
     router_llm=router_llm,
@@ -69,7 +67,7 @@ print(result)
 
 ## Methods
 
-### `__init__(self, llm: RexiaAIOpenAI, task: str, workflow: Optional[Type[BaseWorkflow]] = None, memory: BaseMemory = WorkingMemory(), verbose: bool = False, max_attempts: int = 3, use_router: bool = False, router_llm: Optional[RexiaAIOpenAI] = None, complex_llm: Optional[RexiaAIOpenAI] = None, task_complexity_threshold: int = 50)`
+### `__init__(self, llm: RexiaAIOpenAI, task: str, workflow: Optional[Type[BaseWorkflow]] = None, verbose: bool = False, max_attempts: int = 3, use_router: bool = False, router_llm: Optional[RexiaAIOpenAI] = None, complex_llm: Optional[RexiaAIOpenAI] = None, task_complexity_threshold: int = 50)`
 
 Initializes an `Agent` instance.
 
@@ -78,7 +76,6 @@ Initializes an `Agent` instance.
 - `llm`: The base language model used by the agent.
 - `task`: The task assigned to the agent.
 - `workflow`: The class of the workflow to be used by the agent. Defaults to `ReflectWorkflow`.
-- `memory`: The memory instance used by the agent. Defaults to `WorkingMemory`.
 - `verbose`: A flag for enabling verbose mode. Defaults to `False`.
 - `max_attempts`: The maximum number of attempts to get a valid response from the model. Defaults to `3`.
 - `use_router`: Whether to use the task complexity router. Defaults to `False`.

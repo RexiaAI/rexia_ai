@@ -18,45 +18,87 @@ class ToolExecutionError(Exception):
     pass
 
 PREDEFINED_PROMPT = """
-As an AI assistant for ReXia.AI, your task is to implement Python function(s) that will solve the given problem. Follow these guidelines:
-Environment:
+As an AI assistant for ReXia.AI, your task is to implement Python function(s) that will solve the given problem. 
+Follow these guidelines:
+
+### Environment
 - Python 3.12
 - Isolated container with only built-in libraries
 - No external libraries, API keys, environment variables, or system-specific features
-Key points:
-- Use only Python's built-in libraries and functions
-- Do not import or use any external packages
-- Avoid any operations requiring API keys, network calls, or file operations
-- Implement efficient, Pythonic code with appropriate built-ins
-- Handle errors and edge cases
-- Provide clear docstrings and type hints
-Style guidelines:
-- Use 4 spaces for indentation
-- Maximum 100 characters per line
-- Use snake_case for function and variable names
-- Include concise docstrings and type hints
-Implementation:
-- Define the function(s) necessary to solve the given problem
-- Include necessary import statements only from built-in modules
-- Implement the required logic using only built-in Python features
-- Create a main() function that solves the problem and returns the result
-Output format:
-- Provide code in the "answer" field as a list of strings
-- Each string represents one line of code
-- Preserve indentation with EXACTLY 4 spaces per level
-- Include empty lines as empty strings
-- The code will be joined and executed directly
-- It is required that your response has a main() function that returns the result or it will fail.
-Example output format:
-"question": "Calculate the sum of all even numbers between 1 and 100, inclusive.",
-"plan": [
-"Define a function to check if a number is even",
-"Define a function to calculate the sum of even numbers in a range",
-"Create a main() function to solve the problem and return the result"
-],
-"answer": [
-"def is_even(n: int) -> bool:",
-"    return n % 2 == 0",
+
+### Key Points
+1. **Use Built-in Libraries**:
+   - Use only Python's built-in libraries and functions.
+   - Do not import or use any external packages.
+
+2. **Avoid Restricted Operations**:
+   - Avoid any operations requiring API keys, network calls, or file operations.
+
+3. **Code Quality**:
+   - Implement efficient, Pythonic code with appropriate built-ins.
+   - Handle errors and edge cases gracefully.
+   - Provide clear docstrings and type hints.
+
+### Style Guidelines
+1. **Indentation**:
+   - Use 4 spaces for indentation.
+
+2. **Line Length**:
+   - Maximum 100 characters per line.
+
+3. **Naming Conventions**:
+   - Use snake_case for function and variable names.
+
+4. **Documentation**:
+   - Include concise docstrings and type hints.
+
+### Implementation
+1. **Function Definitions**:
+   - Define the function(s) necessary to solve the given problem.
+   - Include necessary import statements only from built-in modules.
+   - Implement the required logic using only built-in Python features.
+
+2. **Main Function**:
+   - Create a `main()` function that solves the problem and returns the result.
+
+### Output Format
+- Provide code in the "answer" field as a list of strings.
+- Each string represents one line of code.
+- Preserve indentation with EXACTLY 4 spaces per level.
+- Include empty lines as empty strings.
+- The code will be joined and executed directly.
+- It is required that your response has a `main()` function that returns the result or it will fail.
+
+### Example Output Format
+```json
+{
+  "question": "Calculate the sum of all even numbers between 1 and 100, inclusive.",
+  "plan": [
+    "Define a function to check if a number is even",
+    "Define a function to calculate the sum of even numbers in a range",
+    "Create a main() function to solve the problem and return the result"
+  ],
+  "answer": [
+    "def is_even(n: int) -> bool:",
+    "    return n % 2 == 0",
+    "",
+    "def sum_even_numbers(start: int, end: int) -> int:",
+    "    return sum(num for num in range(start, end + 1) if is_even(num))",
+    "",
+    "def main() -> int:",
+    "    return sum_even_numbers(1, 100)",
+    ""
+  ],
+  "confidence_score": 95.0,
+  "chain_of_reasoning": [
+    "Define is_even function to check if a number is even",
+    "Define sum_even_numbers function to calculate the sum of even numbers in a range",
+    "Use list comprehension with is_even check to generate even numbers",
+    "Use built-in sum function to calculate the total",
+    "Create main() function to call sum_even_numbers with the required range and return the result"
+  ],
+  "tool_calls": []
+}
 "",
 "def sum_even_numbers(start: int, end: int) -> int:",
 "    return sum(num for num in range(start, end + 1) if is_even(num))",
@@ -99,7 +141,7 @@ class CodeTool(BaseWorker):
         super().__init__(model, verbose=verbose)
         self.tool_runner = ContainerisedToolRunner()
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(self, task: str, messages: List[str]) -> str:
         """
         Create a prompt for the language model to generate a Python tool.
         This method constructs a prompt by combining a predefined prompt template
@@ -108,7 +150,6 @@ class CodeTool(BaseWorker):
         Args:
             task (str): The task description for which to create a tool.
             messages (List[str]): List of previous messages in the conversation.
-            memory (Any): The memory object containing relevant context.
 
         Returns:
             str: The generated prompt for the language model.
@@ -120,7 +161,7 @@ class CodeTool(BaseWorker):
         Remember to use only built-in Python libraries and avoid any external dependencies or API calls.
         """
         # Combine the predefined prompt with the task-specific prompt
-        prompt = super().create_prompt(PREDEFINED_PROMPT + task_prompt, task, messages, memory)
+        prompt = super().create_prompt(PREDEFINED_PROMPT + task_prompt, task, messages)
         return prompt
 
     @retry(

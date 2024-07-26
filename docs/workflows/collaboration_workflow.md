@@ -9,20 +9,18 @@ The CollaborationWorkflow class implements a workflow that utilizes team collabo
 - `llm`: The language model used by the workflow
 - `task`: The task to be performed
 - `verbose`: Flag for enabling verbose mode
-- `memory`: The memory component
 - `channel`: The collaboration channel for communication
 - `team_work`: The team worker component
 - `tool`: The tool worker component
 
 ## Methods
 
-### `__init__(self, llm: Any, task: str, memory: BaseMemory, verbose: bool = False, max_attempts: int = 3) -> None`
+### `__init__(self, llm: Any, task: str, verbose: bool = False, max_attempts: int = 3) -> None`
 
 Initializes a CollaborationWorkflow instance with the following parameters:
 
 - `llm`: The language model
 - `task`: The assigned task
-- `memory`: The memory instance
 - `verbose`: Flag for verbose mode (default: False)
 - `max_attempts`: Maximum attempts for model responses (default: 3)
 
@@ -34,7 +32,6 @@ Internal method that executes the main workflow process:
 2. Runs the tool component if tools are available
 3. Runs the team work component
 4. Sets the task status to COMPLETED
-5. Adds the final message to memory
 
 ### `run(self) -> None`
 
@@ -46,18 +43,15 @@ To use the CollaborationWorkflow with an Agent:
 
 ```python
 from rexia_ai.workflows import CollaborationWorkflow
-from rexia_ai.memory import WorkingMemory
 from rexia_ai.agent import Agent
 
 llm = ...  # Your language model instance
 task = "Collaborate on a research project and summarize findings."
-memory = WorkingMemory()
 
 agent = Agent(
     llm=llm,
     task=task,
     workflow=CollaborationWorkflow,
-    memory=memory,
     verbose=True
 )
 

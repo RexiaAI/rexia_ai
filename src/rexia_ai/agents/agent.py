@@ -5,8 +5,7 @@ import re
 from typing import Type, Optional, List
 from ..workflows import ReflectWorkflow
 from ..structure import RexiaAIResponse
-from ..memory import WorkingMemory
-from ..base import BaseMemory, BaseWorkflow
+from ..base import BaseWorkflow
 from .routers import TaskComplexityRouter
 from ..llms import RexiaAIOpenAI
 
@@ -33,7 +32,6 @@ class Agent:
         llm: RexiaAIOpenAI,
         task: str,
         workflow: Optional[Type[BaseWorkflow]] = None,
-        memory: BaseMemory = WorkingMemory(),
         verbose: bool = False,
         use_router: bool = False,
         router_llm: Optional[RexiaAIOpenAI] = None,
@@ -47,7 +45,6 @@ class Agent:
             llm (RexiaAIOpenAI): The language model used by the agent.
             task (str): The task assigned to the agent.
             workflow (Optional[Type[BaseWorkflow]]): The class of the workflow to be used.
-            memory (BaseMemory): The memory instance to be used. Defaults to WorkingMemory().
             verbose (bool): Flag for enabling verbose mode. Defaults to False.
             use_router (bool): Whether to use the task complexity router. Defaults to False.
             router_llm (Optional[RexiaAIOpenAI]): The LLM for the router. Required if use_router is True.
@@ -81,7 +78,6 @@ class Agent:
         self.workflow = workflow_class(
             llm=self.llm,
             task=task,
-            memory=memory,
             verbose=verbose,
         )
 
@@ -124,8 +120,12 @@ class Agent:
             The accepted answer if it exists, None otherwise.
         """
         try:
+            self.workflow.clear_channel()
             if task:
-                self.task = self.workflow.channel.task = task
+                logging.info("New task set.")
+                self.task = task
+                self.workflow.channel.task = task
+                self.workflow.task = task
                 if self.router:
                     self.task_complexity = self.router.route(task)
                     self.llm = (
@@ -134,7 +134,6 @@ class Agent:
                         else self.router.base_llm
                     )
                     self.workflow.llm = self.llm
-            self.workflow.clear_channel()  # Clear any messages from a previous task.
             messages = self.run_workflow()
             task_result = self.get_task_result(messages)
             accepted_answer = self.format_accepted_answer(task_result)

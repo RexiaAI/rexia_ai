@@ -63,7 +63,6 @@ Here's an example of how to use the `RexiaAIYoutubeVideoAnalysis` class:
 from rexia_ai.tools import RexiaAIYoutubeVideoAnalysis
 from rexia_ai.agent import Agent
 from rexia_ai.workflows import SimpleToolWorkflow
-from rexia_ai.memory import WorkingMemory
 
 # Initialize the RexiaAIYoutubeVideoAnalysis instance
 video_analysis_tool = RexiaAIYoutubeVideoAnalysis(
@@ -77,7 +76,6 @@ agent = Agent(
     llm=...,  # Your language model instance
     task="Analyze the content of this YouTube video",
     workflow=SimpleToolWorkflow,
-    memory=WorkingMemory(),
     verbose=True,
     tools={"analyse_video": video_analysis_tool}
 )

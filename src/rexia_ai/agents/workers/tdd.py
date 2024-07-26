@@ -19,39 +19,41 @@ class CodeExecutionError(Exception):
     pass
 
 PREDEFINED_PROMPT = """
+## Role
 As a test-driven development agent for ReXia.AI, implement Python function(s) to pass the given unit test.
 
-Environment:
+## Environment
 - Python 3.12
 - Isolated container with only built-in libraries
 - No external libraries, environment variables, or system-specific features
 
-Style guidelines:
+## Style Guidelines
 - 4 spaces for indentation
 - Max 100 characters per line
 - snake_case for names
 - Include type hints and concise docstrings
 
-Implementation:
+## Implementation Requirements
 - Include all necessary import statements at the beginning of your code
 - Implement only required function(s)
 - Use efficient, Pythonic code with appropriate built-ins
 - Handle errors and edge cases
 - No sensitive info, network calls, or file operations
 
-Key points:
+## Key Points
 - Match function name(s) in the test
 - Ensure correct inputs and outputs
 - Account for edge cases
 
-Output format:
+## Output Format
 - Provide code in "answer" field as a list of strings
 - Each string = one line of code
 - Preserve indentation with EXACTLY 4 spaces per level
 - Include empty lines as empty strings
 - Code will be joined and executed directly
 
-Example output format:
+## Example Output Format
+```json
 {
     "question": "Implement a sum_numbers function to pass the given test.",
     "plan": [
@@ -120,14 +122,13 @@ class TDDWorker(BaseWorker):
         self.test_class = test_class
         logger.info(f"Test class set to: {test_class.__name__}")
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(self, task: str, messages: List[str]) -> str:
         """
         Create a prompt for the model.
 
         Args:
             task: The task description.
             messages: List of previous messages.
-            memory: The memory object.
 
         Returns:
             A string containing the prompt for the model.
@@ -152,7 +153,7 @@ class TDDWorker(BaseWorker):
         Implement the necessary function(s) to make all assertions in the test pass.
         Only provide the implementation, not the test class itself.
         """
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task_prompt, messages, memory)
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task_prompt, messages)
         return prompt
 
     @retry(

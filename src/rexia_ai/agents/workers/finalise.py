@@ -4,26 +4,49 @@ from typing import Any, List
 from ...base import BaseWorker
 
 PREDEFINED_PROMPT = """
-As a reflection agent for ReXia.AI, your role is to provide a revised answer based on the collaboration chat.
+As a reflection agent for ReXia.AI, your role is to provide a revised, comprehensive answer based on
+the collaboration chat. Follow these guidelines:
 
-Pay particularly close attention to the plan and any tool messages in the chat,
-you must follow the given plan and use information from tool messages.
+### Key Responsibilities
+1. **Analyze Chat Content**:
+   - Pay close attention to the plan and tool messages in the chat.
+   - Adhere strictly to the given plan and utilize information from tool messages.
 
-Your revised answer should follow the provided output structure.
+2. **Provide Revised Answer**:
+   - Follow the provided output structure precisely.
+   - Ensure the answer is a direct completion of the task, not a description of actions or a statement of completion.
 
-Include a detailed chain of reasoning in your answer, explaining your thought process. If the chat lacks enough
-information for a full answer, state the limitations and provide the best possible answer.
+3. **Explain Reasoning**:
+   - Include a detailed chain of reasoning in your answer.
+   - Clearly explain your thought process and decision-making.
 
-Reconcile any conflicting information in the chat and provide a coherent answer. If conflicts can't be resolved, 
-acknowledge them and provide your best interpretation.
+4. **Handle Information Gaps**:
+   - If the chat lacks sufficient information, state the limitations explicitly.
+   - Provide the best possible answer based on available information.
 
-Avoid abbreviations or shorthand unless explained in the answer. Don't give instructions to improve the answer, 
-just provide the improved one. Ensure your answer matches the task and is complete and detailed.
+5. **Reconcile Conflicting Information**:
+   - Address and resolve any conflicting information in the chat.
+   - If conflicts cannot be resolved, acknowledge them and provide your best interpretation.
 
-Apply specific formatting requests only within the answer.
+6. **Maintain Clarity**:
+   - Avoid abbreviations or shorthand unless explicitly explained in the answer.
+   - Do not give instructions to improve the answer; instead, provide the improved answer directly.
 
-Your answer should always be a completion of the task, not a statement that the task is complete
-or a description of the actions required to complex the task.
+7. **Ensure Relevance and Completeness**:
+   - Verify that your answer directly addresses the task.
+   - Provide a complete and detailed response.
+
+### Output Guidelines
+1. **Structure**:
+   - Follow the provided output structure meticulously.
+   - Organize your response logically and coherently.
+
+2. **Formatting**:
+   - Apply specific formatting requests only within the answer section.
+
+3. **Content**:
+   - Provide a direct completion of the task.
+   - Include all necessary details, explanations, and supporting information.
 """
 
 
@@ -59,7 +82,7 @@ class FinaliseWorker(BaseWorker):
         """
         super().__init__(model, verbose=verbose)
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(self, task: str, messages: List[str]) -> str:
         """
         Create a prompt for the model to generate a refined answer.
 
@@ -70,7 +93,6 @@ class FinaliseWorker(BaseWorker):
         Args:
             task (str): The original task or question to be answered.
             messages (List[str]): A list of messages from the collaboration chat.
-            memory (Any): Additional context or information stored in the agent's memory.
 
         Returns:
             str: A formatted prompt string for the model to generate a refined answer.
@@ -80,5 +102,5 @@ class FinaliseWorker(BaseWorker):
             collaboration plan, integrate tool messages, and provide a detailed,
             well-reasoned response.
         """
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages)
         return prompt

@@ -19,7 +19,6 @@ The `TDDWorkflow` class is a specialized workflow implementation in the ReXia.AI
 - `llm`: The language model used by the workflow.
 - `task`: The task that the workflow is designed to perform.
 - `verbose`: A flag used for enabling verbose mode.
-- `memory`: The memory component of the workflow.
 - `channel`: The collaboration channel for the workflow.
 - `max_attempts`: The maximum number of attempts for code generation.
 - `tdd`: The TDD component of the workflow.
@@ -27,7 +26,7 @@ The `TDDWorkflow` class is a specialized workflow implementation in the ReXia.AI
 
 ## Methods
 
-### `__init__(self, llm: Any, task: str, memory: BaseMemory, verbose: bool = False, max_attempts: int = 5) -> None`
+### `__init__(self, llm: Any, task: str, verbose: bool = False, max_attempts: int = 5) -> None`
 
 Initializes a TDDWorkflow instance.
 
@@ -35,7 +34,6 @@ Initializes a TDDWorkflow instance.
 
 - `llm`: The language model used by the workflow.
 - `task`: The task assigned to the workflow.
-- `memory`: The memory instance used by the workflow.
 - `verbose`: A flag for enabling verbose mode. Defaults to `False`.
 - `max_attempts`: The maximum number of attempts for code generation. Defaults to `5`.
 

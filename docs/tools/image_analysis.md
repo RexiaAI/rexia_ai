@@ -80,7 +80,6 @@ Here's an example of how to use the `RexiaAIImageAnalysis` class:
 from rexia_ai.tools import RexiaAIImageAnalysis
 from rexia_ai.agent import Agent
 from rexia_ai.workflows import SimpleToolWorkflow
-from rexia_ai.memory import WorkingMemory
 
 # Initialize the RexiaAIImageAnalysis instance
 image_analysis_tool = RexiaAIImageAnalysis(
@@ -94,7 +93,6 @@ agent = Agent(
     llm=...,  # Your language model instance
     task="Analyze the content of this image",
     workflow=SimpleToolWorkflow,
-    memory=WorkingMemory(),
     verbose=True,
     tools={"image_analysis": image_analysis_tool}
 )

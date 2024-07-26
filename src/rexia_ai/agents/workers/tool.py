@@ -6,65 +6,79 @@ from ...base import BaseWorker
 from ...structure import RexiaAIResponse
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger(__name__)
 
 
 PREDEFINED_PROMPT = """
-        As a tool calling agent for ReXia.AI, your role is key in supporting task completion. 
+## Role Overview
+As a tool calling agent for ReXia.AI, your role is key in supporting task completion.
 
-        Select tools based on their capabilities, limitations, and trade-offs. Aim for efficiency and minimal redundancy.
+## Tool Selection
+- **Select tools** based on their capabilities, limitations, and trade-offs.
+- **Aim for efficiency** and minimal redundancy.
 
-        Use tools wisely. Make multiple calls if needed, refining your approach based on previous outputs.
-        Always make at least one tool call to contribute to the solution.
+## Tool Usage
+- **Use tools wisely**. Make multiple calls if needed, refining your approach based on previous outputs.
+- **Always make at least one tool call** to contribute to the solution.
 
-        After a tool call, parse the output, handle errors, and integrate the results into the solution. 
-        If output is unclear, consider using additional tools or asking the team for clarification.
+## Handling Tool Outputs
+- After a tool call, **parse the output**, handle errors, and integrate the results into the solution.
+- If output is unclear, consider using additional tools or asking the team for clarification.
 
-        Communicate effectively with the team, share important information, and coordinate your efforts for a unified approach.
+## Communication
+- **Communicate effectively** with the team, share important information, and coordinate your efforts
+for a unified approach.
 
-        Be aware of limitations like resource and time constraints, or ethical considerations, and adjust 
-        your tool usage accordingly.
+## Awareness
+- **Be aware of limitations** like resource and time constraints, or ethical considerations, and adjust
+your tool usage accordingly.
 
-        If the task has specific formatting requests, apply them only within the answer.
+## Formatting Requests
+- If the task has specific formatting requests, apply them only within the answer.
 
-        To call a tool, use the JSON format provided below, ensuring that your tool
-        calls are properly formatted JSON with the correct tool names and arguments.
-        Do not generate incomplete JSON or JSON with syntax errors.
-        
-        Your tool calls should all be contained within the "tool_calls" list of the
-        structured format requested below.
-        
-        Ignore any existing tool calls in the collaboration chat and make your own.
-        
-        Use only tools from available tools to make tool calls.
+## Tool Call Format
+To call a tool, use the JSON format provided below, ensuring that your tool calls are properly formatted
+JSON with the correct tool names and arguments. Do not generate incomplete JSON or JSON with syntax errors.
 
+Your tool calls should all be contained within the "tool_calls" list of the structured format requested below.
+
+Ignore any existing tool calls in the collaboration chat and make your own.
+
+Use only tools from available tools to make tool calls.
+
+```json
+{
+    "tool_calls": [
         {
-        "tool_calls": [
-            {
             "name": "ToolName",
             "parameters": {
                 "parameter1": "value1",
                 "parameter2": "value2"
             }
-            }
-        ]
         }
+    ]
+}
+```
 
-        For example, if asked "What is 3 * 12?" and you have a Multiply tool, respond with:
+### Example
+For example, if asked "What is 3 * 12?" and you have a Multiply tool, respond with:
 
+```json
+{
+    "tool_calls": [
         {
-        "tool_calls": [
-            {
             "name": "Multiply",
             "parameters": {
                 "a": 3,
                 "b": 12
             }
-            }
-        ]
         }
-        """
+    ]
+}
+```
+"""
+
 
 class ToolWorker(BaseWorker):
     """
@@ -110,7 +124,7 @@ class ToolWorker(BaseWorker):
         results = self._handle_tool_calls(agent_response)
         return self._format_response(worker_name, agent_response, results)
 
-    def create_prompt(self, task: str, messages: List[str], memory: Any) -> str:
+    def create_prompt(self, task: str, messages: List[str]) -> str:
         """
         Construct a detailed prompt for the model incorporating task details, context, and available tools.
 
@@ -120,13 +134,12 @@ class ToolWorker(BaseWorker):
         Args:
             task (str): The current task or problem statement.
             messages (List[str]): Previous messages or context relevant to the task.
-            memory (Any): Additional context or information stored in the agent's memory.
 
         Returns:
             str: A formatted prompt string for the model to guide tool selection and usage.
         """
-        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages, memory)
-        prompt += f"\n\nAvailable Tools (Use only these):\n{self._get_available_tools()}\n\n"
+        prompt = super().create_prompt(PREDEFINED_PROMPT, task, messages)
+        prompt += f"\n\nAvailable Tools (Use only these, tools not here will fail):\n{self._get_available_tools()}\n\n"
         return prompt
 
     def _handle_tool_calls(self, rexia_ai_response: RexiaAIResponse) -> Dict[str, Any]:
@@ -169,7 +182,9 @@ class ToolWorker(BaseWorker):
                 results[tool_name] = function_to_call(**tool_args)
                 logger.info(f"Successfully executed {function_name}")
             except Exception as e:
-                logger.exception(f"Error executing {function_name} in {tool_name}: {str(e)}")
+                logger.exception(
+                    f"Error executing {function_name} in {tool_name}: {str(e)}"
+                )
                 results[tool_name] = (
                     f"Error executing {function_name} in {tool_name}: {str(e)}"
                 )
@@ -194,7 +209,9 @@ class ToolWorker(BaseWorker):
         """
         formatted_response = f"{worker_name}: {results}"
         if self.verbose:
-            logger.debug(f"Verbose output: {worker_name}: {agent_response}\n\nTool messages: {results}")
+            logger.debug(
+                f"Verbose output: {worker_name}: {agent_response}\n\nTool messages: {results}"
+            )
         return formatted_response
 
     @staticmethod

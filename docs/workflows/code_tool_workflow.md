@@ -19,13 +19,12 @@ The `CodeToolWorkflow` class is a specialized workflow implementation in the ReX
 - `llm`: The language model used by the workflow.
 - `task`: The task that the workflow is designed to perform.
 - `verbose`: A flag used for enabling verbose mode.
-- `memory`: The memory component of the workflow.
 - `channel`: The collaboration channel for the workflow.
 - `max_attempts`: The maximum number of attempts for code generation.
 
 ## Methods
 
-### `__init__(self, llm: Any, task: str, memory: BaseMemory, verbose: bool = False, max_attempts: int = 3) -> None`
+### `__init__(self, llm: Any, task: str, verbose: bool = False, max_attempts: int = 3) -> None`
 
 Initializes a CodeToolWorkflow instance.
 
@@ -33,7 +32,6 @@ Initializes a CodeToolWorkflow instance.
 
 - `llm`: The language model used by the workflow.
 - `task`: The task assigned to the workflow.
-- `memory`: The memory instance used by the workflow.
 - `verbose`: A flag for enabling verbose mode. Defaults to `False`.
 - `max_attempts`: The maximum number of attempts for code generation. Defaults to `3`.
 
@@ -54,7 +52,6 @@ import os
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
 from rexia_ai.workflows import CodeToolWorkflow
-from rexia_ai.memory import SimpleMemory
 
 # Set up the language model
 YI_LARGE_API_KEY = os.getenv("YI_LARGE_API_KEY")

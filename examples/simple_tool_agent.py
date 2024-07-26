@@ -16,8 +16,8 @@ tools = {"google_search": google_search}
 
 # Create an instance of the ReXiaAI LLM
 llm = RexiaAIOpenAI(
-    base_url="http://localhost:1234/v1",
-    model="lm-studio",
+    base_url="http://localhost:11434/v1",
+    model="llama3.1",
     temperature=0,
     tools=tools,
 )

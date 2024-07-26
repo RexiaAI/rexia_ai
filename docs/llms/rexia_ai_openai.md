@@ -52,7 +52,6 @@ Here's an example of how to use the `RexiaAIOpenAI` class:
 from rexia_ai.llm import RexiaAIOpenAI
 from rexia_ai.agent import Agent
 from rexia_ai.workflows import SimpleToolWorkflow
-from rexia_ai.memory import WorkingMemory
 
 # Initialize the RexiaAIOpenAI instance
 llm = RexiaAIOpenAI(
@@ -65,15 +64,11 @@ llm = RexiaAIOpenAI(
 # Define the task
 task = "Summarize the following text."
 
-# Create a memory instance
-memory = WorkingMemory()
-
 # Create an Agent instance with SimpleToolWorkflow and RexiaAIOpenAI
 agent = Agent(
     llm=llm,
     task=task,
     workflow=SimpleToolWorkflow,
-    memory=memory,
     verbose=True
 )
 

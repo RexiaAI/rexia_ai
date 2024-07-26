@@ -80,7 +80,6 @@ The `ManagerAgent` class manages interactions between agents within an agency.
 - `agents`: A list of available agents.
 - `manager_llm`: The language model used by the manager.
 - `collaboration_channel`: A channel for agent collaboration.
-- `memory`: Working memory for storing task-related information.
 - `task`: The main task assigned to the manager.
 - `subtasks`: A list of subtasks derived from the main task.
 

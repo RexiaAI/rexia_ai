@@ -7,7 +7,7 @@ from .finalise import FinaliseWorker
 from .team_work import TeamWorker
 from .tdd import TDDWorker
 from .code_tool import CodeTool
-from .code_work import CodeWorker
+from .code import CodeWorker
 
 __all__ = [
     "ToolWorker",

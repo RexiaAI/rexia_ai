@@ -5,7 +5,7 @@ import os
 from rexia_ai.llms import RexiaAIOpenAI
 from rexia_ai.agents import Agent
 from rexia_ai.agencies import Agency, AgentInfo
-from rexia_ai.workflows import SimpleToolWorkflow, CodeToolWorkflow
+from rexia_ai.workflows import SimpleToolWorkflow, CodeWorkflow
 from rexia_ai.tools import RexiaAIGoogleSearch
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -39,34 +39,44 @@ agent = Agent(
     task="Reflect Agent",
     verbose=True,
 )
+
 simple_tool_agent = Agent(
     llm=llm,
     task="Simple Tool Agent",
     workflow=SimpleToolWorkflow,
+    verbose=True
 )
-code_tool_agent = Agent(
+
+code_agent = Agent(
     llm=llm,
-    task="Code Tool Agent",
-    workflow=CodeToolWorkflow,
+    task="Code Agent",
+    workflow=CodeWorkflow,
+    verbose=True
 )
 
 # Assign the agents names and descriptions so the agency manager can decide how best to use them.
 complex = AgentInfo(
     agent=agent,
-    name="Steve Jobs",
+    name="Reflect Agent",
     description="A reflect agent for performing complex tasks such as planning.",
+)
+
+code = basic = AgentInfo(
+    agent=code_agent,
+    name="Code Agent",
+    description="A specialised coding agent for use generating (not running, only generate) code.",
 )
 
 basic = AgentInfo(
     agent=simple_tool_agent,
-    name="Elon Musk",
+    name="RAG Agent",
     description="A simple tool agent equipped with google search.",
 )
 
 # Create the Agency with a task and our list of AgentInfos
 agency = Agency(
-    task="Create a game of snake in Python using object oriented principles.",
-    agents=[complex, basic],
+    task="Create a fully functional game of snake in Python using object oriented principles and python best practices.",
+    agents=[complex, basic, code],
     manager_llm=llm,
 )
 

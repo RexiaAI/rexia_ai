@@ -2,7 +2,7 @@
 
 import logging
 from typing import Any
-from ..base import BaseWorkflow, BaseMemory
+from ..base import BaseWorkflow
 from ..common import CollaborationChannel, TaskStatus
 from ..agents import Component
 from ..agents.workers import TeamWorker, ToolWorker
@@ -23,7 +23,6 @@ class CollaborationWorkflow(BaseWorkflow):
         llm (Any): The language model used by the workflow for task processing and decision making.
         task (str): The specific task or objective that the workflow is designed to accomplish.
         verbose (bool): Flag for enabling detailed logging and output for debugging purposes.
-        memory (BaseMemory): The memory component used to store and retrieve relevant information across runs.
         channel (CollaborationChannel): Communication channel for task-related interactions and data sharing.
         team_work (Component): The component responsible for team-based collaborative work.
         tool (Component): The component responsible for tool-related operations and interactions.
@@ -32,7 +31,6 @@ class CollaborationWorkflow(BaseWorkflow):
     llm: Any
     task: str
     verbose: bool
-    memory: BaseMemory
     channel: CollaborationChannel
     team_work: Component
     tool: Component
@@ -41,7 +39,6 @@ class CollaborationWorkflow(BaseWorkflow):
         self,
         llm: Any,
         task: str,
-        memory: BaseMemory,
         verbose: bool = False,
     ) -> None:
         """
@@ -52,23 +49,19 @@ class CollaborationWorkflow(BaseWorkflow):
         Args:
             llm (Any): The language model to be used throughout the workflow.
             task (str): A description of the task to be performed by the workflow.
-            memory (BaseMemory): The memory object to be used for storing and retrieving information.
             verbose (bool, optional): Enable verbose mode for detailed logging. Defaults to False.
         """
         super().__init__(llm, task, verbose)
         self.channel = CollaborationChannel(task)
-        self.memory = memory
         self.team_work = Component(
             "team work",
             self.channel,
             TeamWorker(model=llm, verbose=verbose),
-            memory=self.memory,
         )
         self.tool = Component(
             "tool",
             self.channel,
             ToolWorker(model=llm, verbose=verbose),
-            memory=self.memory,
         )
 
     def _run_task(self) -> None:
@@ -102,8 +95,6 @@ class CollaborationWorkflow(BaseWorkflow):
 
             # Add the final message to the memory
             final_message = self.channel.messages[-1]
-            self.memory.add_message(final_message)
-            logger.info("Result added to memory")
             if self.verbose:
                 logger.debug(f"Result: {final_message}")
 

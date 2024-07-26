@@ -18,7 +18,7 @@ class LLMOutput:
         """
         return (
             "{\n"
-            '    "question": "The question string goes here",\n'
+            '    "question": "The task exactly as written",\n'
             '    "plan": [\n'
             '        "Step 1 of the plan",\n'
             '        "Step 2 of the plan",\n'

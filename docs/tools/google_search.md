@@ -66,7 +66,6 @@ Here's an example of how to use the `RexiaAIGoogleSearch` class:
 from rexia_ai.tools import RexiaAIGoogleSearch
 from rexia_ai.agent import Agent
 from rexia_ai.workflows import SimpleToolWorkflow
-from rexia_ai.memory import WorkingMemory
 
 # Initialize the RexiaAIGoogleSearch instance
 google_search_tool = RexiaAIGoogleSearch(
@@ -79,7 +78,6 @@ agent = Agent(
     llm=...,  # Your language model instance
     task="Search for information on a topic",
     workflow=SimpleToolWorkflow,
-    memory=WorkingMemory(),
     verbose=True,
     tools={"google_search": google_search_tool}
 )

@@ -2,7 +2,7 @@
 
 import logging
 from typing import Any
-from ..base import BaseMemory, BaseWorker
+from ..base import BaseWorker
 from ..common import CollaborationChannel
 
 logging.basicConfig(level=logging.INFO, format='%(message)s')
@@ -21,14 +21,12 @@ class Component:
     name: str
     channel: CollaborationChannel
     worker: BaseWorker
-    memory: BaseMemory
 
     def __init__(
         self,
         name: str,
         channel: CollaborationChannel,
         worker: BaseWorker,
-        memory: BaseMemory,
     ):
         """
         Initialize a Component instance.
@@ -37,12 +35,10 @@ class Component:
             name: The name of the component.
             channel: The channel used by the component.
             worker: The worker used by the component.
-            memory: The memory used by the component.
         """
         self.name = name
         self.channel = channel
         self.worker = worker
-        self.memory = memory
 
     def run(self) -> Any:
         """
@@ -68,8 +64,7 @@ class Component:
         """
         task = self.channel.task
         messages = self.channel.messages
-        memory = self.memory
-        prompt = self.worker.create_prompt(task=task, messages=messages, memory=memory)
+        prompt = self.worker.create_prompt(task=task, messages=messages)
         response = self.worker.action(prompt=prompt, worker_name=self.name)
         self.channel.put(response)
         return response

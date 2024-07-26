@@ -82,7 +82,6 @@ Detailed documentation for each component can be found in the `docs` folder:
 - [Agent](docs/agents/agent.md)
 - [Workflows](docs/workflows)
 - [Language Models](docs/llms)
-- [Memory](docs/memory)
 - [Tools](docs/tools)
 
 ## Tools
