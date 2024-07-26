@@ -74,7 +74,6 @@ class ManagerAgent:
     def manage_agents(self) -> None:
         """
         Manage the work of the various agents to iteratively complete the task.
-        This method repeatedly asks the LLM for the next subtask or completion status.
         """
         try:
             # Generate all subtasks upfront
@@ -214,9 +213,6 @@ class ManagerAgent:
             AssignmentError: If no agent is found with the specified name.
             ValueError: If the status in the LLM response is invalid.
         """
-        if parsed_response["status"] == "complete":
-            return [{"status": "complete", "summary": parsed_response["summary"]}]
-
         subtasks = []
         for subtask in parsed_response["subtasks"]:
             agent_name = subtask["assignment"]["agent"]
@@ -229,7 +225,6 @@ class ManagerAgent:
             )
             subtasks.append(
                 {
-                    "status": "in_progress",
                     "assignment": assignment,
                 }
             )
@@ -270,7 +265,6 @@ class ManagerAgent:
 
         Generate a list of subtasks in the following JSON format:
         {{
-            "status": "in_progress",
             "subtasks": [
                 {{
                     "assignment": {{

@@ -77,7 +77,7 @@ class BaseWorker(ABC):
         return final_prompt
 
     def _format_additional_context(
-        self, messages: List[str], memory: Any, task: str
+        self, messages: List[str], task: str
     ) -> str:
         """
         Format the task, messages and memory for the prompt.
